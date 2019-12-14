@@ -1,4 +1,0 @@
-/Users/francesco/Documents/Project/tcpsocket/build/CMakeFiles/rebuild_cache.dir
-/Users/francesco/Documents/Project/tcpsocket/build/CMakeFiles/edit_cache.dir
-/Users/francesco/Documents/Project/tcpsocket/build/CMakeFiles/Dining-philosophers.dir
-/Users/francesco/Documents/Project/tcpsocket/build/CMakeFiles/Dining-philosophers_autogen.dir
