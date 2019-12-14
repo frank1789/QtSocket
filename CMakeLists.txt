@@ -1,7 +1,8 @@
 cmake_minimum_required (VERSION 3.10)
-project(Dining-philosophers LANGUAGES CXX)
-set(NAME_PROJECT "Dining-philosophers")
+project(QtTcpSocket LANGUAGES CXX)
+set(NAME_PROJECT "QtTcpSocket")
 #set(CMAKE_VERBOSE_MAKEFILE ON)
+
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -36,15 +37,6 @@ set(CMAKE_AUTOUIC ON)
 #else (DOXYGEN_FOUND)
 #  message(STATUS "Doxygen need to be installed to generate the doxygen documentation")
 #endif (DOXYGEN_FOUND)
-
-
-
-
-
-
-
-
-
 
 
 
@@ -84,7 +76,7 @@ endif()
 
 
 file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/log/*.cpp)
-file(GLOB HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.hpp ${CMAKE_CURRENT_SOURCE_DIR}/log/*.hcle)
+file(GLOB HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.hpp ${CMAKE_CURRENT_SOURCE_DIR}/log/*.h)
 file(GLOB UIS ${CMAKE_CURRENT_SOURCE_DIR}/*.ui)
 
 # compile Debug Mode

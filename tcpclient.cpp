@@ -22,16 +22,6 @@
 #include "log/logger.h"
 
 TcpClient::TcpClient(QWidget *parent) : QWidget(parent), m_tcp_socket(new QTcpSocket(this)) {
-  ////////////////////////////////////////////////////////////////////////
-  QTimer *timer = new QTimer(this);
-  timer->setInterval(250);
-  timer->start();
-#if TEST_IMAGE
-  connect(timer, &QTimer::timeout, [=]() { this->sendImageMessage(); });
-#else
-  connect(timer, &QTimer::timeout, [=]() { this->sendTestMessageStream(); });
-#endif
-  ////////////////////////////////////////////////////////////////////////
   // assemble ui
   connectButton = new QPushButton("Connect");
   disconnectButton = new QPushButton("Disconnect");
@@ -98,43 +88,15 @@ TcpClient::TcpClient(QWidget *parent) : QWidget(parent), m_tcp_socket(new QTcpSo
     LOG(INFO, "Opening network session.")
     networkSession->open();
   }
-}
-
-void TcpClient::sendTestMessage() {
-  if (m_tcp_socket->state() != QAbstractSocket::ConnectedState) {
-#if LOGGER_CLIENT
-    LOG(WARN, "socket test function not connected, then exit.")
+#if LOGGER
+  QTimer *timer = new QTimer(this);
+  timer->setInterval(250);
+  timer->start();
+#if TEST_IMAGE
+  connect(timer, &QTimer::timeout, [=]() { this->sendImageMessage(); });
+#else
+  connect(timer, &QTimer::timeout, [=]() { this->sendTestMessageStream(); });
 #endif
-    return;
-  }
-  QString test_message{"Test message sended form code."};
-  QString message = QString("%1: %2").arg(m_user_linedit->text()).arg(test_message);
-  QByteArray ba_message = message.toUtf8();
-  ba_message.append(TERMINATION_ASCII_CODE);
-  m_tcp_socket->write(ba_message);
-}
-
-void TcpClient::sendTestMessageStream() {
-  if (m_tcp_socket->state() != QAbstractSocket::ConnectedState) {
-#if LOGGER_CLIENT
-    LOG(WARN, "socket test function not connected, then exit.")
-#endif
-    return;
-  }
-  const QString test_message{"Test datastrem message, sended form code."};
-  QString message = QString("%1: %2").arg(m_user_linedit->text()).arg(test_message);
-  message.append(TERMINATION_ASCII_CODE);
-  QByteArray ba_message;
-  QDataStream out(&ba_message, QIODevice::ReadWrite);
-  out.setVersion(QDataStream::Qt_5_0);
-  out << QString(GROUP_SEPARATOR_ASII_CODE) << static_cast<quint32>(ba_message.size()) << message;
-  m_tcp_socket->write(ba_message);
-  m_log_text->append(message);
-#if LOGGER_CLIENT
-  LOG(TRACE, "send test message stream")
-  qDebug() << "\theader: " << QString(GROUP_SEPARATOR_ASII_CODE)
-           << "\tsize: " << static_cast<quint32>(ba_message.size());
-  qDebug() << "\t" << message << "\n";
 #endif
 }
 
@@ -227,15 +189,43 @@ void TcpClient::readyRead() {
 #endif
     return;
   }
-  receive_data.append(m_tcp_socket->readAll());
-  while (true) {
-    auto end_index = receive_data.indexOf(TERMINATION_ASCII_CODE);
-    if (end_index < 0) {
-      break;
-    }
-    QString message = QString::fromUtf8(receive_data.left(end_index));
-    receive_data.remove(0, end_index + 1);
+  m_data.startTransaction();
+  QString header{""};
+  qint32 size{0};
+  m_data >> header >> size;
+#if LOGGER_CLIENT
+  LOG(DEBUG,
+      "incoming message control through header identification:\n"
+      "\t* message containing text if the header corresponds to the code UTF-8 '\\u001D' or the ASCII code %d\n"
+      "\t* message containing images if the header corresponds to the code UTF-8 '\\u001E' or the ASCII code %d\n",
+      GROUP_SEPARATOR_ASII_CODE, RECORD_SEPARATOR_ASII_CODE)
+  qDebug() << "\tincoming message header: " << header << "\tsize: " << size << "\n";
+#endif
+  if (header == QString(GROUP_SEPARATOR_ASII_CODE)) {
+    QString message;
+    m_data >> message;
+#if LOGGER_CLIENT
+    LOG(DEBUG, "check message is not empty: %s", (!message.isEmpty()) ? "true" : "false")
+    LOG(DEBUG, "server read message in redyRead()\n\tmessage received:")
+    qDebug() << "\t" << message << "\n";
+#endif
     m_log_text->append(message);
+  } else if (header == QString(RECORD_SEPARATOR_ASII_CODE)) {
+#if LOGGER_CLIENT
+    LOG(DEBUG, "image incoming")
+#endif
+    QByteArray array = m_tcp_socket->read(size);
+    QBuffer buffer(&array);
+    buffer.open(QIODevice::ReadOnly);
+    QImageReader reader(&buffer, "JPG");
+    QImage image = reader.read();
+#if LOGGER_CLIENT
+    LOG(DEBUG, "check image is not empty: %s", (!image.isNull()) ? "true" : "false")
+#endif
+    emit updateImage(image);
+  }
+  if (!m_data.commitTransaction()) {
+    return;
   }
 }
 
@@ -374,6 +364,30 @@ void TcpClient::updateGui(QAbstractSocket::SocketState state) {
 //////////////////////////////////////////////////////////////////////////////
 //// Test function
 //////////////////////////////////////////////////////////////////////////////
+
+void TcpClient::sendTestMessageStream() {
+  if (m_tcp_socket->state() != QAbstractSocket::ConnectedState) {
+#if LOGGER_CLIENT
+    LOG(WARN, "socket test function not connected, then exit.")
+#endif
+    return;
+  }
+  const QString test_message{"Test datastrem message, sended form code."};
+  QString message = QString("%1: %2").arg(m_user_linedit->text()).arg(test_message);
+  message.append(TERMINATION_ASCII_CODE);
+  QByteArray ba_message;
+  QDataStream out(&ba_message, QIODevice::ReadWrite);
+  out.setVersion(QDataStream::Qt_5_0);
+  out << QString(GROUP_SEPARATOR_ASII_CODE) << static_cast<quint32>(ba_message.size()) << message;
+  m_tcp_socket->write(ba_message);
+  m_log_text->append(message);
+#if LOGGER_CLIENT
+  LOG(TRACE, "send test message stream")
+  qDebug() << "\theader: " << QString(GROUP_SEPARATOR_ASII_CODE)
+           << "\tsize: " << static_cast<quint32>(ba_message.size());
+  qDebug() << "\t" << message << "\n";
+#endif
+}
 
 #if TEST_IMAGE
 

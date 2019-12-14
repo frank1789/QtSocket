@@ -25,15 +25,13 @@ class TcpClient : public QWidget {
  signals:
   void updateImage(QImage image);
 
- public slots:
+ private slots:
   /**
    * @brief
    *
    */
-  void sendTestMessage();
-
   void sendTestMessageStream();
- private slots:
+
   /**
    * @brief
    *

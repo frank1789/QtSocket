@@ -6,7 +6,6 @@
 
 #include "mylabel.hpp"
 #include "tcpclient.hpp"
-#include "udpreceiver.hpp"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
