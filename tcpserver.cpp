@@ -9,7 +9,6 @@
 #include <QPushButton>
 #include <QTcpServer>
 #include <QTcpSocket>
-#include <QUdpSocket>
 #include <QtNetwork>
 
 #include "commonconnection.hpp"
@@ -82,22 +81,41 @@ void TcpServer::readyRead() {
 #endif
     return;
   }
-  // init local message
-  QString message;
+  // init input server to resend message
   QDataStream in;
   in.setVersion(QDataStream::Qt_5_0);
   for (auto *socket_devices : m_clients) {
     in.setDevice(socket_devices);
     // fill message from QDataStream
     in.startTransaction();
-    in >> message;
-    if (!message.isEmpty()) {
+    QString header{""};
+    qint32 size{0};
+    in >> header >> size;
+#if LOGGER_SERVER
+    LOG(DEBUG,
+        "incoming message control through header identification:\n"
+        "\t* message containing text if the header corresponds to the code UTF-8 '\\u001D' or the ASCII code %d\n"
+        "\t* message containing images if the header corresponds to the code UTF-8 '\\u001E' or the ASCII code %d",
+        GROUP_SEPARATOR_ASII_CODE, RECORD_SEPARATOR_ASII_CODE)
+    qDebug() << "\tincoming message header: " << header << "\tsize: " << size << "\n";
+#endif
+
+    if (header == QString(GROUP_SEPARATOR_ASII_CODE)) {
+      QString message;
+      in >> message;
 #if LOGGER_SERVER
       LOG(DEBUG, "check message is not empty: %s", (!message.isEmpty()) ? "true" : "false")
       LOG(DEBUG, "server read message in redyRead()\n\tmessage received:")
       qDebug() << "\t" << message << "\n";
 #endif
       newMessage(socket, message);
+    } else if (header == QString(RECORD_SEPARATOR_ASII_CODE)) {
+#if LOGGER_SERVER
+      LOG(DEBUG, "image incoming")
+#endif
+      QByteArray image_ba;
+      in >> image_ba;
+      newMessageImage(socket, image_ba);
     }
     if (!in.commitTransaction()) {
       return;
@@ -118,17 +136,35 @@ void TcpServer::newMessage(QTcpSocket *sender, const QString &message) {
   LOG(DEBUG, "new message ready to be sent")
   qDebug() << "\t" << message << "\n";
 #endif
-  m_log_text->append(tr("Sending message: %1").arg(message));
+  m_log_text->append(QString("Sending message: %1").arg(message));
   // init out buffer message
   QByteArray message_ba;
   QDataStream out(&message_ba, QIODevice::WriteOnly);
   out.setVersion(QDataStream::Qt_5_0);
-  out << message;
+  out << QString(GROUP_SEPARATOR_ASII_CODE) << static_cast<quint32>(message_ba.size()) << message;
   for (QTcpSocket *socket : m_clients) {
     if (socket->state() == QAbstractSocket::ConnectedState) {
       socket->write(message_ba);
     }
   }
+  Q_UNUSED(sender)
+}
+
+void TcpServer::newMessageImage(QTcpSocket *sender, const QByteArray &image) {
+#if LOGGER_SERVER
+  LOG(DEBUG, "new image ready to be sent")
+#endif
+  const QString default_msg{"Sending image"};
+  m_log_text->append(default_msg);
+  // init out buffer message
+  QByteArray message_ba;
+  QDataStream out(&message_ba, QIODevice::WriteOnly);
+  out.setVersion(QDataStream::Qt_5_0);
+  out << QString(RECORD_SEPARATOR_ASII_CODE) << image.size() << image;
+  for (QTcpSocket *socket : m_clients)
+    if (socket->state() == QAbstractSocket::ConnectedState) {
+      socket->write(message_ba);
+    }
   Q_UNUSED(sender)
 }
 

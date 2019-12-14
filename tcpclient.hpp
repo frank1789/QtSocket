@@ -129,6 +129,11 @@ class TcpClient : public QWidget {
 
   // data exchanged
   QByteArray receive_data;
+
+#if TEST_IMAGE
+ private slots:
+  void sendImageMessage();
+#endif
 };
 
 #endif  // TCPCLIENT_HPP

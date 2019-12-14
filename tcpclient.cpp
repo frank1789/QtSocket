@@ -26,7 +26,11 @@ TcpClient::TcpClient(QWidget *parent) : QWidget(parent), m_tcp_socket(new QTcpSo
   QTimer *timer = new QTimer(this);
   timer->setInterval(250);
   timer->start();
+#if TEST_IMAGE
+  connect(timer, &QTimer::timeout, [=]() { this->sendImageMessage(); });
+#else
   connect(timer, &QTimer::timeout, [=]() { this->sendTestMessageStream(); });
+#endif
   ////////////////////////////////////////////////////////////////////////
   // assemble ui
   connectButton = new QPushButton("Connect");
@@ -123,11 +127,13 @@ void TcpClient::sendTestMessageStream() {
   QByteArray ba_message;
   QDataStream out(&ba_message, QIODevice::ReadWrite);
   out.setVersion(QDataStream::Qt_5_0);
-  out << message;
+  out << QString(GROUP_SEPARATOR_ASII_CODE) << static_cast<quint32>(ba_message.size()) << message;
   m_tcp_socket->write(ba_message);
   m_log_text->append(message);
 #if LOGGER_CLIENT
-  LOG(TRACE, "send Test message stream")
+  LOG(TRACE, "send test message stream")
+  qDebug() << "\theader: " << QString(GROUP_SEPARATOR_ASII_CODE)
+           << "\tsize: " << static_cast<quint32>(ba_message.size());
   qDebug() << "\t" << message << "\n";
 #endif
 }
@@ -369,6 +375,8 @@ void TcpClient::updateGui(QAbstractSocket::SocketState state) {
 //// Test function
 //////////////////////////////////////////////////////////////////////////////
 
+#if TEST_IMAGE
+
 QImage randomImage() {
   qsrand(QTime(0, 0, 0).secsTo(QTime::currentTime()));
 
@@ -380,6 +388,34 @@ QImage randomImage() {
     qDebug("No images to show!");
     return QImage();
   }
-
+  qDebug() << entries.at(qrand() % entries.size()).absoluteFilePath();
   return QImage(entries.at(qrand() % entries.size()).absoluteFilePath());
 }
+
+void TcpClient::sendImageMessage() {
+  if (m_tcp_socket->state() != QAbstractSocket::ConnectedState) {
+#if LOGGER_CLIENT
+    LOG(WARN, "socket test function not connected, then exit.")
+#endif
+    return;
+  }
+  // init buffer from image to Qbuffer
+  QBuffer buffer;
+  QImageWriter writer(&buffer, "JPG");
+  QImage image = randomImage();
+  writer.write(image);
+  // prepare datastream
+  QByteArray ba_message;
+  QDataStream out(&ba_message, QIODevice::ReadWrite);
+  out.setVersion(QDataStream::Qt_5_0);
+  out << QString(RECORD_SEPARATOR_ASII_CODE) << static_cast<quint32>(buffer.data().size()) << buffer.data();
+#if LOGGER_CLIENT
+  LOG(DEBUG, "send image from client:")
+  qDebug() << "\theader: " << QString(RECORD_SEPARATOR_ASII_CODE)
+           << "\tsize:" << static_cast<quint32>(buffer.data().size()) << "\n";
+#endif
+  m_tcp_socket->write(ba_message);
+  emit updateImage(image);
+}
+
+#endif

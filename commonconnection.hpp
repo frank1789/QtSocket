@@ -4,5 +4,7 @@
 constexpr int TCP_PORT{52693};
 constexpr int TCP_PORT_IMAGE{9988};
 constexpr int TERMINATION_ASCII_CODE{23};
+constexpr int RECORD_SEPARATOR_ASII_CODE{30};
+constexpr int GROUP_SEPARATOR_ASII_CODE{29};
 
 #endif // COMMONCONNECTION_HPP
