@@ -118,7 +118,7 @@ void TcpServer::newMessage(QTcpSocket *sender, const QString &message) {
   LOG(DEBUG, "new message ready to be sent")
   qDebug() << "\t" << message << "\n";
 #endif
-  m_log_text->append(tr("Sending message: %1").arg(message));
+  m_log_text->append(QString("Sending message: %1").arg(message));
   // init out buffer message
   QByteArray message_ba;
   QDataStream out(&message_ba, QIODevice::WriteOnly);

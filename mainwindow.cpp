@@ -48,7 +48,7 @@ MainWindow::~MainWindow() {
 }
 
 QGridLayout *MainWindow::create_label_preview() {
-#if LOGGER
+#if LOGGER_UI
   LOG(INFO, "make preview label ui.")
 #endif
 

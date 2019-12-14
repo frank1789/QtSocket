@@ -127,7 +127,7 @@ void TcpClient::sendTestMessageStream() {
   m_tcp_socket->write(ba_message);
   m_log_text->append(message);
 #if LOGGER_CLIENT
-  LOG(TRACE, "send Test message stream")
+  LOG(TRACE, "send test message stream")
   qDebug() << "\t" << message << "\n";
 #endif
 }
