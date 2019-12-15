@@ -65,7 +65,7 @@ class TcpServer : public QWidget {
   QLabel *m_connection_address{nullptr};
   QLabel *m_port_number{nullptr};
   QTextEdit *m_log_text{nullptr};
-  void newMessageImage(QTcpSocket *sender, const QByteArray &image);
+  void newMessageImage(QTcpSocket *sender, const QImage &image);
 };
 
 #endif  // TCPSERVER_HPP

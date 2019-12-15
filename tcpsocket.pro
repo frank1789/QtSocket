@@ -42,7 +42,7 @@ FORMS += \
 DEFINES += LOGGER \
            LOGGER_SERVER \
            LOGGER_CLIENT \
-           #TEST_IMAGE
+           TEST_IMAGE
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

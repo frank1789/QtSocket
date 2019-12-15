@@ -90,7 +90,7 @@ TcpClient::TcpClient(QWidget *parent) : QWidget(parent), m_tcp_socket(new QTcpSo
   }
 #if LOGGER
   QTimer *timer = new QTimer(this);
-  timer->setInterval(250);
+  timer->setInterval(2500);
   timer->start();
 #if TEST_IMAGE
   connect(timer, &QTimer::timeout, [=]() { this->sendImageMessage(); });
@@ -223,6 +223,9 @@ void TcpClient::readyRead() {
     LOG(DEBUG, "check image is not empty: %s", (!image.isNull()) ? "true" : "false")
 #endif
     emit updateImage(image);
+  } else {
+    m_data.abortTransaction();
+    return;
   }
   if (!m_data.commitTransaction()) {
     return;
@@ -414,19 +417,20 @@ void TcpClient::sendImageMessage() {
     return;
   }
   // init buffer from image to Qbuffer
-  QBuffer buffer;
-  QImageWriter writer(&buffer, "JPG");
+  //  QBuffer buffer;
+  //  QImageWriter writer(&buffer, "JPG");
   QImage image = randomImage();
-  writer.write(image);
-  // prepare datastream
+  //  writer.write(image);
+  //  // prepare datastream
   QByteArray ba_message;
   QDataStream out(&ba_message, QIODevice::ReadWrite);
   out.setVersion(QDataStream::Qt_5_0);
-  out << QString(RECORD_SEPARATOR_ASII_CODE) << static_cast<quint32>(buffer.data().size()) << buffer.data();
+
+  out << QString(RECORD_SEPARATOR_ASII_CODE) << static_cast<quint32>(image.sizeInBytes()) << image;
 #if LOGGER_CLIENT
   LOG(DEBUG, "send image from client:")
   qDebug() << "\theader: " << QString(RECORD_SEPARATOR_ASII_CODE)
-           << "\tsize:" << static_cast<quint32>(buffer.data().size()) << "\n";
+           << "\tsize:" << static_cast<quint32>(image.sizeInBytes()) << "\n";
 #endif
   m_tcp_socket->write(ba_message);
   emit updateImage(image);

@@ -113,9 +113,9 @@ void TcpServer::readyRead() {
 #if LOGGER_SERVER
       LOG(DEBUG, "image incoming")
 #endif
-      QByteArray image_ba;
-      in >> image_ba;
-      newMessageImage(socket, image_ba);
+      QImage image;
+      in >> image;
+      newMessageImage(socket, image);
     }
     if (!in.commitTransaction()) {
       return;
@@ -150,7 +150,7 @@ void TcpServer::newMessage(QTcpSocket *sender, const QString &message) {
   Q_UNUSED(sender)
 }
 
-void TcpServer::newMessageImage(QTcpSocket *sender, const QByteArray &image) {
+void TcpServer::newMessageImage(QTcpSocket *sender, const QImage &image) {
 #if LOGGER_SERVER
   LOG(DEBUG, "new image ready to be sent")
 #endif
@@ -160,7 +160,7 @@ void TcpServer::newMessageImage(QTcpSocket *sender, const QByteArray &image) {
   QByteArray message_ba;
   QDataStream out(&message_ba, QIODevice::WriteOnly);
   out.setVersion(QDataStream::Qt_5_0);
-  out << QString(RECORD_SEPARATOR_ASII_CODE) << image.size() << image;
+  out << QString(RECORD_SEPARATOR_ASII_CODE) << static_cast<quint32>(image.sizeInBytes()) << image;
   for (QTcpSocket *socket : m_clients)
     if (socket->state() == QAbstractSocket::ConnectedState) {
       socket->write(message_ba);

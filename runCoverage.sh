@@ -5,7 +5,7 @@ lcov --directory . --zerocounters
 cmake ..
 cmake --build . --config Debug
 
-./Dining-philosophers
+./QtTcpSocket
 
 # Create lcov report capturing coverage info
 lcov --directory . --capture --output-file coverage.info
