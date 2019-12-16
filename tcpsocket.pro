@@ -25,7 +25,8 @@ SOURCES += \
     MyLabel.cpp \
     palettes.cpp \
     tcpclient.cpp \
-    tcpserver.cpp
+    tcpserver.cpp  \
+commonconnection.cpp
 
 HEADERS += \
     log/logger.h \

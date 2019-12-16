@@ -14,7 +14,8 @@
 #include "commonconnection.hpp"
 #include "log/logger.h"
 
-TcpServer::TcpServer(QWidget *parent) : QWidget(parent), m_server(new QTcpServer(this)) {
+TcpServer::TcpServer(QWidget *parent)
+    : QWidget(parent), m_server(new QTcpServer(this)) {
   this->setWindowTitle("Server");
   // assemble ui
   QGridLayout *grid = new QGridLayout;
@@ -26,7 +27,8 @@ TcpServer::TcpServer(QWidget *parent) : QWidget(parent), m_server(new QTcpServer
     LOG(ERROR, "Failure while tcp starting server:")
     qDebug() << m_server->errorString();
 #endif
-    const auto error_message = QString("Failure while starting server: %1").arg(m_server->errorString());
+    const auto error_message = QString("Failure while starting server: %1")
+                                   .arg(m_server->errorString());
     m_log_text->append(error_message);
     return;
   }
@@ -36,11 +38,17 @@ TcpServer::TcpServer(QWidget *parent) : QWidget(parent), m_server(new QTcpServer
   m_port_number->setText(QString::number(m_server->serverPort()));
 
   // connect signal
-  connect(m_server, &QTcpServer::newConnection, [=]() { this->newConnection(); });
-  connect(disconnectButton, &QPushButton::clicked, [=]() { this->onDisconnectClientsClicked(); });
+  connect(m_server, &QTcpServer::newConnection,
+          [=]() { this->newConnection(); });
+  connect(disconnectButton, &QPushButton::clicked,
+          [=]() { this->onDisconnectClientsClicked(); });
 }
 
 TcpServer::~TcpServer() {}
+
+//////////////////////////////////////////////////////////////////////////////
+//// Slot function
+//////////////////////////////////////////////////////////////////////////////
 
 void TcpServer::newConnection() {
   while (m_server->hasPendingConnections()) {
@@ -48,14 +56,18 @@ void TcpServer::newConnection() {
     m_clients << socket;
     disconnectButton->setEnabled(true);
     // connect signals
-    connect(socket, &QTcpSocket::disconnected, this, &TcpServer::removeConnection);
+    connect(socket, &QTcpSocket::disconnected, this,
+            &TcpServer::removeConnection);
     connect(socket, &QTcpSocket::readyRead, this, &TcpServer::readyRead);
-    m_log_text->append(
-        QString("* New connection: %1, port %2").arg(socket->peerAddress().toString()).arg(socket->peerPort()));
+    m_log_text->append(QString("* New connection: %1, port %2")
+                           .arg(socket->peerAddress().toString())
+                           .arg(socket->peerPort()));
 #if LOGGER_SERVER
     LOG(INFO, "enter new connection.")
     qDebug() << "\t"
-             << QString("* New connection: %1, port %2").arg(socket->peerAddress().toString()).arg(socket->peerPort());
+             << QString("* New connection: %1, port %2")
+                    .arg(socket->peerAddress().toString())
+                    .arg(socket->peerPort());
 #endif
   }
 }
@@ -65,8 +77,9 @@ void TcpServer::removeConnection() {
   if (!socket) {
     return;
   }
-  m_log_text->append(
-      tr("* Connection removed: %1, port %2").arg(socket->peerAddress().toString()).arg(socket->peerPort()));
+  m_log_text->append(tr("* Connection removed: %1, port %2")
+                         .arg(socket->peerAddress().toString())
+                         .arg(socket->peerPort()));
   m_clients.removeOne(socket);
   m_receivedData.remove(socket);
   socket->deleteLater();
@@ -77,49 +90,35 @@ void TcpServer::readyRead() {
   QTcpSocket *socket = qobject_cast<QTcpSocket *>(sender());
   if (!socket) {
 #if LOGGER_SERVER
-    LOG(ERROR, "socket not readable, return")
+    LOG(ERROR, "socket not available, return")
 #endif
     return;
   }
-  // init input server to resend message
+  QImage image;
+  QString message{""};
   QDataStream in;
-  in.setVersion(QDataStream::Qt_5_0);
-  for (auto *socket_devices : m_clients) {
-    in.setDevice(socket_devices);
-    // fill message from QDataStream
-    in.startTransaction();
-    QString header{""};
-    qint32 size{0};
-    in >> header >> size;
-#if LOGGER_SERVER
-    LOG(DEBUG,
-        "incoming message control through header identification:\n"
-        "\t* message containing text if the header corresponds to the code UTF-8 '\\u001D' or the ASCII code %d\n"
-        "\t* message containing images if the header corresponds to the code UTF-8 '\\u001E' or the ASCII code %d",
-        GROUP_SEPARATOR_ASII_CODE, RECORD_SEPARATOR_ASII_CODE)
-    qDebug() << "\tincoming message header: " << header << "\tsize: " << size << "\n";
-#endif
-
-    if (header == QString(GROUP_SEPARATOR_ASII_CODE)) {
-      QString message;
+  in.setDevice(socket);
+  in.setVersion(QDataStream::Qt_4_0);
+  QString header{""};
+  qint32 size{0};
+  in.startTransaction();
+  in >> header >> size;
+  auto message_type = identifies_message_type(header, size);
+  switch (message_type) {
+    case MessageType::Text:
       in >> message;
-#if LOGGER_SERVER
-      LOG(DEBUG, "check message is not empty: %s", (!message.isEmpty()) ? "true" : "false")
-      LOG(DEBUG, "server read message in redyRead()\n\tmessage received:")
-      qDebug() << "\t" << message << "\n";
-#endif
       newMessage(socket, message);
-    } else if (header == QString(RECORD_SEPARATOR_ASII_CODE)) {
-#if LOGGER_SERVER
-      LOG(DEBUG, "image incoming")
-#endif
-      QImage image;
+      break;
+    case MessageType::Image:
       in >> image;
-      newMessageImage(socket, image);
-    }
-    if (!in.commitTransaction()) {
+      newMessage(socket, image);
+      break;
+    case MessageType::Unknow:
+      in.abortTransaction();
       return;
-    }
+  }
+  if (!in.commitTransaction()) {
+    return;
   }
 }
 
@@ -132,38 +131,24 @@ void TcpServer::onDisconnectClientsClicked() {
 }
 
 void TcpServer::newMessage(QTcpSocket *sender, const QString &message) {
-#if LOGGER_SERVER
-  LOG(DEBUG, "new message ready to be sent")
-  qDebug() << "\t" << message << "\n";
-#endif
   m_log_text->append(QString("Sending message: %1").arg(message));
-  // init out buffer message
-  QByteArray message_ba;
-  QDataStream out(&message_ba, QIODevice::WriteOnly);
-  out.setVersion(QDataStream::Qt_5_0);
-  out << QString(GROUP_SEPARATOR_ASII_CODE) << static_cast<quint32>(message_ba.size()) << message;
   for (QTcpSocket *socket : m_clients) {
     if (socket->state() == QAbstractSocket::ConnectedState) {
-      socket->write(message_ba);
+      send_message_text(socket, message);
     }
   }
   Q_UNUSED(sender)
 }
 
-void TcpServer::newMessageImage(QTcpSocket *sender, const QImage &image) {
+void TcpServer::newMessage(QTcpSocket *sender, const QImage &image) {
 #if LOGGER_SERVER
   LOG(DEBUG, "new image ready to be sent")
 #endif
   const QString default_msg{"Sending image"};
   m_log_text->append(default_msg);
-  // init out buffer message
-  QByteArray message_ba;
-  QDataStream out(&message_ba, QIODevice::WriteOnly);
-  out.setVersion(QDataStream::Qt_5_0);
-  out << QString(RECORD_SEPARATOR_ASII_CODE) << static_cast<quint32>(image.sizeInBytes()) << image;
   for (QTcpSocket *socket : m_clients)
     if (socket->state() == QAbstractSocket::ConnectedState) {
-      socket->write(message_ba);
+      send_message_image(socket, image);
     }
   Q_UNUSED(sender)
 }
@@ -229,7 +214,8 @@ QString TcpServer::findIpAddress() {
     }
   }
   // if we did not find one, use IPv4 localhost
-  if (ipAddress.isEmpty()) ipAddress = QHostAddress(QHostAddress::LocalHost).toString();
+  if (ipAddress.isEmpty())
+    ipAddress = QHostAddress(QHostAddress::LocalHost).toString();
 #if LOGGER_SERVER
   LOG(DEBUG, "server is running on IP")
   qDebug() << "\t" << ipAddress << " port " << m_server->serverPort();

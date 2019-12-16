@@ -6,8 +6,6 @@
 #include <QGridLayout>
 #include <QGroupBox>
 #include <QImage>
-#include <QImageReader>
-#include <QImageWriter>
 #include <QLabel>
 #include <QLineEdit>
 #include <QMessageBox>
@@ -16,12 +14,12 @@
 #include <QSettings>
 #include <QString>
 #include <QTextEdit>
-#include <QThread>
 
 #include "commonconnection.hpp"
 #include "log/logger.h"
 
-TcpClient::TcpClient(QWidget *parent) : QWidget(parent), m_tcp_socket(new QTcpSocket(this)) {
+TcpClient::TcpClient(QWidget *parent)
+    : QWidget(parent), m_tcp_socket(new QTcpSocket(this)) {
   // assemble ui
   connectButton = new QPushButton("Connect");
   disconnectButton = new QPushButton("Disconnect");
@@ -46,21 +44,29 @@ TcpClient::TcpClient(QWidget *parent) : QWidget(parent), m_tcp_socket(new QTcpSo
 
   // connect functions
   connect(m_tcp_socket, &QTcpSocket::readyRead, [=]() { this->readyRead(); });
-  connect(m_tcp_socket, &QTcpSocket::connected, [=]() { this->connectedToServer(); });
-  connect(m_tcp_socket, &QTcpSocket::disconnected, [=]() { this->disconnectByServer(); });
+  connect(m_tcp_socket, &QTcpSocket::connected,
+          [=]() { this->connectedToServer(); });
+  connect(m_tcp_socket, &QTcpSocket::disconnected,
+          [=]() { this->disconnectByServer(); });
 
   // connect buttons
-  connect(disconnectButton, &QPushButton::clicked, [=]() { this->onDisconnectClicked(); });
-  connect(connectButton, &QPushButton::clicked, [=]() { this->onConnectClicked(); });
+  connect(disconnectButton, &QPushButton::clicked,
+          [=]() { this->onDisconnectClicked(); });
+  connect(connectButton, &QPushButton::clicked,
+          [=]() { this->onConnectClicked(); });
 
   // connect ui
-  connect(hostCombo, &QComboBox::editTextChanged, this, &TcpClient::enableConnectButton);
-  connect(m_port_linedit, &QLineEdit::textChanged, this, &TcpClient::enableConnectButton);
-  //  connect(m_tcp_socket, &QIODevice::readyRead, this, &TcpClient::readFortune);
+  connect(hostCombo, &QComboBox::editTextChanged, this,
+          &TcpClient::enableConnectButton);
+  connect(m_port_linedit, &QLineEdit::textChanged, this,
+          &TcpClient::enableConnectButton);
+  //  connect(m_tcp_socket, &QIODevice::readyRead, this,
+  //  &TcpClient::readFortune);
 
   // connect error
   connect(m_tcp_socket,
-          QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error),this, &TcpClient::displayError);
+          QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error),
+          this, &TcpClient::displayError);
 
   // network manager
   QNetworkConfigurationManager manager;
@@ -90,7 +96,7 @@ TcpClient::TcpClient(QWidget *parent) : QWidget(parent), m_tcp_socket(new QTcpSo
   }
 #if LOGGER
   QTimer *timer = new QTimer(this);
-  timer->setInterval(2500);
+  timer->setInterval(1000);
   timer->start();
 #if TEST_IMAGE
   connect(timer, &QTimer::timeout, [=]() { this->sendImageMessage(); });
@@ -99,6 +105,20 @@ TcpClient::TcpClient(QWidget *parent) : QWidget(parent), m_tcp_socket(new QTcpSo
 #endif
 #endif
 }
+
+void TcpClient::sendImage(QImage image) {
+  if (m_tcp_socket->state() != QAbstractSocket::ConnectedState) {
+#if LOGGER_CLIENT
+    LOG(WARN, "socket test function not connected, then exit.")
+#endif
+    return;
+  }
+  send_message_image(m_tcp_socket, image);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+//// Slot function
+//////////////////////////////////////////////////////////////////////////////
 
 void TcpClient::connectedToServer() {
 #if LOGGER_CLIENT
@@ -124,7 +144,9 @@ void TcpClient::sessionOpened() {
   QNetworkConfiguration config = networkSession->configuration();
   QString id;
   if (config.type() == QNetworkConfiguration::UserChoice)
-    id = networkSession->sessionProperty(QLatin1String("UserChoiceConfiguration")).toString();
+    id = networkSession
+             ->sessionProperty(QLatin1String("UserChoiceConfiguration"))
+             .toString();
   else
     id = config.identifier();
 
@@ -153,14 +175,16 @@ void TcpClient::displayError(QAbstractSocket::SocketError socketError) {
       break;
     default:
       QMessageBox::information(this, tr("Client"),
-                               tr("The following error occurred: %1.").arg(m_tcp_socket->errorString()));
+                               tr("The following error occurred: %1.")
+                                   .arg(m_tcp_socket->errorString()));
   }
   m_tcp_socket->abort();
   updateGui(QAbstractSocket::UnconnectedState);
 }
 
 void TcpClient::enableConnectButton() {
-  connectButton->setEnabled((!networkSession || networkSession->isOpen()) && !hostCombo->currentText().isEmpty() &&
+  connectButton->setEnabled((!networkSession || networkSession->isOpen()) &&
+                            !hostCombo->currentText().isEmpty() &&
                             !m_port_linedit->text().isEmpty());
 }
 
@@ -185,7 +209,7 @@ void TcpClient::readFortune() {
 void TcpClient::readyRead() {
   if (m_tcp_socket->state() != QAbstractSocket::ConnectedState) {
 #if LOGGER_CLIENT
-    LOG(WARN, "impossible read from socket.")
+    LOG(ERROR, "impossible read from socket, disconnected")
 #endif
     return;
   }
@@ -196,33 +220,35 @@ void TcpClient::readyRead() {
 #if LOGGER_CLIENT
   LOG(DEBUG,
       "incoming message control through header identification:\n"
-      "\t* message containing text if the header corresponds to the code UTF-8 '\\u001D' or the ASCII code %d\n"
-      "\t* message containing images if the header corresponds to the code UTF-8 '\\u001E' or the ASCII code %d\n",
-      GROUP_SEPARATOR_ASII_CODE, RECORD_SEPARATOR_ASII_CODE)
-  qDebug() << "\tincoming message header: " << header << "\tsize: " << size << "\n";
+      "\t* message containing text if the header corresponds to the code UTF-8 "
+      "'\\u001D' or the ASCII code %d\n"
+      "\t* message containing images if the header corresponds to the code "
+      "UTF-8 '\\u001E' or the ASCII code %d\n",
+      GROUP_SEPARATOR_ASCII_CODE, RECORD_SEPARATOR_ASCII_CODE)
+  qDebug() << "\tincoming message header: " << header << "\tsize: " << size
+           << "\n";
 #endif
-  if (header == QString(GROUP_SEPARATOR_ASII_CODE)) {
+  if (header == QString(GROUP_SEPARATOR_ASCII_CODE)) {
     QString message;
     m_data >> message;
 #if LOGGER_CLIENT
-    LOG(DEBUG, "check message is not empty: %s", (!message.isEmpty()) ? "true" : "false")
+    LOG(DEBUG, "check message is not empty: %s",
+        (!message.isEmpty()) ? "true" : "false")
     LOG(DEBUG, "server read message in redyRead()\n\tmessage received:")
     qDebug() << "\t" << message << "\n";
 #endif
-    m_log_text->append(message);
-  } else if (header == QString(RECORD_SEPARATOR_ASII_CODE)) {
+    if (!message.isEmpty()) m_log_text->append(message);
+  } else if (header == QString(RECORD_SEPARATOR_ASCII_CODE)) {
 #if LOGGER_CLIENT
     LOG(DEBUG, "image incoming")
 #endif
-    QByteArray array = m_tcp_socket->read(size);
-    QBuffer buffer(&array);
-    buffer.open(QIODevice::ReadOnly);
-    QImageReader reader(&buffer, "JPG");
-    QImage image = reader.read();
+    QImage image;
+    m_data >> image;
 #if LOGGER_CLIENT
-    LOG(DEBUG, "check image is not empty: %s", (!image.isNull()) ? "true" : "false")
+    LOG(DEBUG, "check image is not empty: %s",
+        (!image.isNull()) ? "true" : "false")
 #endif
-    emit updateImage(image);
+    if (!image.isNull()) emit updateImage(image);
   } else {
     m_data.abortTransaction();
     return;
@@ -237,14 +263,16 @@ void TcpClient::onConnectClicked() {
 #if LOGGER_CLIENT
     LOG(ERROR, "unable to connect, must define user name.")
 #endif
-    m_log_text->append(tr("== Unable to connect to server.\nYou must define an user name."));
+    m_log_text->append(
+        tr("== Unable to connect to server.\nYou must define an user name."));
     return;
   }
   if (m_tcp_socket->state() != QAbstractSocket::ConnectedState) {
     m_log_text->append(tr("== Connecting..."));
     auto port = static_cast<quint16>(m_port_linedit->text().toInt());
     m_tcp_socket->connectToHost(hostCombo->currentText(), port);
-    auto result = QString("== Connected %1:%2.").arg(hostCombo->currentText()).arg(port);
+    auto result =
+        QString("== Connected %1:%2.").arg(hostCombo->currentText()).arg(port);
     m_log_text->append(result);
 #if LOGGER_CLIENT
     LOG(DEBUG, "try connect, display connection status:")
@@ -291,7 +319,8 @@ QGroupBox *TcpClient::createInformationGroup() {
     QString domain = QHostInfo::localDomainName();
     if (!domain.isEmpty()) hostCombo->addItem(name + QChar('.') + domain);
   }
-  if (name != QLatin1String("localhost")) hostCombo->addItem(QString("localhost"));
+  if (name != QLatin1String("localhost"))
+    hostCombo->addItem(QString("localhost"));
 
   // find out IP addresses of this machine
   QList<QHostAddress> ipAddressesList = QNetworkInterface::allAddresses();
@@ -376,20 +405,10 @@ void TcpClient::sendTestMessageStream() {
     return;
   }
   const QString test_message{"Test datastrem message, sended form code."};
-  QString message = QString("%1: %2").arg(m_user_linedit->text()).arg(test_message);
-  message.append(TERMINATION_ASCII_CODE);
-  QByteArray ba_message;
-  QDataStream out(&ba_message, QIODevice::ReadWrite);
-  out.setVersion(QDataStream::Qt_5_0);
-  out << QString(GROUP_SEPARATOR_ASII_CODE) << static_cast<quint32>(ba_message.size()) << message;
-  m_tcp_socket->write(ba_message);
-  m_log_text->append(message);
-#if LOGGER_CLIENT
-  LOG(TRACE, "send test message stream")
-  qDebug() << "\theader: " << QString(GROUP_SEPARATOR_ASII_CODE)
-           << "\tsize: " << static_cast<quint32>(ba_message.size());
-  qDebug() << "\t" << message << "\n";
-#endif
+  QString message =
+      QString("%1: %2").arg(m_user_linedit->text()).arg(test_message);
+  send_message_text(m_tcp_socket, message);
+  //  m_log_text->append(message);
 }
 
 #if TEST_IMAGE
@@ -416,24 +435,7 @@ void TcpClient::sendImageMessage() {
 #endif
     return;
   }
-  // init buffer from image to Qbuffer
-  //  QBuffer buffer;
-  //  QImageWriter writer(&buffer, "JPG");
-  QImage image = randomImage();
-  //  writer.write(image);
-  //  // prepare datastream
-  QByteArray ba_message;
-  QDataStream out(&ba_message, QIODevice::ReadWrite);
-  out.setVersion(QDataStream::Qt_5_0);
-
-  out << QString(RECORD_SEPARATOR_ASII_CODE) << static_cast<quint32>(image.sizeInBytes()) << image;
-#if LOGGER_CLIENT
-  LOG(DEBUG, "send image from client:")
-  qDebug() << "\theader: " << QString(RECORD_SEPARATOR_ASII_CODE)
-           << "\tsize:" << static_cast<quint32>(image.sizeInBytes()) << "\n";
-#endif
-  m_tcp_socket->write(ba_message);
-  emit updateImage(image);
+  send_message_image(m_tcp_socket, randomImage());
 }
 
 #endif
