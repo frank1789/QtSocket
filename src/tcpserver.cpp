@@ -12,7 +12,7 @@
 #include <QtNetwork>
 
 #include "commonconnection.hpp"
-#include "log/logger.h"
+#include "../log/logger.h"
 
 TcpServer::TcpServer(QWidget *parent)
     : QWidget(parent), m_server(new QTcpServer(this)) {

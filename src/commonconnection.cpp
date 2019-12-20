@@ -7,7 +7,7 @@
 #include <QString>
 #include <QTcpSocket>
 
-#include "log/logger.h"
+#include "../log/logger.h"
 
 MessageType identifies_message_type(const QString &header, const qint32 &size) {
 #if LOGGER_SERVER || LOGGER_CLIENT
