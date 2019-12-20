@@ -1,7 +1,7 @@
 # QtSocket
 
 This project creates a TCP socket in Qt to allow communication between 2 or more devices.
-it is used as a module for the main project Flir-Lepton thus allows the communication between the Raspberry Pi 3b and the Google Coral Dev Board.
+it is used as a module for the main project [Flir-Lepton](https://github.com/frank1789/Flir-Lepton/tree/develop) thus allows the communication between the Raspberry Pi 3b and the Google Coral Dev Board.
 
 ## Prerequisites
 
@@ -43,3 +43,45 @@ add_definitions(-DLOGGER -DLOGGER_SERVER -DTEST_IMAGE)
 ```cmake
 add_definitions(-DLOGGER -DLOGGER_SERVER)
 ```
+
+## Start
+
+To run project build Sender
+
+```sh
+mkdir build
+cd build
+cmake -D CMAKE_BUILD_TYPE=Debug ..
+make
+EXECUTABLE=$(find $PWD -name "QtSocket")
+${EXECUTABLE}
+```
+
+Build Receiver
+
+```sh
+mkdir build
+cd build
+cmake -D CMAKE_BUILD_TYPE=Debug ..
+make
+EXECUTABLE=$(find $PWD -name "QtReceiver")
+${EXECUTABLE}
+```
+
+Once the program has started, will be appear like this:
+
+![server-disconnect](assets/server-disconnect.png)
+![sender-disconnect](assets/sender-disconnect.png)
+
+enter the value 52693 in the port and the image or text stream will start.
+
+![server-connect](assets/server-connect.png)
+![sender-connect](assets/sender-connect.png)
+
+You need to use a second client to receive messages by repeating the previous
+steps.
+
+![receiver-disconnect](assets/receiver-disconnect.png)
+![receiver-connect](assets/receiver-connect.png)
+![receiver-read](assets/receiver-read.png)
+
