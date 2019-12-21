@@ -41,12 +41,12 @@ MainWindow::MainWindow(QWidget *parent)
   // load image
   m_raspic_label->setPixmap(QPixmap::fromImage(*m_raspic_image));
 
-  client = new TcpClient();
+  client = new UdpClient();
   m_group_all->addWidget(m_raspic_label, 0, 0);
   m_group_all->addWidget(client, 0, 1);
   widget->setLayout(m_group_all);
 
-  connect(client, &TcpClient::updateImage,
+  connect(client, &UdpClient::updateImage,
           [=](QImage img) { m_raspic_label->setImage(img); });
 }
 

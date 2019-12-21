@@ -413,21 +413,6 @@ void TcpClient::sendTestMessageStream() {
 
 #if TEST_IMAGE
 
-QImage randomImage() {
-  qsrand(QTime(0, 0, 0).secsTo(QTime::currentTime()));
-
-  QDir dir("/Users/francesco/Desktop/landingzone/CiterX");
-  dir.setFilter(QDir::Files);
-  QFileInfoList entries = dir.entryInfoList();
-
-  if (entries.size() == 0) {
-    qDebug("No images to show!");
-    return QImage();
-  }
-  qDebug() << entries.at(qrand() % entries.size()).absoluteFilePath();
-  return QImage(entries.at(qrand() % entries.size()).absoluteFilePath());
-}
-
 void TcpClient::sendImageMessage() {
   if (m_tcp_socket->state() != QAbstractSocket::ConnectedState) {
 #if LOGGER_CLIENT

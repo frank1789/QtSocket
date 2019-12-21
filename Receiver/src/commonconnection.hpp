@@ -6,6 +6,9 @@
 #include <QImage>
 #include <QString>
 #include <QTcpSocket>
+#include <QUdpSocket>
+
+#include "../log/logger.h"
 
 constexpr int TCP_PORT{52693};
 constexpr int TERMINATION_ASCII_CODE{23};
@@ -50,10 +53,33 @@ MessageType identifies_message_type(const QString &header, const qint32 &size);
  * stream are constructed. the message is composed of the header, then the size,
  * the text of the message.
  *
- * @param socket[in] tcp-socket required to send the buffer.
+ * @param socket[in] socket required to send the buffer.
  * @param message[in] string containing the text message.
  */
-void send_message_text(QTcpSocket *socket, const QString &message);
+template <typename T>
+void send_message_text(T *socket, const QString &message) {
+  // check image is not empty
+  if (message.isNull()) {
+#if LOGGER_CLIENT || LOGGER_SERVER
+    LOG(ERROR, "image is not valid: %s", message.isNull() ? "true" : "false")
+#endif
+    return;
+  }
+  // prepare datastream
+  QByteArray ba_message;
+  QDataStream out(&ba_message, QIODevice::ReadWrite);
+  out.setVersion(QDataStream::Qt_4_0);
+  // serialize information
+  out << QString(GROUP_SEPARATOR_ASCII_CODE)
+      << static_cast<quint32>(ba_message.size()) << message;
+  socket->write(ba_message);
+#if LOGGER_CLIENT || LOGGER_SERVER
+  LOG(TRACE, "sending text")
+  qDebug() << "\theader: " << QString(GROUP_SEPARATOR_ASCII_CODE)
+           << "\tsize: " << static_cast<quint32>(ba_message.size());
+  qDebug() << "\t" << message << "\n";
+#endif
+}
 
 /**
  * @brief send_message_image send the message.
@@ -63,9 +89,35 @@ void send_message_text(QTcpSocket *socket, const QString &message);
  * stream are constructed. the message is composed of the header, then the size,
  * the image.
  *
- * @param socket[in] tcp-socket required to send the buffer.
+ * @param socket[in] socket required to send the buffer.
  * @param image[in] containing the picture.
  */
-void send_message_image(QTcpSocket *socket, const QImage &image);
+template <typename T>
+void send_message_image(T *socket, const QImage &image) {
+  // check image is not null
+  if (image.isNull()) {
+#if LOGGER_CLIENT || LOGGER_SERVER
+    LOG(ERROR, "image is not valid: %s", image.isNull() ? "true" : "false")
+#endif
+    return;
+  }
+  // prepare datastream
+  QByteArray ba_message;
+  QDataStream out(&ba_message, QIODevice::ReadWrite);
+  out.setVersion(QDataStream::Qt_4_0);
+  // serialize information
+  out << QString(RECORD_SEPARATOR_ASCII_CODE)
+      << static_cast<quint32>(image.sizeInBytes()) << image;
+  socket->write(ba_message);
+#if LOGGER_CLIENT || LOGGER_SERVER
+  LOG(DEBUG, "sending image:")
+  qDebug() << "\theader: " << QString(RECORD_SEPARATOR_ASCII_CODE)
+           << "\tsize:" << static_cast<quint32>(image.sizeInBytes()) << "\n";
+#endif
+}
+
+#if TEST_IMAGE
+extern QImage randomImage();
+#endif
 
 #endif  // COMMONCONNECTION_HPP

@@ -1,11 +1,9 @@
 #include "commonconnection.hpp"
 
-#include <QByteArray>
-#include <QDataStream>
 #include <QDebug>
-#include <QImage>
+#include <QDir>
 #include <QString>
-#include <QTcpSocket>
+#include <QTime>
 
 #include "../log/logger.h"
 
@@ -32,49 +30,21 @@ MessageType identifies_message_type(const QString &header, const qint32 &size) {
   return MessageType::Unknow;
 }
 
-void send_message_text(QTcpSocket *socket, const QString &message) {
-  // check image is not empty
-  if (message.isNull()) {
-#if LOGGER_CLIENT || LOGGER_SERVER
-    LOG(ERROR, "image is not valid: %s", message.isNull() ? "true" : "false")
-#endif
-    return;
+#if TEST_IMAGE
+
+QImage randomImage() {
+  qsrand(QTime(0, 0, 0).secsTo(QTime::currentTime()));
+
+  QDir dir("/Users/francesco/Desktop/landingzone/CiterX");
+  dir.setFilter(QDir::Files);
+  QFileInfoList entries = dir.entryInfoList();
+
+  if (entries.size() == 0) {
+    qDebug("No images to show!");
+    return QImage();
   }
-  // prepare datastream
-  QByteArray ba_message;
-  QDataStream out(&ba_message, QIODevice::ReadWrite);
-  out.setVersion(QDataStream::Qt_4_0);
-  // serialize information
-  out << QString(GROUP_SEPARATOR_ASCII_CODE)
-      << static_cast<quint32>(ba_message.size()) << message;
-  socket->write(ba_message);
-#if LOGGER_CLIENT || LOGGER_SERVER
-  LOG(TRACE, "sending text")
-  qDebug() << "\theader: " << QString(GROUP_SEPARATOR_ASCII_CODE)
-           << "\tsize: " << static_cast<quint32>(ba_message.size());
-  qDebug() << "\t" << message << "\n";
-#endif
+  qDebug() << entries.at(qrand() % entries.size()).absoluteFilePath();
+  return QImage(entries.at(qrand() % entries.size()).absoluteFilePath());
 }
 
-void send_message_image(QTcpSocket *socket, const QImage &image) {
-  // check image is not null
-  if (image.isNull()) {
-#if LOGGER_CLIENT || LOGGER_SERVER
-    LOG(ERROR, "image is not valid: %s", image.isNull() ? "true" : "false")
 #endif
-    return;
-  }
-  // prepare datastream
-  QByteArray ba_message;
-  QDataStream out(&ba_message, QIODevice::ReadWrite);
-  out.setVersion(QDataStream::Qt_4_0);
-  // serialize information
-  out << QString(RECORD_SEPARATOR_ASCII_CODE)
-      << static_cast<quint32>(image.sizeInBytes()) << image;
-  socket->write(ba_message);
-#if LOGGER_CLIENT || LOGGER_SERVER
-  LOG(DEBUG, "sending image:")
-  qDebug() << "\theader: " << QString(RECORD_SEPARATOR_ASCII_CODE)
-           << "\tsize:" << static_cast<quint32>(image.sizeInBytes()) << "\n";
-#endif
-}
