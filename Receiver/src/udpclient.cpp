@@ -96,7 +96,7 @@ TcpClient::TcpClient(QWidget *parent)
   }
 #if LOGGER
   QTimer *timer = new QTimer(this);
-  timer->setInterval(5000);
+  timer->setInterval(1000);
   timer->start();
 #if TEST_IMAGE
   connect(timer, &QTimer::timeout, [=]() { this->sendImageMessage(); });
