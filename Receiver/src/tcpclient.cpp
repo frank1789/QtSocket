@@ -16,7 +16,7 @@
 #include <QTextEdit>
 
 #include "commonconnection.hpp"
-#include "log/logger.h"
+#include "../log/logger.h"
 
 TcpClient::TcpClient(QWidget *parent)
     : QWidget(parent), m_tcp_socket(new QTcpSocket(this)) {

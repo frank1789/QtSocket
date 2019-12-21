@@ -12,7 +12,7 @@
 #include <QString>
 #include <QVBoxLayout>
 
-#include "log/logger.h"
+#include "../log/logger.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {
