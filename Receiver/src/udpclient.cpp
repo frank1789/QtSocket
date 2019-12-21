@@ -1,4 +1,4 @@
-#include "tcpclient.hpp"
+#include "udpclient.hpp"
 
 #include <QComboBox>
 #include <QDebug>
@@ -18,8 +18,8 @@
 #include "commonconnection.hpp"
 #include "../log/logger.h"
 
-TcpClient::TcpClient(QWidget *parent)
-    : QWidget(parent), m_tcp_socket(new QTcpSocket(this)) {
+UdpClient::UdpClient(QWidget *parent)
+    : QWidget(parent), m_udp_socket(new QUdpSocket(this)) {
   // assemble ui
   connectButton = new QPushButton("Connect");
   disconnectButton = new QPushButton("Disconnect");
@@ -39,14 +39,14 @@ TcpClient::TcpClient(QWidget *parent)
 #endif
 
   // config client
-  m_data.setDevice(m_tcp_socket);
+  m_data.setDevice(m_udp_socket);
   m_data.setVersion(QDataStream::Qt_4_0);
 
   // connect functions
-  connect(m_tcp_socket, &QTcpSocket::readyRead, [=]() { this->readyRead(); });
-  connect(m_tcp_socket, &QTcpSocket::connected,
+  connect(m_udp_socket, &QTcpSocket::readyRead, [=]() { this->readyRead(); });
+  connect(m_udp_socket, &QTcpSocket::connected,
           [=]() { this->connectedToServer(); });
-  connect(m_tcp_socket, &QTcpSocket::disconnected,
+  connect(m_udp_socket, &QTcpSocket::disconnected,
           [=]() { this->disconnectByServer(); });
 
   // connect buttons
@@ -57,16 +57,16 @@ TcpClient::TcpClient(QWidget *parent)
 
   // connect ui
   connect(hostCombo, &QComboBox::editTextChanged, this,
-          &TcpClient::enableConnectButton);
+          &UdpClient::enableConnectButton);
   connect(m_port_linedit, &QLineEdit::textChanged, this,
-          &TcpClient::enableConnectButton);
-  //  connect(m_tcp_socket, &QIODevice::readyRead, this,
-  //  &TcpClient::readFortune);
+          &UdpClient::enableConnectButton);
+  //  connect(m_udp_socket, &QIODevice::readyRead, this,
+  //  &UdpClient::readFortune);
 
   // connect error
-  connect(m_tcp_socket,
+  connect(m_udp_socket,
           QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error),
-          this, &TcpClient::displayError);
+          this, &UdpClient::displayError);
 
   // network manager
   QNetworkConfigurationManager manager;
@@ -87,7 +87,7 @@ TcpClient::TcpClient(QWidget *parent)
     }
     networkSession = new QNetworkSession(config, this);
     connect(networkSession, &QNetworkSession::opened, this,
-            &TcpClient::sessionOpened);
+            &UdpClient::sessionOpened);
 
     connectButton->setEnabled(false);
     m_log_text->append(tr("Opening network session."));
@@ -106,21 +106,21 @@ TcpClient::TcpClient(QWidget *parent)
 #endif
 }
 
-void TcpClient::sendImage(QImage image) {
-  if (m_tcp_socket->state() != QAbstractSocket::ConnectedState) {
+void UdpClient::sendImage(QImage image) {
+  if (m_udp_socket->state() != QAbstractSocket::ConnectedState) {
 #if LOGGER_CLIENT
     LOG(WARN, "socket test function not connected, then exit.")
 #endif
     return;
   }
-  send_message_image(m_tcp_socket, image);
+  send_message_image(m_udp_socket, image);
 }
 
 //////////////////////////////////////////////////////////////////////////////
 //// Slot function
 //////////////////////////////////////////////////////////////////////////////
 
-void TcpClient::connectedToServer() {
+void UdpClient::connectedToServer() {
 #if LOGGER_CLIENT
   LOG(INFO, "update connection status: Connect to server.")
 #endif
@@ -128,18 +128,18 @@ void TcpClient::connectedToServer() {
   updateGui(QAbstractSocket::ConnectedState);
 }
 
-void TcpClient::onDisconnectClicked() {
-  if (m_tcp_socket->state() != QAbstractSocket::ConnectingState) {
+void UdpClient::onDisconnectClicked() {
+  if (m_udp_socket->state() != QAbstractSocket::ConnectingState) {
     m_log_text->append(tr("== Abort connecting."));
 #if LOGGER_CLIENT
     LOG(INFO, "update connection status: abort connecting.")
 #endif
   }
-  m_tcp_socket->abort();
+  m_udp_socket->abort();
   updateGui(QAbstractSocket::UnconnectedState);
 }
 
-void TcpClient::sessionOpened() {
+void UdpClient::sessionOpened() {
   // Save the used configuration
   QNetworkConfiguration config = networkSession->configuration();
   QString id;
@@ -157,7 +157,7 @@ void TcpClient::sessionOpened() {
   connectButton->setEnabled(true);
 }
 
-void TcpClient::displayError(QAbstractSocket::SocketError socketError) {
+void UdpClient::displayError(QAbstractSocket::SocketError socketError) {
   switch (socketError) {
     case QAbstractSocket::RemoteHostClosedError:
       break;
@@ -176,19 +176,19 @@ void TcpClient::displayError(QAbstractSocket::SocketError socketError) {
     default:
       QMessageBox::information(this, tr("Client"),
                                tr("The following error occurred: %1.")
-                                   .arg(m_tcp_socket->errorString()));
+                                   .arg(m_udp_socket->errorString()));
   }
-  m_tcp_socket->abort();
+  m_udp_socket->abort();
   updateGui(QAbstractSocket::UnconnectedState);
 }
 
-void TcpClient::enableConnectButton() {
+void UdpClient::enableConnectButton() {
   connectButton->setEnabled((!networkSession || networkSession->isOpen()) &&
                             !hostCombo->currentText().isEmpty() &&
                             !m_port_linedit->text().isEmpty());
 }
 
-void TcpClient::readFortune() {
+void UdpClient::readFortune() {
   m_data.startTransaction();
 
   QString nextFortune;
@@ -197,7 +197,7 @@ void TcpClient::readFortune() {
   if (!m_data.commitTransaction()) return;
 
   if (nextFortune == currentFortune) {
-    QTimer::singleShot(100, this, &TcpClient::connectedToServer);
+    QTimer::singleShot(100, this, &UdpClient::connectedToServer);
     return;
   }
 
@@ -206,8 +206,8 @@ void TcpClient::readFortune() {
   connectButton->setEnabled(true);
 }
 
-void TcpClient::readyRead() {
-  if (m_tcp_socket->state() != QAbstractSocket::ConnectedState) {
+void UdpClient::readyRead() {
+  if (m_udp_socket->state() != QAbstractSocket::ConnectedState) {
 #if LOGGER_CLIENT
     LOG(ERROR, "impossible read from socket, disconnected")
 #endif
@@ -258,7 +258,7 @@ void TcpClient::readyRead() {
   }
 }
 
-void TcpClient::onConnectClicked() {
+void UdpClient::onConnectClicked() {
   if (m_user_linedit->text().isEmpty()) {
 #if LOGGER_CLIENT
     LOG(ERROR, "unable to connect, must define user name.")
@@ -267,10 +267,10 @@ void TcpClient::onConnectClicked() {
         tr("== Unable to connect to server.\nYou must define an user name."));
     return;
   }
-  if (m_tcp_socket->state() != QAbstractSocket::ConnectedState) {
+  if (m_udp_socket->state() != QAbstractSocket::ConnectedState) {
     m_log_text->append(tr("== Connecting..."));
     auto port = static_cast<quint16>(m_port_linedit->text().toInt());
-    m_tcp_socket->connectToHost(hostCombo->currentText(), port);
+    m_udp_socket->connectToHost(hostCombo->currentText(), port);
     auto result =
         QString("== Connected %1:%2.").arg(hostCombo->currentText()).arg(port);
     m_log_text->append(result);
@@ -281,11 +281,11 @@ void TcpClient::onConnectClicked() {
   }
 }
 
-void TcpClient::disconnectByServer() {
+void UdpClient::disconnectByServer() {
 #if LOGGER_CLIENT
   LOG(INFO, "update connection status: disconnected by server.")
   qDebug() << "\t"
-           << "connection state: " << m_tcp_socket->state();
+           << "connection state: " << m_udp_socket->state();
 #endif
   m_log_text->append(tr("== Disconnected by server."));
   updateGui(QAbstractSocket::UnconnectedState);
@@ -295,7 +295,7 @@ void TcpClient::disconnectByServer() {
 //// Layout function
 //////////////////////////////////////////////////////////////////////////////
 
-QGroupBox *TcpClient::createInformationGroup() {
+QGroupBox *UdpClient::createInformationGroup() {
 #if LOGGER_CLIENT
   LOG(INFO, "build information group ui")
 #endif
@@ -359,7 +359,7 @@ QGroupBox *TcpClient::createInformationGroup() {
   return groupBox;
 }
 
-QGroupBox *TcpClient::createLogGroup() {
+QGroupBox *UdpClient::createLogGroup() {
 #if LOGGER_UI
   LOG(INFO, "build logging group ui")
 #endif
@@ -377,7 +377,7 @@ QGroupBox *TcpClient::createLogGroup() {
   return groupBox;
 }
 
-void TcpClient::updateGui(QAbstractSocket::SocketState state) {
+void UdpClient::updateGui(QAbstractSocket::SocketState state) {
   const bool connected = (state == QAbstractSocket::ConnectedState);
   const bool unconnected = (state == QAbstractSocket::UnconnectedState);
 #if LOGGER_UI
@@ -397,8 +397,8 @@ void TcpClient::updateGui(QAbstractSocket::SocketState state) {
 //// Test function
 //////////////////////////////////////////////////////////////////////////////
 
-void TcpClient::sendTestMessageStream() {
-  if (m_tcp_socket->state() != QAbstractSocket::ConnectedState) {
+void UdpClient::sendTestMessageStream() {
+  if (m_udp_socket->state() != QAbstractSocket::ConnectedState) {
 #if LOGGER_CLIENT
     LOG(WARN, "socket test function not connected, then exit.")
 #endif
@@ -407,7 +407,7 @@ void TcpClient::sendTestMessageStream() {
   const QString test_message{"Test datastrem message, sended form code."};
   QString message =
       QString("%1: %2").arg(m_user_linedit->text()).arg(test_message);
-  send_message_text(m_tcp_socket, message);
+  send_message_text(m_udp_socket, message);
   //  m_log_text->append(message);
 }
 
@@ -428,14 +428,14 @@ QImage randomImage() {
   return QImage(entries.at(qrand() % entries.size()).absoluteFilePath());
 }
 
-void TcpClient::sendImageMessage() {
-  if (m_tcp_socket->state() != QAbstractSocket::ConnectedState) {
+void UdpClient::sendImageMessage() {
+  if (m_udp_socket->state() != QAbstractSocket::ConnectedState) {
 #if LOGGER_CLIENT
     LOG(WARN, "socket test function not connected, then exit.")
 #endif
     return;
   }
-  send_message_image(m_tcp_socket, randomImage());
+  send_message_image(m_udp_socket, randomImage());
 }
 
 #endif

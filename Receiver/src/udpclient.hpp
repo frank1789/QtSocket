@@ -1,5 +1,5 @@
-#ifndef TCPCLIENT_HPP
-#define TCPCLIENT_HPP
+#ifndef UDPCLIENT_HPP
+#define UDPCLIENT_HPP
 
 #include <QWidget>
 #include <QtNetwork>
@@ -10,17 +10,17 @@ class QLabel;
 class QTextEdit;
 class QLineEdit;
 class QPushButton;
-class QTcpSocket;
+class QUdpSocket;
 class QNetworkSession;
 class QGroupBox;
 class QImage;
 QT_END_NAMESPACE
 
-class TcpClient : public QWidget {
+class UdpClient : public QWidget {
   Q_OBJECT
 
  public:
-  explicit TcpClient(QWidget *parent = nullptr);
+  explicit UdpClient(QWidget *parent = nullptr);
 
  public slots:
   /**
@@ -130,14 +130,12 @@ class TcpClient : public QWidget {
   QString currentFortune;
 
   // network variables
-  QTcpSocket *m_tcp_socket{nullptr};
+  QUdpSocket *m_udp_socket{nullptr};
   QDataStream m_data;
   QNetworkSession *networkSession{nullptr};
 
   // data exchanged
   QByteArray receive_data;
-
-  QThread *thread{nullptr};
 
 #if TEST_IMAGE
  private slots:
@@ -145,4 +143,4 @@ class TcpClient : public QWidget {
 #endif
 };
 
-#endif  // TCPCLIENT_HPP
+#endif  // UDPCLIENT_HPP
