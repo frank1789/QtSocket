@@ -2,7 +2,6 @@
 #define COMMONCONNECTION_HPP
 
 #include <QByteArray>
-
 #include <QImage>
 #include <QString>
 #include <QTcpSocket>

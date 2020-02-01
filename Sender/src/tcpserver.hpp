@@ -17,11 +17,11 @@ QT_END_NAMESPACE
 class TcpServer : public QWidget {
   Q_OBJECT
 
- public:
+public:
   explicit TcpServer(QWidget *parent = nullptr);
   ~TcpServer();
 
- private slots:
+private slots:
   /**
    * @brief Adds clients to the server.
    *
@@ -57,7 +57,7 @@ class TcpServer : public QWidget {
    */
   void onDisconnectClientsClicked();
 
- private:
+private:
   /**
    * @brief sends text message
    *
@@ -115,4 +115,4 @@ class TcpServer : public QWidget {
   QHash<QTcpSocket *, QByteArray> m_receivedData;
 };
 
-#endif  // TCPSERVER_HPP
+#endif // TCPSERVER_HPP

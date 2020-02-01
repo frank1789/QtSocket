@@ -1,5 +1,4 @@
 #include "mainwindow.hpp"
-#include "ui_mainwindow.h"
 
 #include <QColor>
 #include <QComboBox>
@@ -13,6 +12,7 @@
 #include <QVBoxLayout>
 
 #include "../log/logger.h"
+#include "ui_mainwindow.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {
@@ -41,12 +41,12 @@ MainWindow::MainWindow(QWidget *parent)
   // load image
   m_raspic_label->setPixmap(QPixmap::fromImage(*m_raspic_image));
 
-  client = new UdpClient();
+  client = new TcpClient();
   m_group_all->addWidget(m_raspic_label, 0, 0);
   m_group_all->addWidget(client, 0, 1);
   widget->setLayout(m_group_all);
 
-  connect(client, &UdpClient::updateImage,
+  connect(client, &TcpClient::updateImage,
           [=](QImage img) { m_raspic_label->setImage(img); });
 }
 

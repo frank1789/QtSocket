@@ -15,8 +15,8 @@
 #include <QString>
 #include <QTextEdit>
 
-#include "commonconnection.hpp"
 #include "../log/logger.h"
+#include "commonconnection.hpp"
 
 TcpClient::TcpClient(QWidget *parent)
     : QWidget(parent), m_tcp_socket(new QTcpSocket(this)) {
@@ -234,7 +234,7 @@ void TcpClient::readyRead() {
 #if LOGGER_CLIENT
     LOG(DEBUG, "check message is not empty: %s",
         (!message.isEmpty()) ? "true" : "false")
-    LOG(DEBUG, "server read message in redyRead()\n\tmessage received:")
+    LOG(DEBUG, "server read message in readyRead()\n\tmessage received:")
     qDebug() << "\t" << message << "\n";
 #endif
     if (!message.isEmpty()) m_log_text->append(message);

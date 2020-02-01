@@ -1,0 +1,22 @@
+{
+    "configurations": [
+        {
+            "name": "macOS",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "/usr/local/Cellar/qt/5.14.0/**"
+            ],
+            "defines": [],
+            "macFrameworkPath": [
+                "/System/Library/Frameworks",
+                "/Library/Frameworks"
+            ],
+            "compilerPath": "/usr/bin/clang",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "${default}",
+            "compileCommands": "${workspaceFolder}/udpreciver/build/compile_commands.json"
+        }
+    ],
+    "version": 4
+}
