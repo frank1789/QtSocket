@@ -11,8 +11,8 @@
 #include <QTcpSocket>
 #include <QtNetwork>
 
-#include "commonconnection.hpp"
 #include "../log/logger.h"
+#include "commonconnection.hpp"
 
 TcpServer::TcpServer(QWidget *parent)
     : QWidget(parent), m_server(new QTcpServer(this)) {
@@ -105,17 +105,17 @@ void TcpServer::readyRead() {
   in >> header >> size;
   auto message_type = identifies_message_type(header, size);
   switch (message_type) {
-    case MessageType::Text:
-      in >> message;
-      newMessage(socket, message);
-      break;
-    case MessageType::Image:
-      in >> image;
-      newMessage(socket, image);
-      break;
-    case MessageType::Unknow:
-      in.abortTransaction();
-      return;
+  case MessageType::Text:
+    in >> message;
+    newMessage(socket, message);
+    break;
+  case MessageType::Image:
+    in >> image;
+    newMessage(socket, image);
+    break;
+  case MessageType::Unknow:
+    in.abortTransaction();
+    return;
   }
   if (!in.commitTransaction()) {
     return;

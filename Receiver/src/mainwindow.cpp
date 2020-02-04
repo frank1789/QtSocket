@@ -1,5 +1,4 @@
 #include "mainwindow.hpp"
-#include "ui_mainwindow.h"
 
 #include <QColor>
 #include <QComboBox>
@@ -13,6 +12,7 @@
 #include <QVBoxLayout>
 
 #include "../log/logger.h"
+#include "ui_mainwindow.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {

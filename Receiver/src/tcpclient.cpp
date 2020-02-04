@@ -15,8 +15,8 @@
 #include <QString>
 #include <QTextEdit>
 
-#include "commonconnection.hpp"
 #include "../log/logger.h"
+#include "commonconnection.hpp"
 
 TcpClient::TcpClient(QWidget *parent)
     : QWidget(parent), m_tcp_socket(new QTcpSocket(this)) {
@@ -234,7 +234,7 @@ void TcpClient::readyRead() {
 #if LOGGER_CLIENT
     LOG(DEBUG, "check message is not empty: %s",
         (!message.isEmpty()) ? "true" : "false")
-    LOG(DEBUG, "server read message in redyRead()\n\tmessage received:")
+    LOG(DEBUG, "server read message in readyRead()\n\tmessage received:")
     qDebug() << "\t" << message << "\n";
 #endif
     if (!message.isEmpty()) m_log_text->append(message);
@@ -412,21 +412,6 @@ void TcpClient::sendTestMessageStream() {
 }
 
 #if TEST_IMAGE
-
-QImage randomImage() {
-  qsrand(QTime(0, 0, 0).secsTo(QTime::currentTime()));
-
-  QDir dir("/Users/francesco/Desktop/landingzone/CiterX");
-  dir.setFilter(QDir::Files);
-  QFileInfoList entries = dir.entryInfoList();
-
-  if (entries.size() == 0) {
-    qDebug("No images to show!");
-    return QImage();
-  }
-  qDebug() << entries.at(qrand() % entries.size()).absoluteFilePath();
-  return QImage(entries.at(qrand() % entries.size()).absoluteFilePath());
-}
 
 void TcpClient::sendImageMessage() {
   if (m_tcp_socket->state() != QAbstractSocket::ConnectedState) {

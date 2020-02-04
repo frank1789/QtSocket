@@ -50,24 +50,19 @@ extern void logger(level_t level, const char *file, int line, const char *fmt,
 #endif
 
 class TimeMeter {
- public:
+public:
   explicit TimeMeter() {}
-
   inline void start();
-
   inline void stop();
-
   void getPartialElapsed();
-
   void getTotalElapsed();
-
   ~TimeMeter();
 
- private:
+private:
   std::chrono::time_point<std::chrono::high_resolution_clock> m_start;
   std::chrono::time_point<std::chrono::high_resolution_clock> m_stop;
   std::chrono::duration<double, std::micro> m_partial_elapsed;
   std::chrono::duration<double, std::micro> m_total_elapsed;
 };
 
-#endif  // LOGGER_H
+#endif // LOGGER_H

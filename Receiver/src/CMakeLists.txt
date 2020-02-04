@@ -17,6 +17,6 @@ target_link_libraries(${NAME_PROJECT}
   Qt5::Widgets
   Qt5::Network
   ${CMAKE_THREAD_LIBS_INIT}
-  coverage_config
+  # coverage_config
   logger)
-target_compile_options(${NAME_PROJECT} PUBLIC -fpic -g -O0)
+target_compile_options(${NAME_PROJECT} PUBLIC -fpic -O2)
