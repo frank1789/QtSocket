@@ -19,4 +19,4 @@ target_link_libraries(${NAME_PROJECT}
   ${CMAKE_THREAD_LIBS_INIT}
   coverage_config
   logger)
-target_compile_options(${NAME_PROJECT} PUBLIC -fpic -02)
+target_compile_options(${NAME_PROJECT} PUBLIC -fpic -O2)
