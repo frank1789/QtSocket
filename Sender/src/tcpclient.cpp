@@ -235,7 +235,7 @@ void TcpClient::readyRead() {
 #if LOGGER_CLIENT
     LOG(DEBUG, "check message is not empty: %s",
         (!message.isEmpty()) ? "true" : "false")
-    LOG(DEBUG, "server read message in redyRead()\n\tmessage received:")
+    LOG(DEBUG, "server read message in readyRead()\n\tmessage received:")
     qDebug() << "\t" << message << "\n";
 #endif
     if (!message.isEmpty())
