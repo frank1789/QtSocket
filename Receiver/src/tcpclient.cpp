@@ -94,16 +94,6 @@ TcpClient::TcpClient(QWidget *parent)
     LOG(INFO, "Opening network session.")
     networkSession->open();
   }
-#if LOGGER
-  QTimer *timer = new QTimer(this);
-  timer->setInterval(1000);
-  timer->start();
-#if TEST_IMAGE
-  connect(timer, &QTimer::timeout, [=]() { this->sendImageMessage(); });
-#else
-  connect(timer, &QTimer::timeout, [=]() { this->sendTestMessageStream(); });
-#endif
-#endif
 }
 
 void TcpClient::sendImage(QImage image) {
@@ -392,35 +382,3 @@ void TcpClient::updateGui(QAbstractSocket::SocketState state) {
   disconnectButton->setEnabled(!unconnected);
   m_log_text->setEnabled(connected);
 }
-
-//////////////////////////////////////////////////////////////////////////////
-//// Test function
-//////////////////////////////////////////////////////////////////////////////
-
-void TcpClient::sendTestMessageStream() {
-  if (m_tcp_socket->state() != QAbstractSocket::ConnectedState) {
-#if LOGGER_CLIENT
-    LOG(WARN, "socket test function not connected, then exit.")
-#endif
-    return;
-  }
-  const QString test_message{"Test datastrem message, sended form code."};
-  QString message =
-      QString("%1: %2").arg(m_user_linedit->text()).arg(test_message);
-  send_message_text(m_tcp_socket, message);
-  //  m_log_text->append(message);
-}
-
-#if TEST_IMAGE
-
-void TcpClient::sendImageMessage() {
-  if (m_tcp_socket->state() != QAbstractSocket::ConnectedState) {
-#if LOGGER_CLIENT
-    LOG(WARN, "socket test function not connected, then exit.")
-#endif
-    return;
-  }
-  send_message_image(m_tcp_socket, randomImage());
-}
-
-#endif

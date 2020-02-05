@@ -37,7 +37,7 @@ class TcpClient : public QWidget {
    * @brief
    *
    */
-  void sendTestMessageStream();
+  // void sendTestMessageStream();
 
   /**
    * @brief
@@ -136,13 +136,6 @@ class TcpClient : public QWidget {
 
   // data exchanged
   QByteArray receive_data;
-
-  QThread *thread{nullptr};
-
-#if TEST_IMAGE
- private slots:
-  void sendImageMessage();
-#endif
 };
 
 #endif  // TCPCLIENT_HPP
