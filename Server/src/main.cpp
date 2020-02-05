@@ -1,12 +1,12 @@
-#include "mainwindow.hpp"
-#include "tcpclient.hpp"
-
 #include <QApplication>
 #include <QPointer>
 
+#include "tcpserver.hpp"
+
+
 int main(int argc, char *argv[]) {
   QApplication a(argc, argv);
-  QPointer<TcpClient> client = new TcpClient();
-  client->show();
+  QPointer<TcpServer> server = new TcpServer();
+  server->show();
   return a.exec();
 }
