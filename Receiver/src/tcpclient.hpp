@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QtNetwork>
+#include "streamerclient.hpp"
 
 QT_BEGIN_NAMESPACE
 class QComboBox;
