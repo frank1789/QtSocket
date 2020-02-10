@@ -106,12 +106,12 @@ void send_message_image(T *socket, const QImage &image) {
   out.setVersion(QDataStream::Qt_4_0);
   // serialize information
   out << QString(RECORD_SEPARATOR_ASCII_CODE)
-      << static_cast<quint32>(image.sizeInBytes()) << image;
+      << static_cast<quint32>(ba_message.size()) << image;
   socket->write(ba_message);
 #if LOGGER_CLIENT || LOGGER_SERVER
   LOG(DEBUG, "sending image:")
   qDebug() << "\theader: " << QString(RECORD_SEPARATOR_ASCII_CODE)
-           << "\tsize:" << static_cast<quint32>(image.sizeInBytes()) << "\n";
+           << "\tsize:" << static_cast<quint32>(ba_message.size()) << "\n";
 #endif
 }
 
