@@ -10,3 +10,9 @@ void MyLabel::setImage(QImage image) {
   int h = this->height();
   setPixmap(pixmap.scaled(w, h, Qt::KeepAspectRatio));
 }
+
+void MyLabel::updatePixmap(QPixmap image) {
+  int w = this->width();
+  int h = this->height();
+  setPixmap(image.scaled(w, h, Qt::KeepAspectRatio));
+}

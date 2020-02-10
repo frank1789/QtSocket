@@ -18,55 +18,49 @@
 #include "../log/logger.h"
 #include "commonconnection.hpp"
 
-TcpClient::TcpClient(QWidget *parent)
-    : QWidget(parent), m_tcp_socket(new QTcpSocket(this)) {
-  // assemble ui
+TcpClient::TcpClient(QWidget *parent) : QWidget(parent) {
+#if LOGGER_UI
+  LOG(INFO, "ctor Client initialize parameters.")
+  LOG(INFO, "dis/connect buttons are set disable.")
+  LOG(INFO, "Opening network session.")
+#endif
+  // initialize button and assemble ui
   connectButton = new QPushButton("Connect");
   disconnectButton = new QPushButton("Disconnect");
   connectButton->setEnabled(false);
   disconnectButton->setEnabled(false);
-#if LOGGER_UI
-  LOG(INFO, "dis/connect buttons are set disable")
-#endif
   QGridLayout *grid = new QGridLayout;
   grid->addWidget(createInformationGroup(), 0, 0, 1, 3);
   grid->addWidget(connectButton, 1, 1);
   grid->addWidget(disconnectButton, 1, 2);
   grid->addWidget(createLogGroup(), 2, 0, 1, 3);
   setLayout(grid);
-#if LOGGER_CLIENT
-  LOG(INFO, "ctor Client init params")
-#endif
-
-  // config client
-  m_data.setDevice(m_tcp_socket);
-  m_data.setVersion(QDataStream::Qt_4_0);
-
   // connect functions
-  connect(m_tcp_socket, &QTcpSocket::readyRead, [=]() { this->readyRead(); });
-  connect(m_tcp_socket, &QTcpSocket::connected,
+  m_stream = new StreamerThread(this);
+  connect(m_stream->socket, &QTcpSocket::connected,
           [=]() { this->connectedToServer(); });
-  connect(m_tcp_socket, &QTcpSocket::disconnected,
-          [=]() { this->disconnectByServer(); });
-
+  connect(this, &TcpClient::disconnectHost, [=]() { m_stream->slotQuit(); });
   // connect buttons
-  connect(disconnectButton, &QPushButton::clicked,
-          [=]() { this->onDisconnectClicked(); });
+  connect(disconnectButton, &QPushButton::clicked, [=]() {
+    this->onDisconnectClicked();
+    this->m_stream->slotQuit();
+  });
   connect(connectButton, &QPushButton::clicked,
           [=]() { this->onConnectClicked(); });
-
   // connect ui
   connect(hostCombo, &QComboBox::editTextChanged, this,
           &TcpClient::enableConnectButton);
   connect(m_port_linedit, &QLineEdit::textChanged, this,
           &TcpClient::enableConnectButton);
-  //  connect(m_tcp_socket, &QIODevice::readyRead, this,
-  //  &TcpClient::readFortune);
-
+  connect(m_stream, &StreamerThread::newImageAvailabe, this,
+          &TcpClient::imageAvailabe);
   // connect error
-  connect(m_tcp_socket,
+  connect(m_stream->socket,
           QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error),
           this, &TcpClient::displayError);
+
+  connect(m_stream, &StreamerThread::newImageAvailabe, this,
+          &TcpClient::imageAvailabe);
 
   // network manager
   QNetworkConfigurationManager manager;
@@ -88,45 +82,48 @@ TcpClient::TcpClient(QWidget *parent)
     networkSession = new QNetworkSession(config, this);
     connect(networkSession, &QNetworkSession::opened, this,
             &TcpClient::sessionOpened);
-
     connectButton->setEnabled(false);
-    m_log_text->append(tr("Opening network session."));
-    LOG(INFO, "Opening network session.")
+    m_log_text->append(tr("* Opening network session."));
     networkSession->open();
   }
-}
-
-void TcpClient::sendImage(QImage image) {
-  if (m_tcp_socket->state() != QAbstractSocket::ConnectedState) {
-#if LOGGER_CLIENT
-    LOG(WARN, "socket test function not connected, then exit.")
-#endif
-    return;
-  }
-  send_message_image(m_tcp_socket, image);
 }
 
 //////////////////////////////////////////////////////////////////////////////
 //// Slot function
 //////////////////////////////////////////////////////////////////////////////
 
+void TcpClient::imageAvailabe(QByteArray baImage) {
+  QPixmap pixImage;
+  QImage image;
+
+  if (!pixImage.loadFromData(baImage, "JPG")) return;
+  image = pixImage.toImage();
+  if (image.pixel(image.width() - 1, image.height() - 1) == 4286611584 &&
+      image.pixel(image.width() / 2, image.height() - 1) == 4286611584 &&
+      image.pixel(0, image.height() - 1) == 4286611584)
+    return;
+
+  emit updatePixmap(pixImage);
+}
+
 void TcpClient::connectedToServer() {
-#if LOGGER_CLIENT
-  LOG(INFO, "update connection status: Connect to server.")
+#if LOGGER_UI
+  LOG(INFO, "update connection status: try connect to server.")
+  LOG(INFO, "update ui.")
 #endif
-  m_log_text->append(tr("== Connected to server."));
+  m_log_text->append(tr("* Connected to server."));
   updateGui(QAbstractSocket::ConnectedState);
 }
 
 void TcpClient::onDisconnectClicked() {
-  if (m_tcp_socket->state() != QAbstractSocket::ConnectingState) {
-    m_log_text->append(tr("== Abort connecting."));
-#if LOGGER_CLIENT
-    LOG(INFO, "update connection status: abort connecting.")
-#endif
+  if (m_stream->socket->state() != QAbstractSocket::ConnectingState) {
+    m_log_text->append(tr("* Disconnect."));
   }
-  m_tcp_socket->abort();
+  emit disconnectHost();
   updateGui(QAbstractSocket::UnconnectedState);
+#if LOGGER_UI
+  LOG(INFO, "update connection status: close connection.")
+#endif
 }
 
 void TcpClient::sessionOpened() {
@@ -166,9 +163,9 @@ void TcpClient::displayError(QAbstractSocket::SocketError socketError) {
     default:
       QMessageBox::information(this, tr("Client"),
                                tr("The following error occurred: %1.")
-                                   .arg(m_tcp_socket->errorString()));
+                                   .arg(m_stream->socket->errorString()));
   }
-  m_tcp_socket->abort();
+  m_stream->socket->abort();
   updateGui(QAbstractSocket::UnconnectedState);
 }
 
@@ -178,107 +175,32 @@ void TcpClient::enableConnectButton() {
                             !m_port_linedit->text().isEmpty());
 }
 
-void TcpClient::readFortune() {
-  m_data.startTransaction();
-
-  QString nextFortune;
-  m_data >> nextFortune;
-
-  if (!m_data.commitTransaction()) return;
-
-  if (nextFortune == currentFortune) {
-    QTimer::singleShot(100, this, &TcpClient::connectedToServer);
-    return;
-  }
-
-  currentFortune = nextFortune;
-  m_log_text->append(currentFortune);
-  connectButton->setEnabled(true);
-}
-
-void TcpClient::readyRead() {
-  if (m_tcp_socket->state() != QAbstractSocket::ConnectedState) {
-#if LOGGER_CLIENT
-    LOG(ERROR, "impossible read from socket, disconnected")
-#endif
-    return;
-  }
-  m_data.startTransaction();
-  QString header{""};
-  qint32 size{0};
-  m_data >> header >> size;
-#if LOGGER_CLIENT
-  LOG(DEBUG,
-      "incoming message control through header identification:\n"
-      "\t* message containing text if the header corresponds to the code UTF-8 "
-      "'\\u001D' or the ASCII code %d\n"
-      "\t* message containing images if the header corresponds to the code "
-      "UTF-8 '\\u001E' or the ASCII code %d\n",
-      GROUP_SEPARATOR_ASCII_CODE, RECORD_SEPARATOR_ASCII_CODE)
-  qDebug() << "\tincoming message header: " << header << "\tsize: " << size
-           << "\n";
-#endif
-  if (header == QString(GROUP_SEPARATOR_ASCII_CODE)) {
-    QString message;
-    m_data >> message;
-#if LOGGER_CLIENT
-    LOG(DEBUG, "check message is not empty: %s",
-        (!message.isEmpty()) ? "true" : "false")
-    LOG(DEBUG, "server read message in readyRead()\n\tmessage received:")
-    qDebug() << "\t" << message << "\n";
-#endif
-    if (!message.isEmpty()) m_log_text->append(message);
-  } else if (header == QString(RECORD_SEPARATOR_ASCII_CODE)) {
-#if LOGGER_CLIENT
-    LOG(DEBUG, "image incoming")
-#endif
-    QImage image;
-    m_data >> image;
-#if LOGGER_CLIENT
-    LOG(DEBUG, "check image is not empty: %s",
-        (!image.isNull()) ? "true" : "false")
-#endif
-    if (!image.isNull()) emit updateImage(image);
-  } else {
-    m_data.abortTransaction();
-    return;
-  }
-  if (!m_data.commitTransaction()) {
-    return;
-  }
-}
-
 void TcpClient::onConnectClicked() {
+  // check user name is not empty
   if (m_user_linedit->text().isEmpty()) {
 #if LOGGER_CLIENT
-    LOG(ERROR, "unable to connect, must define user name.")
+    LOG(ERROR, "must define user name.")
 #endif
-    m_log_text->append(
-        tr("== Unable to connect to server.\nYou must define an user name."));
+    QMessageBox::information(this, tr("Client"), tr("Define an user name"));
     return;
   }
-  if (m_tcp_socket->state() != QAbstractSocket::ConnectedState) {
-    m_log_text->append(tr("== Connecting..."));
+
+  // try to connect
+  if (m_stream->socket->state() != QAbstractSocket::ConnectedState) {
+    m_log_text->append(tr("* Connecting..."));
     auto port = static_cast<quint16>(m_port_linedit->text().toInt());
-    m_tcp_socket->connectToHost(hostCombo->currentText(), port);
+    m_stream->socket->connectToHost(QHostAddress(hostCombo->currentText()),
+                                    port);
     auto result =
-        QString("== Connected %1:%2.").arg(hostCombo->currentText()).arg(port);
+        QString("* Connected %1:%2.").arg(hostCombo->currentText()).arg(port);
     m_log_text->append(result);
+    m_stream->start();
 #if LOGGER_CLIENT
-    LOG(DEBUG, "try connect, display connection status:")
+    LOG(DEBUG, "try connect, connection status:")
     qDebug() << "\t" << result;
+    LOG(DEBUG, "start thread")
 #endif
   }
-}
-
-void TcpClient::disconnectByServer() {
-#if LOGGER_CLIENT
-  LOG(INFO, "update connection status: disconnected by server.")
-  qDebug() << "\t"
-           << "connection state: " << m_tcp_socket->state();
-#endif
-  m_log_text->append(tr("== Disconnected by server."));
-  updateGui(QAbstractSocket::UnconnectedState);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -321,12 +243,6 @@ QGroupBox *TcpClient::createInformationGroup() {
     }
   }
 
-  // add localhost addresses
-  for (int i = 0; i < ipAddressesList.size(); ++i) {
-    if (ipAddressesList.at(i).isLoopback()) {
-      hostCombo->addItem(ipAddressesList.at(i).toString());
-    }
-  }
 #if LOGGER_CLIENT
   LOG(DEBUG, "find out all IP address:")
   for (const auto &list : ipAddressesList) {
