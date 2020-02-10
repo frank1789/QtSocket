@@ -18,11 +18,12 @@ void StreamerThread::run() {
   while (m_quit == false) {
     if (socket->waitForReadyRead(3000)) {
       buffer.append(socket->readAll());
+      msleep(50);
       emit newImageAvailabe(buffer);
-      msleep(100);
       buffer.clear();
     }
   }
+  socket = nullptr;
 }
 
 void StreamerThread::setAddressHost(const QString &str_address) {
@@ -35,10 +36,9 @@ void StreamerThread::setAddressHost(const QHostAddress &address) {
 
 void StreamerThread::setPortHost(const quint16 &port) { m_port = port; }
 
-void StreamerThread::slotQuit() {
-  m_quit = true;
-  socket->disconnectFromHost();
-}
+void StreamerThread::slotQuit() { m_quit = true; }
+
+void StreamerThread::slotReconnect() { m_quit = false; }
 
 StreamerThread::~StreamerThread() {
   if (socket) {

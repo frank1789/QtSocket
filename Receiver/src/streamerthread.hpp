@@ -37,6 +37,7 @@ class StreamerThread : public QThread {
    * @brief quit Signal emitted when the application is closed.
    */
   void slotQuit();
+  void slotReconnect();
 
  private:
   QHostAddress m_address;

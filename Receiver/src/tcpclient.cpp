@@ -39,26 +39,19 @@ TcpClient::TcpClient(QWidget *parent) : QWidget(parent) {
   m_stream = new StreamerThread(this);
   connect(m_stream->socket, &QTcpSocket::connected,
           [=]() { this->connectedToServer(); });
-  connect(this, &TcpClient::disconnectHost, [=]() { m_stream->slotQuit(); });
   // connect buttons
   connect(disconnectButton, &QPushButton::clicked, [=]() {
     this->onDisconnectClicked();
-    m_stream->slotQuit();
   });
-  connect(connectButton, &QPushButton::clicked,
-          [=]() { this->onConnectClicked(); });
+  connect(connectButton, &QPushButton::clicked, [=]() {
+    this->onConnectClicked();
+    m_stream->slotReconnect();
+  });
   // connect ui
   connect(hostCombo, &QComboBox::editTextChanged, this,
           &TcpClient::enableConnectButton);
   connect(m_port_linedit, &QLineEdit::textChanged, this,
           &TcpClient::enableConnectButton);
-  connect(m_stream, &StreamerThread::newImageAvailabe, this,
-          &TcpClient::imageAvailabe);
-  // connect error
-  connect(m_stream->socket,
-          QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error),
-          this, &TcpClient::displayError);
-
   connect(m_stream, &StreamerThread::newImageAvailabe, this,
           &TcpClient::imageAvailabe);
 
@@ -116,14 +109,14 @@ void TcpClient::connectedToServer() {
 }
 
 void TcpClient::onDisconnectClicked() {
-  //  if (m_stream->socket->state() != QAbstractSocket::ConnectingState) {
-  m_log_text->append(tr("* Disconnect."));
-  //  }
-  emit disconnectHost();
-//  updateGui(QAbstractSocket::UnconnectedState);
 #if LOGGER_UI
-  LOG(INFO, "update connection status: close connection.")
+  LOG(INFO, "disconnect button pressed, emit signal.")
+  LOG(DEBUG, "set connect button true, set disconnect button false.")
 #endif
+  m_stream->slotQuit();
+  m_log_text->append(tr("* Disconnect."));
+  connectButton->setEnabled(true);
+  disconnectButton->setEnabled(false);
 }
 
 void TcpClient::sessionOpened() {
@@ -185,8 +178,14 @@ void TcpClient::onConnectClicked() {
     return;
   }
 
+  if (m_user_linedit->text().isEmpty()) {
+#if LOGGER_CLIENT
+    LOG(ERROR, "must define port.")
+#endif
+    QMessageBox::information(this, tr("Client"), tr("Define port 52693."));
+    return;
+  }
   // try to connect
-  //  if (m_stream->socket->state() != QAbstractSocket::ConnectedState) {
   m_log_text->append(tr("* Connecting..."));
   m_stream->setAddressPortHost(hostCombo->currentText(),
                                m_port_linedit->text().toInt());
@@ -195,12 +194,13 @@ void TcpClient::onConnectClicked() {
                     .arg(m_port_linedit->text().toInt());
   m_log_text->append(result);
   m_stream->start();
+  connectButton->setEnabled(false);
+  disconnectButton->setEnabled(true);
 #if LOGGER_CLIENT
     LOG(DEBUG, "try connect, connection status:")
     qDebug() << "\t" << result;
     LOG(DEBUG, "start thread")
 #endif
-    //  }
 }
 
 //////////////////////////////////////////////////////////////////////////////
