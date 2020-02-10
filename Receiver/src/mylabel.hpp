@@ -32,7 +32,8 @@ class MyLabel : public QLabel {
    * @brief Set the Image object function that allows the transition from QImage
    * to QPixmap.
    */
-  void setImage(QImage);
+  void setImage(QImage image);
+  void updatePixmap(QPixmap image);
 };
 
 #endif  // MYLABEL_HPP
