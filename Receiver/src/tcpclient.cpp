@@ -39,6 +39,7 @@ TcpClient::TcpClient(QWidget *parent) : QWidget(parent) {
   m_stream = new StreamerThread(this);
   connect(m_stream->socket, &QTcpSocket::connected,
           [=]() { this->connectedToServer(); });
+  connect(this, &TcpClient::disconnectHost, [=]() { m_stream->slotQuit(); });
   // connect buttons
   connect(disconnectButton, &QPushButton::clicked, [=]() {
     this->onDisconnectClicked();
@@ -118,7 +119,7 @@ void TcpClient::onDisconnectClicked() {
   if (m_stream->socket->state() != QAbstractSocket::ConnectingState) {
     m_log_text->append(tr("* Disconnect."));
   }
-  m_stream->socket->abort();
+  emit disconnectHost();
   updateGui(QAbstractSocket::UnconnectedState);
 #if LOGGER_UI
   LOG(INFO, "update connection status: close connection.")

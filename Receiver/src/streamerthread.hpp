@@ -1,6 +1,7 @@
 #ifndef STREAMERTHREAD_HPP
 #define STREAMERTHREAD_HPP
 
+#include <QMutex>
 #include <QObject>
 #include <QTcpSocket>
 #include <QThread>
@@ -29,6 +30,7 @@ class StreamerThread : public QThread {
  private:
   QByteArray m_baImage;
   bool m_quit;
+  QMutex mutex;
 };
 
 #endif  // STREAMERTHREAD_HPP
