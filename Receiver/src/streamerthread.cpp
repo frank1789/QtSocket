@@ -18,7 +18,7 @@ void StreamerThread::run() {
   while (m_quit == false) {
     if (socket->waitForReadyRead(3000)) {
       buffer.append(socket->readAll());
-      msleep(50);
+      msleep(350);
       emit newImageAvailabe(buffer);
       buffer.clear();
     }
