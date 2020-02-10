@@ -3,7 +3,7 @@
 
 #include <QWidget>
 #include <QtNetwork>
-#include "streamerclient.hpp"
+#include "streamerthread.hpp"
 
 QT_BEGIN_NAMESPACE
 class QComboBox;
@@ -24,21 +24,14 @@ class TcpClient : public QWidget {
   explicit TcpClient(QWidget *parent = nullptr);
 
  public slots:
-  /**
-   * @brief sendImage
-   * @param image
-   */
-  void sendImage(QImage image);
 
  signals:
-  void updateImage(QImage image);
+  void updateImage(QImage);
+  void updatePixmap(QPixmap);
 
  private slots:
-  /**
-   * @brief
-   *
-   */
-  // void sendTestMessageStream();
+
+  void imageAvailabe(QByteArray baImage);
 
   /**
    * @brief
@@ -75,27 +68,7 @@ class TcpClient : public QWidget {
    * @brief
    *
    */
-  void readFortune();
-
-  /**
-   * @brief Read from socket.
-   *
-   * Function that reads the socket when data are available.
-   *
-   */
-  void readyRead();
-
-  /**
-   * @brief
-   *
-   */
   void onConnectClicked();
-
-  /**
-   * @brief
-   *
-   */
-  void disconnectByServer();
 
  private:
   /**
@@ -128,15 +101,9 @@ class TcpClient : public QWidget {
   QPushButton *connectButton{nullptr};
   QPushButton *disconnectButton{nullptr};
 
-  QString currentFortune;
-
   // network variables
-  QTcpSocket *m_tcp_socket{nullptr};
-  QDataStream m_data;
+  StreamerThread *m_stream{nullptr};
   QNetworkSession *networkSession{nullptr};
-
-  // data exchanged
-  QByteArray receive_data;
 };
 
 #endif  // TCPCLIENT_HPP
