@@ -43,7 +43,7 @@ TcpClient::TcpClient(QWidget *parent) : QWidget(parent) {
   // connect buttons
   connect(disconnectButton, &QPushButton::clicked, [=]() {
     this->onDisconnectClicked();
-    this->m_stream->slotQuit();
+    m_stream->slotQuit();
   });
   connect(connectButton, &QPushButton::clicked,
           [=]() { this->onConnectClicked(); });

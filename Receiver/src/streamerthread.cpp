@@ -27,3 +27,12 @@ void StreamerThread::slotQuit() {
   m_quit = true;
   socket->disconnectFromHost();
 }
+
+StreamerThread::~StreamerThread() {
+  if (socket->state() == QTcpSocket::ConnectedState) {
+    socket->disconnect();
+    socket->disconnectFromHost();
+  }
+  socket->deleteLater();
+  socket = nullptr;
+}

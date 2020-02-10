@@ -11,6 +11,7 @@ class StreamerThread : public QThread {
 
  public:
   StreamerThread(QObject *parent = nullptr);
+  ~StreamerThread() override;
   void run() override;
   QTcpSocket *socket{nullptr};
 

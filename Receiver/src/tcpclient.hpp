@@ -31,7 +31,6 @@ class TcpClient : public QWidget {
   void disconnectHost();
 
  private slots:
-
   void imageAvailabe(QByteArray baImage);
 
   /**

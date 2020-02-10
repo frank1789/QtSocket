@@ -1,55 +1,39 @@
 cmake_minimum_required (VERSION 3.7)
 project(QtTcpSocket LANGUAGES CXX)
-set(NAME_PROJECT "QtReceiver")
+set(NAME_PROJECT "Receiver")
 
+
+#-----------------------------------------------------------------------------
+# check build type
+#-----------------------------------------------------------------------------
+if(NOT CMAKE_BUILD_TYPE)
+	message(STATUS "Compile in debug mode")
+	set(CMAKE_BUILD_TYPE Debug)
+elseif(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+	message(STATUS "CMAKE_BUILD_TYPE = ${CMAKE_BUILD_TYPE}")
+	set(CMAKE_BUILD_TYPE Debug)
+elseif(${CMAKE_BUILD_TYPE} STREQUAL "Release")
+	message(STATUS "CMAKE_BUILD_TYPE = ${CMAKE_BUILD_TYPE}")
+	set(CMAKE_BUILD_TYPE Release)
+endif()
+
+#-----------------------------------------------------------------------------
+# C/C++ standard extensions
+#-----------------------------------------------------------------------------
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_C_EXTENSIONS OFF)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# Find includes in corresponding build directories
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
-# Instruct CMake to run moc automatically when needed
-set(CMAKE_AUTOMOC ON)
-# Create code from a list of Qt designer ui files
-set(CMAKE_AUTOUIC ON)
-
-#-------------------------------------------------------------------------------
-# Build Documentation
-#-------------------------------------------------------------------------------
-# check if Doxygen is installed
-# find_package(Doxygen)
-# if (DOXYGEN_FOUND)
-#     # set input and output files
-#     set(DOXYGEN_IN  ${CMAKE_CURRENT_SOURCE_DIR}/docs/Doxyfile.in)
-#     set(DOXYGEN_OUT ${CMAKE_CURRENT_BINARY_DIR}/docs/Doxyfile)
-#     # request to configure the file
-#     configure_file(${DOXYGEN_IN} ${DOXYGEN_OUT} @ONLY)
-#     message("Doxygen build started")
-#     # note the option ALL which allows to build the docs together with the application
-#     add_custom_target( doc_doxygen ALL
-#         COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_OUT}
-#         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-#         COMMENT "Generating API documentation with Doxygen"
-#         VERBATIM )
-# else (DOXYGEN_FOUND)
-#  message(STATUS "Doxygen need to be installed to generate the doxygen documentation")
-# endif (DOXYGEN_FOUND)
-
-# Find the Qt library
-if(APPLE AND EXISTS /usr/local/opt/qt5)
-	list(APPEND CMAKE_PREFIX_PATH "/usr/local/opt/qt5")
-endif()
-find_package(Qt5 COMPONENTS Widgets REQUIRED)
-find_package(Qt5 COMPONENTS Network REQUIRED)
-if (${Qt5_FOUND})
-   message(STATUS "Found Qt 5")
-else (${Qt5_FOUND})
-   message(FATAL_ERROR "Could not locate Qt.")
-endif (${Qt5_FOUND})
-
-# Find PThread Library
-set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
-find_package(Threads REQUIRED)
+#-----------------------------------------------------------------------------
+# Specific Flag for RaspBerry Pi 3 
+#-----------------------------------------------------------------------------
+#set(CMAKE_C_FLAGS_DEBUG "-march=armv8-a+crc -mtune=cortex-a53 -mfpu=crypto-neon-fp-armv8 -mfloat-abi=hard -ftree-vectorize -funsafe-math-optimizations -pipe")
+#set(CMAKE_CXX_FLAGS_DEBUG "-march=armv8-a+crc -mtune=cortex-a53 -mfpu=crypto-neon-fp-armv8 -mfloat-abi=hard -ftree-vectorize -funsafe-math-optimizations -pipe")
+#set(CMAKE_C_FLAGS_RELEASE "-march=armv8-a+crc -mtune=cortex-a53 -mfpu=crypto-neon-fp-armv8 -mfloat-abi=hard -ftree-vectorize -funsafe-math-optimizations -pipe")
+#set(CMAKE_CXX_FLAGS_RELEASE "-march=armv8-a+crc -mtune=cortex-a53 -mfpu=crypto-neon-fp-armv8 -mfloat-abi=hard -ftree-vectorize -funsafe-math-optimizations -pipe")
 
 #-----------------------------------------------------------------------------
 # Code coverage
@@ -72,8 +56,58 @@ if(COVERAGE)
 	endif()
 endif()
 
-#-------------------------------------------------------------------------------
-# Add subdirectories
-#-------------------------------------------------------------------------------
-add_subdirectory(log)
+# Find includes in corresponding build directories
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+# Instruct CMake to run moc automatically when needed
+set(CMAKE_AUTOMOC ON)
+# Create code from a list of Qt designer ui files
+set(CMAKE_AUTOUIC ON)
+
+#-----------------------------------------------------------------------------
+# Library and Dependecies
+#-----------------------------------------------------------------------------
+# Find the Qt library
+if(APPLE AND EXISTS /usr/local/opt/qt5)
+	list(APPEND CMAKE_PREFIX_PATH "/usr/local/opt/qt5")
+endif()
+find_package(Qt5 COMPONENTS Widgets REQUIRED)
+find_package(Qt5 COMPONENTS Network REQUIRED)
+if (${Qt5_FOUND})
+   message(STATUS "Found Qt 5")
+else (${Qt5_FOUND})
+   message(FATAL_ERROR "Could not locate Qt.")
+endif (${Qt5_FOUND})
+
+# Find PThread Library
+set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
+find_package(Threads REQUIRED)
+
+#-----------------------------------------------------------------------------
+# Local library and dependecies
+#-----------------------------------------------------------------------------
 add_subdirectory(src)
+add_subdirectory(log)
+
+# wrap ui
+file(GLOB UIS ${CMAKE_CURRENT_SOURCE_DIR}/*.ui)
+# Check architecture
+EXECUTE_PROCESS( COMMAND uname -m COMMAND tr -d '\n' OUTPUT_VARIABLE ARCHITECTURE )
+
+# ----------------------------------------------------------------------------
+# display status message for important variables
+# ----------------------------------------------------------------------------
+message( STATUS )
+message( STATUS "-------------------------------------------------------------------------------" )
+message( STATUS "General configuration for ${PROJECT_NAME} ${PROJECT_VERSION}")
+message( STATUS "-------------------------------------------------------------------------------" )
+message( STATUS )
+message( STATUS "Architecture:\t${ARCHITECTURE}" )
+message( STATUS "Compiler:\t${CMAKE_COMPILER}\t${CMAKE_CXX_COMPILER}")
+message( STATUS "C flags (Release): \t${CMAKE_C_FLAGS} ${CMAKE_C_FLAGS_RELEASE}")
+message( STATUS "C flags (Debug): \t${CMAKE_C_FLAGS} ${CMAKE_C_FLAGS_DEBUG}")
+message( STATUS "C++ flags (Release):\t${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_RELEASE}")
+message( STATUS "C++ flags (Debug):\t${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_DEBUG}")
+message( STATUS "CMAKE_BINARY_DIR:\t${CMAKE_BINARY_DIR}")
+message( STATUS )
+message( STATUS "Change a value with: cmake -D<Variable>=<Value> .." )
+message( STATUS )
