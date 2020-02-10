@@ -116,11 +116,11 @@ void TcpClient::connectedToServer() {
 }
 
 void TcpClient::onDisconnectClicked() {
-  if (m_stream->socket->state() != QAbstractSocket::ConnectingState) {
-    m_log_text->append(tr("* Disconnect."));
-  }
+  //  if (m_stream->socket->state() != QAbstractSocket::ConnectingState) {
+  m_log_text->append(tr("* Disconnect."));
+  //  }
   emit disconnectHost();
-  updateGui(QAbstractSocket::UnconnectedState);
+//  updateGui(QAbstractSocket::UnconnectedState);
 #if LOGGER_UI
   LOG(INFO, "update connection status: close connection.")
 #endif
@@ -165,8 +165,8 @@ void TcpClient::displayError(QAbstractSocket::SocketError socketError) {
                                tr("The following error occurred: %1.")
                                    .arg(m_stream->socket->errorString()));
   }
-  m_stream->socket->abort();
-  updateGui(QAbstractSocket::UnconnectedState);
+  //  m_stream->socket->abort();
+  //  updateGui(QAbstractSocket::UnconnectedState);
 }
 
 void TcpClient::enableConnectButton() {
@@ -186,21 +186,21 @@ void TcpClient::onConnectClicked() {
   }
 
   // try to connect
-  if (m_stream->socket->state() != QAbstractSocket::ConnectedState) {
-    m_log_text->append(tr("* Connecting..."));
-    auto port = static_cast<quint16>(m_port_linedit->text().toInt());
-    m_stream->socket->connectToHost(QHostAddress(hostCombo->currentText()),
-                                    port);
-    auto result =
-        QString("* Connected %1:%2.").arg(hostCombo->currentText()).arg(port);
-    m_log_text->append(result);
-    m_stream->start();
+  //  if (m_stream->socket->state() != QAbstractSocket::ConnectedState) {
+  m_log_text->append(tr("* Connecting..."));
+  m_stream->setAddressPortHost(hostCombo->currentText(),
+                               m_port_linedit->text().toInt());
+  auto result = QString("* Connected %1:%2.")
+                    .arg(hostCombo->currentText())
+                    .arg(m_port_linedit->text().toInt());
+  m_log_text->append(result);
+  m_stream->start();
 #if LOGGER_CLIENT
     LOG(DEBUG, "try connect, connection status:")
     qDebug() << "\t" << result;
     LOG(DEBUG, "start thread")
 #endif
-  }
+    //  }
 }
 
 //////////////////////////////////////////////////////////////////////////////
