@@ -37,9 +37,6 @@ MainWindow::MainWindow(QWidget *parent)
   m_group_all->addLayout(create_label_preview(), 0, 0);
   m_group_all->addWidget(client, 0, 1);
   widget->setLayout(m_group_all);
-
-  connect(client, &TcpClient::updateImage,
-          [=](QImage img) { m_raspic_label->setImage(img); });
 }
 
 MainWindow::~MainWindow() {

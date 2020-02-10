@@ -28,10 +28,8 @@ class TcpClient : public QWidget {
  signals:
   void updateImage(QImage);
   void updatePixmap(QPixmap);
-  void disconnectHost();
 
  private slots:
-
   void imageAvailabe(QByteArray baImage);
 
   /**

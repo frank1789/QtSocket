@@ -1,6 +1,7 @@
 #ifndef STREAMERTHREAD_HPP
 #define STREAMERTHREAD_HPP
 
+#include <QHostAddress>
 #include <QMutex>
 #include <QObject>
 #include <QTcpSocket>
@@ -11,8 +12,18 @@ class StreamerThread : public QThread {
 
  public:
   StreamerThread(QObject *parent = nullptr);
+  ~StreamerThread() override;
   void run() override;
   QTcpSocket *socket{nullptr};
+
+  void setAddressHost(const QString &str_address);
+  void setAddressHost(const QHostAddress &address);
+  void setPortHost(const quint16 &port);
+  template <typename A, typename P>
+  void setAddressPortHost(const A &address, const P &port) {
+    m_address = static_cast<QHostAddress>(address);
+    m_port = static_cast<quint16>(port);
+  }
 
  signals:
   /**
@@ -26,10 +37,13 @@ class StreamerThread : public QThread {
    * @brief quit Signal emitted when the application is closed.
    */
   void slotQuit();
+  void slotReconnect();
 
  private:
-  QByteArray m_baImage;
+  QHostAddress m_address;
+  quint16 m_port;
   bool m_quit;
+  QByteArray m_baImage;
   QMutex mutex;
 };
 

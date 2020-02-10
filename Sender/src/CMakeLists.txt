@@ -20,7 +20,7 @@ target_link_libraries(${NAME_PROJECT}
 	)
 if (CMAKE_BUILD_TYPE MATCHES "Debug")
 	target_compile_options(${NAME_PROJECT} PUBLIC -fpic -O0)
-        add_definitions(-DLOGGER -DLOGGER_SERVER -DTEST_IMAGE)
+        add_definitions(-DLOGGER -DLOGGER_UI)
 	if(COVERAGE)
 		target_link_libraries(coverage_config)
 	endif()

@@ -26,28 +26,28 @@ MainWindow::MainWindow(QWidget *parent)
   auto m_group_all = new QGridLayout;
 
   // allocate image
-  m_raspic_image = new QImage(640, 480, QImage::Format_RGB888);
+  m_image = new QImage(640, 480, QImage::Format_RGB888);
   for (int i = 0; i < 640; i++) {
     for (int j = 0; j < 480; j++) {
-      m_raspic_image->setPixel(i, j, qRgb(0, 0, 0));
+      m_image->setPixel(i, j, qRgb(0, 0, 0));
     }
   }
 
-  m_raspic_label = new MyLabel(this);
+  m_label = new MyLabel(this);
 
   // set minimum size
-  m_raspic_label->setMinimumSize(640, 480);
+  m_label->setMinimumSize(640, 480);
 
   // load image
-  m_raspic_label->setPixmap(QPixmap::fromImage(*m_raspic_image));
+  m_label->setPixmap(QPixmap::fromImage(*m_image));
 
   client = new TcpClient();
-  m_group_all->addWidget(m_raspic_label, 0, 0);
+  m_group_all->addWidget(m_label, 0, 0);
   m_group_all->addWidget(client, 0, 1);
   widget->setLayout(m_group_all);
 
   connect(client, &TcpClient::updatePixmap,
-          [=](QPixmap img) { m_raspic_label->updatePixmap(img); });
+          [=](QPixmap img) { m_label->updatePixmap(img); });
 }
 
 MainWindow::~MainWindow() {
@@ -56,25 +56,10 @@ MainWindow::~MainWindow() {
 }
 
 QGridLayout *MainWindow::create_label_preview() {
-#if LOGGER
+#if LOGGER_UI
   LOG(INFO, "make preview label ui.")
 #endif
-
   // create horizontal layout
   auto m_group_label = new QGridLayout;
-
-  //  // allocate label's placeholder
-  //  m_raspic_label = new MyLabel(this);
-
-  //  // set minimum size
-  //  m_raspic_label->setMinimumSize(640, 480);
-
-  //  // load image
-  //  m_raspic_label->setPixmap(QPixmap::fromImage(*m_raspic_image));
-
-  //  // define horizontal layout
-  //  m_group_label->addWidget(m_raspic_label, 0, 0);
-
-  //  // return layout
   return m_group_label;
 }
