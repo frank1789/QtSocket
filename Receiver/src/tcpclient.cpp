@@ -16,6 +16,7 @@
 #include <QTextEdit>
 
 #include "../log/logger.h"
+#include "../log/instrumentor.h"
 #include "commonconnection.hpp"
 
 TcpClient::TcpClient(QWidget *parent) : QWidget(parent) {
@@ -86,6 +87,7 @@ TcpClient::TcpClient(QWidget *parent) : QWidget(parent) {
 //////////////////////////////////////////////////////////////////////////////
 
 void TcpClient::imageAvailabe(QByteArray baImage) {
+  PROFILE_FUNCTION();
   QPixmap pixImage;
   QImage image;
 
@@ -100,6 +102,7 @@ void TcpClient::imageAvailabe(QByteArray baImage) {
 }
 
 void TcpClient::connectedToServer() {
+PROFILE_FUNCTION();
 #if LOGGER_UI
   LOG(INFO, "update connection status: try connect to server.")
   LOG(INFO, "update ui.")

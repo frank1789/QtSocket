@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <QMutexLocker>
 #include "commonconnection.hpp"
+#include "../log/instrumentor.h"
 
 StreamerThread::StreamerThread(QObject *parent)
     : m_address(QHostAddress::LocalHost), m_port(TCP_PORT) {
@@ -10,6 +11,7 @@ StreamerThread::StreamerThread(QObject *parent)
 }
 
 void StreamerThread::run() {
+  PROFILE_FUNCTION();
   socket = new QTcpSocket;
   socket->connectToHost(m_address, m_port);
   socket->write(new char[4]{1, 2, 3, 4});
