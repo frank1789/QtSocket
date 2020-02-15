@@ -1,0 +1,3 @@
+[submodule "Receiver/edgetpu"]
+	path = Receiver/edgetpu
+	url = https://github.com/google-coral/edgetpu.git
