@@ -62,7 +62,6 @@ qrc_*.cpp
 ui_*.h
 *.qmlc
 *.jsc
-Makefile*
 *build-*
 *.qm
 *.prl
@@ -132,8 +131,8 @@ _deps
 *.app
 
 
-Receiver/build/
+Receiver/build_*/
 
-Sender/build/
+Sender/build_*/
 
-Server/build/
+Server/build_*/

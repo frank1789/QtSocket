@@ -87,6 +87,8 @@ find_package(Threads REQUIRED)
 #-----------------------------------------------------------------------------
 add_subdirectory(src)
 add_subdirectory(log)
+add_subdirectory(tf)
+add_subdirectory(vendor)
 
 # wrap ui
 file(GLOB UIS ${CMAKE_CURRENT_SOURCE_DIR}/*.ui)
