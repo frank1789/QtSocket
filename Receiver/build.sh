@@ -52,6 +52,9 @@ clear_old_build() {
 # main script
 # ////////////////////////////////////////////////////////////////////////////
 
+# generate dependecies if not exist
+make -f $PWD/Makefile
+
 if [ "$#" -eq "0" ]; then
     echo "build release version"
     compile_release

@@ -6,16 +6,16 @@
 #include <QVBoxLayout>
 #include <QWidget>
 
-#include "log/logger.h"
+#include "../log/logger.h"
 
 FindModel::FindModel(QString path, QDialog* parent)
     : QDialog(parent), m_currentdir(path) {
   auto vert_layout = new QVBoxLayout;
-  m_combo = new QComboBox(this);
+  m_combo = new QComboBox;
 
   vert_layout->addWidget(m_combo);
-  this->setLayout(vert_layout);
-  this->resize(100, 45);
+  //  this->setLayout(vert_layout);
+  //  this->resize(100, 45);
 
   m_combo->setCurrentIndex(-1);
 
@@ -43,8 +43,7 @@ void FindModel::updateModel(const QString& t) {
 #if LOGGER_UI
   LOG(DEBUG, "return model")
   qDebug() << "value selected " << t;
-  qDebug() << "associated model "
-           << m_list_model.
+  qDebug() << "associated model " << m_list_model.indexOf(t);
 #endif
               model_name = t;
 }
@@ -61,6 +60,10 @@ QString FindModel::getModelPath() {
 }
 
 void FindModel::find() {
+#if LOGGER_UI
+  LOG(DEBUG, "searching for *.tflite models in directory:")
+  qDebug() << QDir(m_currentdir).absolutePath();
+#endif
   auto dir = QDir(m_currentdir);
   QStringList filter;
   filter << QString("*.tflite");
@@ -68,7 +71,6 @@ void FindModel::find() {
   QFileInfoList entries = dir.entryInfoList();
   for (auto it = entries.begin(); it != entries.end(); ++it) {
     m_list_model << it->absoluteFilePath();
-    m_list_model.sort();
     m_combo->addItem(it->completeBaseName());
   }
   switch (entries.size()) {
@@ -83,3 +85,11 @@ void FindModel::find() {
       m_combo->setCurrentIndex(-1);
   }
 }
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// Layout
+////////////////////////////////////////////////////////////////////////////////
+
+
+

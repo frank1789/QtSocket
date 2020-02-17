@@ -5,8 +5,9 @@
 #include <iostream>
 
 #include "../log/instrumentor.h"
-#include "findmodel.hpp"
-#include "util_label_image.hpp"
+//#include "findmodel.hpp"
+//#include "model_tpu.hpp"
+//#include "util_label_image.hpp"
 
 #include <chrono>
 #include <thread>
@@ -21,22 +22,27 @@ int main(int argc, char* argv[]) {
   QApplication a(argc, argv);
   MainWindow w;
   w.show();
-  FindModel all_models(model_path);
-  switch (all_models.count()) {
-    case 1: {
-      QString first_model = all_models.getModelPath();
-      break;
-    }
-    case 2: {
-      std::this_thread::sleep_for(std::chrono::milliseconds(20));
-      break;
-    }
-    default: {
-      std::this_thread::sleep_for(std::chrono::milliseconds(450));
-      all_models.show();
-      //      qDebug() << all_models.getModelPath();
-    }
-  }
+  //  FindModel all_models(model_path);
+  //  switch (all_models.count()) {
+  //    case 1: {
+  //      QString first_model = all_models.getModelPath();
+  //      break;
+  //    }
+  //    case 2: {
+  //      std::this_thread::sleep_for(std::chrono::milliseconds(20));
+  //      break;
+  //    }
+  //    default: {
+  //      std::this_thread::sleep_for(std::chrono::milliseconds(450));
+  //      all_models.show();
+  //      //      qDebug() << all_models.getModelPath();
+  //    }
+  //  }
+
+  //  auto model =
+  //      ModelTPU(QString("/Users/francesco/Documents/Project/tcpsocket/Receiver/"
+  //                       "models/detect.tflite"));
+
   auto r = a.exec();
 
   //  std::unordered_map<int, std::string> mymap = read_label_file(

@@ -20,4 +20,11 @@ class LabelSplitter {
 std::unordered_map<int, std::string> read_label_file(
     const std::string& file_path, callback_split split);
 
+class LabelObjectDetection {
+ public:
+  LabelObjectDetection();
+
+  std::unordered_map<int, std::string> getLabels();
+};
+
 #endif  // UTIL_LABEL_IMAGE_HPP
