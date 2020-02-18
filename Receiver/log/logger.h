@@ -12,7 +12,20 @@ extern "C" {
 #include <stdarg.h>
 #include <stdio.h>
 
+#define LOGGER 1
+#define LOGGER_UI 1
+
+#if LOGGER_UI
 #define LOG(LEVEL, ...) logger(LEVEL, __FILE__, __LINE__, __VA_ARGS__);
+#else
+#define LOG(LEVEL, ...)
+#endif
+
+#if LOGGER
+#define LOG(LEVEL, ...) logger(LEVEL, __FILE__, __LINE__, __VA_ARGS__);
+#else
+#define LOG(LEVEL, ...)
+#endif
 
 // define constant color hex
 extern const char RED[];
