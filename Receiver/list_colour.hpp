@@ -1,0 +1,4 @@
+#ifndef LIST_COLOUR_HPP
+#define LIST_COLOUR_HPP
+
+#endif // LIST_COLOUR_HPP
