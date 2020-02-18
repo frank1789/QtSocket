@@ -1,10 +1,12 @@
 #include "util_label_image.hpp"
 
+#include <QFile>
 #include <QRegularExpression>
 #include <QString>
+#include <QTextStream>
 
-#include "log/instrumentor.h"
-#include "log/logger.h"
+#include "../log/instrumentor.h"
+#include "../log/logger.h"
 
 std::tuple<int, std::string> LabelSplitter::coco_label_split(
     const QString &str) {
@@ -89,4 +91,29 @@ std::unordered_map<int, std::string> read_label_file(
     }
   }
   return labels;
+}
+
+LabelDetection::LabelDetection(const QString &path) : m_filename(path) {
+  if (path.endsWith(".txt")) {
+    m_process_line = LabelSplitter::coco_label_split;
+  } else if (path.endsWith(".pbtxt")) {
+    m_process_line = LabelSplitter::tensorflow_label_map;
+  } else {
+    LOG(ERROR, "unsupported label map %s", path.toStdString().c_str())
+  }
+}
+
+void LabelDetection::read() {
+  QFile file(m_filename);
+  if (!file.open(QIODevice::ReadOnly)) {
+    LOG(ERROR, "file not exist %s", m_filename.toStdString().c_str())
+    return;
+  }
+
+  QTextStream in(&file);
+  while (!in.atEnd()) {
+    QString line = in.readLine();
+    auto [label_id, label_name] = m_process_line(line);
+    m_labels[label_id] = label_name;
+  }
 }
