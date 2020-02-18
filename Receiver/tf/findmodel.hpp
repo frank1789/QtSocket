@@ -1,32 +1,42 @@
 #ifndef FINDMODEL_HPP
 #define FINDMODEL_HPP
 
-#include <QComboBox>
 #include <QDialog>
-#include <QProgressDialog>
+#include <QObject>
+
+QT_BEGIN_NAMESPACE
+class QDialog;
+class QLineEdit;
+class QString;
+class QGridLayout;
+QT_END_NAMESPACE
 
 class FindModel : public QDialog {
   Q_OBJECT
  public:
-  explicit FindModel(QString path, QDialog *parent = nullptr);
+  explicit FindModel(QDialog *parent = nullptr);
   ~FindModel();
-
-  int count();
   QString getModelPath();
- private slots:
+  QString getLabelPath();
 
-  void updateIndex(int i);
-  void updateModel(const QString &t);
+ private slots:
+  void loadModelFile();
+  void loadLabelMapFile();
+  void CloseOnClick();
+
  signals:
 
  private:
-  void find();
-  QComboBox *m_combo{nullptr};
-  QString m_currentdir;
-  QStringList m_list_model;
-  QString model_name;
-  int counter_file;
-  int index;
+  // methods
+  QGridLayout *initializeLayout();
+  // attributes
+  QLineEdit *m_line_model{nullptr};
+  QLineEdit *m_line_label{nullptr};
+  QPushButton *m_confirmbtn{nullptr};
+  QPushButton *m_load_modelbtn{nullptr};
+  QPushButton *m_load_labelbtn{nullptr};
+  QString m_filename_model{""};
+  QString m_filename_label{""};
 };
 
 #endif // FINDMODEL_HPP

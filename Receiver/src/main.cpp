@@ -5,8 +5,8 @@
 #include <iostream>
 
 #include "../log/instrumentor.h"
-//#include "findmodel.hpp"
-//#include "model_tpu.hpp"
+#include "tf/findmodel.hpp"
+#include "tf/model_tpu.hpp"
 //#include "util_label_image.hpp"
 
 #include <chrono>
@@ -22,6 +22,8 @@ int main(int argc, char* argv[]) {
   QApplication a(argc, argv);
   MainWindow w;
   w.show();
+  FindModel m;
+  m.show();
   //  FindModel all_models(model_path);
   //  switch (all_models.count()) {
   //    case 1: {
@@ -43,6 +45,7 @@ int main(int argc, char* argv[]) {
   //      ModelTPU(QString("/Users/francesco/Documents/Project/tcpsocket/Receiver/"
   //                       "models/detect.tflite"));
 
+  //  ModelTensorFlowTFlite modeltflite;
   auto r = a.exec();
 
   //  std::unordered_map<int, std::string> mymap = read_label_file(

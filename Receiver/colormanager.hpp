@@ -12,7 +12,6 @@ QT_END_NAMESPACE
 class ColorManager
 {
  public:
-  ColorManager();
   QColor getColor(QString element);
   static QImage billinearInterpolation(QImage mask, double newHeight,
                                        double newWidth);

@@ -43,28 +43,26 @@ int getColor(QImage mask, QColor color, int x, int y) {
 
 int billinerColor(QImage mask, QColor color, int xa, int xb, int xc, int xd,
                   int ya, int yb, int yc, int yd, double alpha, double beta) {
-  int pa, pb, pc, pd;
-
-  pa = getColor(mask, color, xa, ya);
-  pb = getColor(mask, color, xb, yb);
-  pc = getColor(mask, color, xc, yc);
-  pd = getColor(mask, color, xd, yd);
-  return (1 - alpha) * (1 - beta) * pa + alpha * (1 - beta) * pb +
-         (1 - alpha) * beta * pc + alpha * beta * pd + 0.5;
+  int pa = getColor(mask, color, xa, ya);
+  int pb = getColor(mask, color, xb, yb);
+  int pc = getColor(mask, color, xc, yc);
+  int pd = getColor(mask, color, xd, yd);
+  auto result = (1 - alpha) * (1 - beta) * pa + alpha * (1 - beta) * pb +
+                (1 - alpha) * beta * pc + alpha * beta * pd + 0.5;
+  return static_cast<int>(result);
 }
 
 uint billinearPixel(QImage mask, double sx, double sy, int k, int j) {
   double alpha, beta;
-  int xa, xb, xc, xd, ya, yb, yc, yd;
 
-  xa = k / sx;
-  ya = j / sy;
-  xb = xa + 1;
-  yb = ya;
-  xc = xa;
-  yc = ya + 1;
-  xd = xa + 1;
-  yd = ya + 1;
+  int xa = static_cast<int>(k / sx);
+  int ya = static_cast<int>(j / sy);
+  int xb = xa + 1;
+  int yb = ya;
+  int xc = xa;
+  int yc = ya + 1;
+  int xd = xa + 1;
+  int yd = ya + 1;
   if (xb >= mask.width()) xb--;
   if (xd >= mask.width()) xd--;
   if (yc >= mask.height()) yc--;
@@ -88,8 +86,9 @@ QImage ColorManager::billinearInterpolation(QImage mask, double newHeight,
   const double sx = newWidth / mask.width();
 
   // Resize mask to box size
-  QImage maskScaled(mask.width() * sx, mask.height() * sy,
-                    QImage::Format_ARGB32_Premultiplied);
+  auto res_w = static_cast<int>(mask.width() * sx);
+  auto res_h = static_cast<int>(mask.height() * sy);
+  QImage maskScaled(res_w, res_h, QImage::Format_ARGB32_Premultiplied);
   maskScaled.fill(Qt::transparent);
 
   // Billinear interpolation
@@ -104,11 +103,9 @@ QImage ColorManager::billinearInterpolation(QImage mask, double newHeight,
 QImage ColorManager::applyTransformation(QImage image,
                                          QTransform painterTransform) {
   QPainter painter;
-
   if (painter.begin(&image)) {
     painter.setTransform(painterTransform);
     painter.end();
   }
-
   return image;
 }

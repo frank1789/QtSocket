@@ -12,8 +12,11 @@ extern "C" {
 #include <stdarg.h>
 #include <stdio.h>
 
+#ifndef LOGGER
 #define LOGGER 1
+#define LOGGER_GEN 1
 #define LOGGER_UI 1
+#endif  // LOGGER
 
 #if LOGGER_UI
 #define LOG(LEVEL, ...) logger(LEVEL, __FILE__, __LINE__, __VA_ARGS__);
@@ -21,7 +24,7 @@ extern "C" {
 #define LOG(LEVEL, ...)
 #endif
 
-#if LOGGER
+#if LOGGER_GEN
 #define LOG(LEVEL, ...) logger(LEVEL, __FILE__, __LINE__, __VA_ARGS__);
 #else
 #define LOG(LEVEL, ...)
