@@ -103,6 +103,10 @@ LabelDetection::LabelDetection(const QString &path) : m_filename(path) {
   }
 }
 
+std::unordered_map<int, std::string> LabelDetection::getLabels() {
+  return m_labels;
+}
+
 void LabelDetection::read() {
   QFile file(m_filename);
   if (!file.open(QIODevice::ReadOnly)) {
@@ -114,6 +118,7 @@ void LabelDetection::read() {
   while (!in.atEnd()) {
     QString line = in.readLine();
     auto [label_id, label_name] = m_process_line(line);
+    LOG(DEBUG, "found label: %d %s", label_id, label_name.c_str())
     m_labels[label_id] = label_name;
   }
 }
