@@ -46,8 +46,10 @@ MainWindow::MainWindow(QWidget *parent)
   m_group_all->addWidget(client, 0, 1);
   widget->setLayout(m_group_all);
 
-  connect(client, &TcpClient::updatePixmap,
-          [=](QPixmap img) { m_label->updatePixmap(img); });
+  connect(client, &TcpClient::updatePixmap, [=](QPixmap img) {
+    m_label->updatePixmap(img);
+    emit updateImage(img);
+  });
 }
 
 MainWindow::~MainWindow() {

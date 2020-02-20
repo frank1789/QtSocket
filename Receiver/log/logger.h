@@ -81,4 +81,14 @@ private:
   std::chrono::duration<double, std::micro> m_total_elapsed;
 };
 
+class StopWatch {
+ public:
+  explicit StopWatch();
+  ~StopWatch();
+
+ private:
+  std::chrono::time_point<std::chrono::high_resolution_clock> m_start;
+  std::chrono::time_point<std::chrono::high_resolution_clock> m_stop;
+};
+
 #endif // LOGGER_H

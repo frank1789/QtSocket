@@ -118,7 +118,7 @@ void LabelDetection::read() {
   while (!in.atEnd()) {
     QString line = in.readLine();
     auto [label_id, label_name] = m_process_line(line);
-    LOG(DEBUG, "found label: %d %s", label_id, label_name.c_str())
+    LOG(DEBUG, "found label: %4d %s", label_id, label_name.c_str())
     m_labels[label_id] = label_name;
   }
 }

@@ -22,24 +22,29 @@
 
 constexpr float min_threshold{0.6f};
 
-ModelTensorFlowLite::ModelTensorFlowLite()
+ModelTensorFlowLite::ModelTensorFlowLite() : QObject() {
+  threshold = min_threshold;
+  img_height = 512;
+  img_width = 512;
+  wanted_height = 0;
+  wanted_width = 0;
+  wanted_channels = 3;
+  has_detection_mask = false;
+  kind_network = type_detection::none;
+  numThreads = 1;
+  LOG(INFO, "ctor model tensorflow lite")
+}
+
+ModelTensorFlowLite::ModelTensorFlowLite(const QString &path)
     : QObject(),
       threshold(min_threshold),
       img_height(512),
       img_width(512),
-      has_detection_mask(false),
       wanted_height(0),
       wanted_width(0),
       wanted_channels(3),
-      kind_network(-1),
-      numThreads(1){LOG(INFO, "ctor model tensorflow lite")}
-
-      ModelTensorFlowLite::ModelTensorFlowLite(const QString &path)
-    : QObject(),
-      threshold(min_threshold),
-      img_height(512),
-      img_width(512),
       has_detection_mask(false),
+      kind_network(type_detection::none),
       numThreads(1) {
   LOG(INFO, "ctor model tensorflow lite")
   LOG(DEBUG, "load model from resources %s", path.toStdString().c_str())
@@ -52,13 +57,14 @@ void ModelTensorFlowLite::setLabel(
 }
 
 void ModelTensorFlowLite::imageAvailable(QPixmap image) {
-  // LOG(DEBUG, "image size w: %d, h: %d", image.width(), image.height())
-  //  QPixmap input = image.scaled(wanted_width, wanted_height);
-  //  LOG(DEBUG, "image resized w: %d, h: %d", input.width(), input.height())
-  run(image.toImage());
+  if (!image.isNull()) {
+    LOG(DEBUG, "image not null: %s", !image.isNull() ? "true" : "false")
+    QImage input = image.toImage().convertToFormat(QImage::Format_RGB888);
+    run(input);
+  }
 }
 
-void ModelTensorFlowLite::run(const QImage &image) {
+void ModelTensorFlowLite::run(QImage image) {
   LOG(DEBUG, "run inference tflite")
   StopWatch tm;
   PROFILE_FUNCTION();

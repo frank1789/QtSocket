@@ -10,6 +10,8 @@ QT += widgets core network
 
 CONFIG += c++17
 
+QMAKE_CXXFLAGS += -O2 -march=native -fstack-protector-strong -fpic -Wall
+
 # You can make your code fail to compile if you use deprecated APIs.
 # In order to do so, uncomment the following line.
 # Please consult the documentation of the deprecated API in order to know
@@ -19,8 +21,8 @@ CONFIG += c++17
 
 # Input
 HEADERS += log/instrumentor.h \
-    colormanager.hpp \
-    list_colour.hpp \
+    tf/colormanager.hpp \
+    tf/list_colour.hpp \
            log/logger.h \
            src/commonconnection.hpp \
            src/mainwindow.hpp \
@@ -36,8 +38,8 @@ FORMS += src/mainwindow.ui
 
 
 SOURCES += log/logger.cpp \
-    colormanager.cpp \
-    list_colour.cpp \
+    tf/colormanager.cpp \
+    tf/list_colour.cpp \
            src/commonconnection.cpp \
            src/main.cpp \
            src/mainwindow.cpp \

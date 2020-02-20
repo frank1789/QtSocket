@@ -1,13 +1,14 @@
 #ifndef MODEL_TPU_HPP
 #define MODEL_TPU_HPP
 
-#include <memory>
-#include <string>
+#include <tensorflow/lite/interpreter.h>
+#include <tensorflow/lite/kernels/register.h>
+#include <tensorflow/lite/model.h>
 
 #include <QObject>
 #include <QThread>
-
-#include <tensorflow/lite/interpreter.h>
+#include <memory>
+#include <string>
 #include <tensorflow/lite/kernels/register.h>
 #include <tensorflow/lite/model.h>
 
@@ -17,7 +18,7 @@ class QString;
 class QByteArray;
 QT_END_NAMESPACE
 
-enum type_detection { image_classifier = 1, object_detection = 2 };
+enum type_detection { none = -1, image_classifier = 1, object_detection = 2 };
 
 struct result_t {
   // Results
@@ -32,7 +33,7 @@ class ModelTensorFlowLite : public QObject {
   explicit ModelTensorFlowLite();
   explicit ModelTensorFlowLite(const QString &path);
 
-  void run(const QImage &image);
+  void run(QImage image);
 
   void setInput(QImage image);
 

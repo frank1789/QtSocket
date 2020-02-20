@@ -15,8 +15,8 @@
 #include <QString>
 #include <QTextEdit>
 
-#include "../log/logger.h"
 #include "../log/instrumentor.h"
+#include "../log/logger.h"
 #include "commonconnection.hpp"
 
 TcpClient::TcpClient(QWidget *parent) : QWidget(parent) {
@@ -41,9 +41,8 @@ TcpClient::TcpClient(QWidget *parent) : QWidget(parent) {
   connect(m_stream->socket, &QTcpSocket::connected,
           [=]() { this->connectedToServer(); });
   // connect buttons
-  connect(disconnectButton, &QPushButton::clicked, [=]() {
-    this->onDisconnectClicked();
-  });
+  connect(disconnectButton, &QPushButton::clicked,
+          [=]() { this->onDisconnectClicked(); });
   connect(connectButton, &QPushButton::clicked, [=]() {
     this->onConnectClicked();
     m_stream->slotReconnect();
@@ -102,7 +101,7 @@ void TcpClient::imageAvailabe(QByteArray baImage) {
 }
 
 void TcpClient::connectedToServer() {
-PROFILE_FUNCTION();
+  PROFILE_FUNCTION();
 #if LOGGER_UI
   LOG(INFO, "update connection status: try connect to server.")
   LOG(INFO, "update ui.")
@@ -174,17 +173,13 @@ void TcpClient::enableConnectButton() {
 void TcpClient::onConnectClicked() {
   // check user name is not empty
   if (m_user_linedit->text().isEmpty()) {
-#if LOGGER_CLIENT
     LOG(ERROR, "must define user name.")
-#endif
     QMessageBox::information(this, tr("Client"), tr("Define an user name"));
     return;
   }
 
   if (m_user_linedit->text().isEmpty()) {
-#if LOGGER_CLIENT
     LOG(ERROR, "must define port.")
-#endif
     QMessageBox::information(this, tr("Client"), tr("Define port 52693."));
     return;
   }
@@ -199,11 +194,8 @@ void TcpClient::onConnectClicked() {
   m_stream->start();
   connectButton->setEnabled(false);
   disconnectButton->setEnabled(true);
-#if LOGGER_CLIENT
-    LOG(DEBUG, "try connect, connection status:")
-    qDebug() << "\t" << result;
-    LOG(DEBUG, "start thread")
-#endif
+  LOG(DEBUG, "try connect, connection status: %s, start thread",
+      result.toUtf8().data())
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -211,12 +203,9 @@ void TcpClient::onConnectClicked() {
 //////////////////////////////////////////////////////////////////////////////
 
 QGroupBox *TcpClient::createInformationGroup() {
-#if LOGGER_CLIENT
   LOG(INFO, "build information group ui")
-#endif
   // defining layout group
   QGroupBox *groupBox = new QGroupBox(tr("Server Configuration"));
-
   // init element ui
   QLabel *address_label = new QLabel("Address:");
   QLabel *port_label = new QLabel("Port:");
@@ -245,14 +234,6 @@ QGroupBox *TcpClient::createInformationGroup() {
       hostCombo->addItem(ipAddressesList.at(i).toString());
     }
   }
-
-#if LOGGER_CLIENT
-  LOG(DEBUG, "find out all IP address:")
-  for (const auto &list : ipAddressesList) {
-    qDebug() << "\t" << list.toString();
-  }
-#endif
-
   // validate input port must be 1 <= x <= 65535
   m_port_linedit->setValidator(new QIntValidator(1, 65535, this));
 

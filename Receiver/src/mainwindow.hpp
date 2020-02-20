@@ -32,6 +32,7 @@ class MainWindow : public QMainWindow {
 
  signals:
   void update_rgb_image(QImage);
+  void updateImage(QPixmap);
 
  private:
   /**
