@@ -13,6 +13,7 @@ int main(int argc, char* argv[]) {
 #endif
   QApplication a(argc, argv);
   MainWindow w;
+  w.setWindowTitle("Receiver");
   w.show();
   // initiliaze qdialog for setup model and label
   FindModel m;

@@ -8,15 +8,14 @@
 #include <QFileInfo>
 #include <QImage>
 
-#include "tensorflow/lite/examples/label_image/get_top_n_impl.h"
-#include "tensorflow/lite/kernels/internal/tensor.h"
-#include "tensorflow/lite/kernels/internal/tensor_utils.h"
-
 #include "../log/instrumentor.h"
 #include "../log/logger.h"
 #include "colormanager.hpp"
 #include "model_support_function.hpp"
 #include "src/streamerthread.hpp"
+#include "tensorflow/lite/examples/label_image/get_top_n_impl.h"
+#include "tensorflow/lite/kernels/internal/tensor.h"
+#include "tensorflow/lite/kernels/internal/tensor_utils.h"
 
 #define LOG_CNN 1
 
@@ -93,7 +92,7 @@ void ModelTensorFlowLite::run(QImage image) {
     }
     case type_detection::object_detection: {
       LOG(DEBUG, "retrive object detection result")
-      if (!get_object_outputs(&m_result)) {
+      if (!get_object_outputs()) {
         LOG(DEBUG, "empty result")
         return;
       }
@@ -249,7 +248,7 @@ bool ModelTensorFlowLite::get_classifier_output(
   return status;
 }
 
-bool ModelTensorFlowLite::get_object_outputs(result_t *result) {
+bool ModelTensorFlowLite::get_object_outputs() {
   bool status{false};
   if (outputs.size() >= 4) {
     const int num_detections =
@@ -264,15 +263,17 @@ bool ModelTensorFlowLite::get_object_outputs(result_t *result) {
 
     for (int i = 0; i < num_detections; i++) {
       // Get class
-      const int cls = static_cast<int>(detection_classes[i]);
+      const int cls = static_cast<int>(detection_classes[i]) + 1;
       // Ignore first one
       if (cls == 0) continue;
       // Get score
       auto score = detection_scores[i];
       // Check minimum score
-      LOG(DEBUG, "score: %3.3lf, class %s", static_cast<double>(score),
-          getLabel(cls).toStdString().c_str())
-      if (score < threshold) break;
+      if (score < threshold) {
+        LOG(WARN, "low score: %3.3lf, class %s", static_cast<double>(score),
+            getLabel(cls).toStdString().c_str())
+        break;
+      }
       // Get class label
       const QString label = getLabel(cls);
       // Get coordinates
@@ -317,16 +318,16 @@ bool ModelTensorFlowLite::get_object_outputs(result_t *result) {
         //         ColorManager::applyTransformation(maskScaled,trans);
 
         // Append to masks
-        result->masks.append(maskScaled);
+        //        result->masks.append(maskScaled);
       }
       // Append data
-      LOG(DEBUG, "label: %s, score: %f", label.toStdString().c_str(),
+      LOG(DEBUG, "label: %s, score: %3.3lf", label.toStdString().c_str(),
           static_cast<double>(score))
-      result->caption.append(label);
-      result->confidences.append(static_cast<double>(score));
-      result->box.append(box);
+      //      result->caption.append(label);
+      //      result->confidences.append(static_cast<double>(score));
+      //      result->box.append(box);
+      status = true;
     }
-    status = true;
   }
   return status;
 }

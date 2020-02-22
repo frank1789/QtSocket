@@ -9,8 +9,6 @@
 #include <QThread>
 #include <memory>
 #include <string>
-#include <tensorflow/lite/kernels/register.h>
-#include <tensorflow/lite/model.h>
 
 QT_BEGIN_NAMESPACE
 class QImage;
@@ -38,7 +36,7 @@ class ModelTensorFlowLite : public QObject {
   void setInput(QImage image);
 
   bool get_classifier_output(std::vector<std::pair<float, int> > *top_results);
-  bool get_object_outputs(result_t *result);
+  bool get_object_outputs();
 
   void setLabel(const std::unordered_map<int, std::string> &l);
   QString getLabel(int i);
