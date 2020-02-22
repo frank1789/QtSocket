@@ -1,7 +1,8 @@
 FROM ubuntu:18.04
 ARG BAZEL_VERSION=0.29.1
 
-COPY edgetpu/docker/update_sources.sh /
+
+COPY Receiver/edgetpu/docker/update_sources.sh /
 RUN /update_sources.sh
 
 RUN dpkg --add-architecture armhf
@@ -41,6 +42,22 @@ RUN rm bazel-${BAZEL_VERSION}-installer-linux-x86_64.sh
 
 RUN git clone https://github.com/raspberrypi/tools.git
 
-COPY edgetpu/docker/glibc_compat.h /usr/include
+COPY Receiver/edgetpu/docker/glibc_compat.h /usr/include
 RUN chmod 644 /usr/include/glibc_compat.h
+
+
+# install qt
+ARG QT_VERSION=5.13.0
+ARG QT_URL="https://download.qt.io/official_releases/qt/__QT_MAJMIN__/${QT_VERSION}/qt-opensource-linux-x64-${QT_VERSION}.run"
+ARG QT_SHA256="0cd82c80287a783bd5db1339b6184803d57517c9450ffe16f505254853f0a41f"
+
+COPY Receiver/extract-qt-installer.sh /tmp/qt/
+
+# Download & unpack Qt toolchains & clean
+RUN echo "${QT_SHA256} -" > sum.txt && curl -fLs "$(echo "${QT_URL}" | sed "s/__QT_MAJMIN__/$(echo "${QT_VERSION}" | cut -d. -f 1-2)/g")" | tee /tmp/qt/installer.run | sha256sum -c sum.txt \
+  && QT_CI_PACKAGES=qt.qt5.$(echo "${QT_VERSION}" | tr -d .).${QT_BIN_PACKAGE} /tmp/qt/extract-qt-installer.sh /tmp/qt/installer.run "$QT_PATH" \
+  && find "${QT_PATH}" -mindepth 1 -maxdepth 1 ! -name "${QT_VERSION}" -exec echo 'Cleaning Qt SDK: {}' \; -exec rm -r '{}' \; \
+  && rm -rf /tmp/qt
+
+
 CMD [ "/bin/bash" ]

@@ -1,0 +1,20 @@
+language: python
+python:
+    - "3.6"
+
+addons:
+  apt:
+    packages:
+      - docker-ce
+
+services:
+- docker
+
+cache:
+  directories:
+  - /home/travis/docker/
+
+
+
+script:
+  - make
