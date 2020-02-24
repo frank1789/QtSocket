@@ -4,6 +4,7 @@ set(LIB_NAME "neuralnetwork")
 
 
 #-------------------------------------------------------------------------------
+# Include dirs
 #-------------------------------------------------------------------------------
 set(HEADERS_PATH "${CMAKE_HOME_DIRECTORY}/vendor/tensorflow-lite/include" CACHE INTERNAL "")
 message(STATUS "Search for ${HEADERS_PATH}")
@@ -14,7 +15,7 @@ foreach(dir ${dirs})
 endforeach()
 
 #-------------------------------------------------------------------------------
-
+# Select external Library
 #-------------------------------------------------------------------------------
 if (${CMAKE_SYSTEM_NAME} MATCHES "Linux" AND "${ARCHITECTURE}" STREQUAL "x86_64")
 	include_directories(${HEADERS_PATH})
@@ -26,6 +27,7 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin" AND "${ARCHITECTURE}" STREQUAL "x8
     set(LIBRARYPATH "${CMAKE_CURRENT_SOURCE_DIR}/tensorflow-lite/osx_x86_64/lib" CACHE INTERNAL "")
     message(STATUS "Detect os: ${CMAKE_SYSTEM_NAME}\tarch: ${ARCHITECTURE}")
     message(STATUS "Set library's directory: ${LIBRARYPATH}")
+    link_directories(${LIBRARYPATH})
 endif()
 
 #-------------------------------------------------------------------------------
@@ -39,7 +41,7 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/util_label_image.cpp
 )
 
-add_library(${LIB_NAME} ${SOURCES})
+add_library(${LIB_NAME} ${SOURCES} ${HEADERS})
 target_link_libraries(${LIB_NAME}
     Qt5::Widgets 
     Qt5::Network 
