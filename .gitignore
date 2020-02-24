@@ -135,3 +135,5 @@ Receiver/build_*/
 Sender/build_*/
 
 Server/build_*/
+
+*build*
