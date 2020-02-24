@@ -4,10 +4,6 @@
 !./vendor/tensorflow-lite/osx_x86_64/lib/libtensorflow-lite.a
 !./vendor/tensorflow-lite/aarch64_armv8-a/lib/libtensorflow-lite.a
 
-
-
-
-
 # General
 .DS_Store
 .AppleDouble
