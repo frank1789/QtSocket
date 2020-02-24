@@ -34,10 +34,12 @@ include_directories(${HEADERS_PATH})
 #-------------------------------------------------------------------------------
 # Select external Library
 #-------------------------------------------------------------------------------
-if (${CMAKE_SYSTEM_NAME} MATCHES "Linux" AND "${ARCHITECTURE}" STREQUAL "x86_64")
-	link_directories(vendor/tensorflow-lite/aarch64_armv8-a/lib)
+if (${CMAKE_SYSTEM_NAME} MATCHES "Linux" AND "${ARCHITECTURE}" STREQUAL "aarch64")
+	set(LIBRARYPATH "${CMAKE_CURRENT_SOURCE_DIR}/vendor/tensorflow-lite/aarch64_armv8-a/lib" CACHE INTERNAL "")
+    message(STATUS "Detect os: ${CMAKE_SYSTEM_NAME}\tarch: ${ARCHITECTURE}")
+    message(STATUS "Set library's directory: ${LIBRARYPATH}")
+    link_directories(${LIBRARYPATH})
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Linux" AND "${ARCHITECTURE}" STREQUAL "armv7l")
-	link_directories(vendor/tensorflow-lite/rpi_armv7l/lib)
 	set(LIBRARYPATH "${CMAKE_CURRENT_SOURCE_DIR}/vendor/tensorflow-lite/rpi_armv7l/lib" CACHE INTERNAL "")
     message(STATUS "Detect os: ${CMAKE_SYSTEM_NAME}\tarch: ${ARCHITECTURE}")
     message(STATUS "Set library's directory: ${LIBRARYPATH}")
