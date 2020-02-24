@@ -2,7 +2,6 @@ cmake_minimum_required (VERSION 3.7)
 project(QtTcpSocket LANGUAGES CXX)
 set(NAME_PROJECT "Receiver")
 
-
 #-----------------------------------------------------------------------------
 # check build type
 #-----------------------------------------------------------------------------
@@ -30,9 +29,24 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # Check architecture
 EXECUTE_PROCESS( COMMAND uname -m COMMAND tr -d '\n' OUTPUT_VARIABLE ARCHITECTURE )
 
+set(HEADERS_PATH "${CMAKE_CURRENT_SOURCE_DIR}/vendor/tensorflow-lite/include" CACHE INTERNAL "")
+include_directories(${HEADERS_PATH})
+#-------------------------------------------------------------------------------
+# Select external Library
+#-------------------------------------------------------------------------------
 if (${CMAKE_SYSTEM_NAME} MATCHES "Linux" AND "${ARCHITECTURE}" STREQUAL "x86_64")
-	include_directories(${HEADERS_PATH})
 	link_directories(vendor/tensorflow-lite/aarch64_armv8-a/lib)
+elseif(${CMAKE_SYSTEM_NAME} MATCHES "Linux" AND "${ARCHITECTURE}" STREQUAL "x86_64")
+	link_directories(vendor/tensorflow-lite/rpi_armv7l/lib)
+elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin" AND "${ARCHITECTURE}" STREQUAL "x86_64")
+    set(LIBRARYPATH "${CMAKE_CURRENT_SOURCE_DIR}/vendor/tensorflow-lite/osx_x86_64/lib" CACHE INTERNAL "")
+    message(STATUS "Detect os: ${CMAKE_SYSTEM_NAME}\tarch: ${ARCHITECTURE}")
+    message(STATUS "Set library's directory: ${LIBRARYPATH}")
+    link_directories(${LIBRARYPATH})
+endif()
+
+if (${CMAKE_SYSTEM_NAME} MATCHES "Linux" AND "${ARCHITECTURE}" STREQUAL "x86_64")
+
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Linux" AND "${ARCHITECTURE}" STREQUAL "x86_64")
 	#-----------------------------------------------------------------------------
 	# Specific Flag for RaspBerry Pi 3 
@@ -50,17 +64,6 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin" AND "${ARCHITECTURE}" STREQUAL "x8
 	set(CMAKE_C_FLAGS_RELEASE "-march=native")
 	set(CMAKE_CXX_FLAGS_RELEASE "-march=native")
 endif()
-
-
-
-
-
-
-
-
-
-
-
 
 #-----------------------------------------------------------------------------
 # Code coverage
