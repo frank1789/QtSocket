@@ -1,3 +1,9 @@
+
+# save only specific libraries
+!./vendor/tensorflow-lite/rpi_armv7l/lib/libtensorflow-lite.a
+!./vendor/tensorflow-lite/osx_x86_64/lib/libtensorflow-lite.a
+!./vendor/tensorflow-lite/aarch64_armv8-a/lib/libtensorflow-lite.a
+
 # General
 .DS_Store
 .AppleDouble
@@ -135,3 +141,5 @@ Receiver/build_*/
 Sender/build_*/
 
 Server/build_*/
+
+*build*

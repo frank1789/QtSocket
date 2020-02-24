@@ -1,6 +1,6 @@
-[submodule "Receiver/edgetpu"]
-	path = Receiver/edgetpu
+[submodule "edgetpu"]
+	path = edgetpu
 	url = https://github.com/google-coral/edgetpu.git
-[submodule "Receiver/tensorflow"]
-	path = Receiver/tensorflow
+[submodule "tensorflow"]
+	path = tensorflow
 	url = https://github.com/tensorflow/tensorflow.git

@@ -1,5 +1,9 @@
 #include "model_tpu.hpp"
 
+#include <tensorflow/lite/examples/label_image/get_top_n_impl.h>
+#include <tensorflow/lite/kernels/internal/tensor.h>
+#include <tensorflow/lite/kernels/internal/tensor_utils.h>
+
 #include <QApplication>
 #include <QDebug>
 #include <QDir>
@@ -10,12 +14,9 @@
 
 #include "../log/instrumentor.h"
 #include "../log/logger.h"
+#include "../src/streamerthread.hpp"
 #include "colormanager.hpp"
 #include "model_support_function.hpp"
-#include "src/streamerthread.hpp"
-#include "tensorflow/lite/examples/label_image/get_top_n_impl.h"
-#include "tensorflow/lite/kernels/internal/tensor.h"
-#include "tensorflow/lite/kernels/internal/tensor_utils.h"
 
 #define LOG_CNN 1
 

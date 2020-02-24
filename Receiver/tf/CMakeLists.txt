@@ -1,13 +1,24 @@
 # Simple and fast logger for embedded programs C / C ++ interface
 cmake_minimum_required(VERSION 3.7)
-set(PROJECT_NAME "neural")
-project(${PROJECT_NAME})
+set(LIB_NAME "neuralnetwork")
 
-# add library LOG
-set(PROJECT_NAME ${PROJECT_NAME})
-set(LIBRARY_TARGET_NAME ${PROJECT_NAME})
-file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
-file(GLOB_RECURSE HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.hpp)
-add_library(${PROJECT_NAME} ${SOURCES})
-target_link_libraries(${PROJECT_NAME} Qt5::Widgets log tflite)
-target_compile_options(${PROJECT_NAME} PUBLIC -march=native -fpic -O2)
+#-------------------------------------------------------------------------------
+# add library neural network
+#-------------------------------------------------------------------------------
+set(LIBRARY_TARGET_NAME ${LIB_NAME})
+set(SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/list_colour.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/colormanager.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/findmodel.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/model_tpu.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/util_label_image.cpp
+)
+
+add_library(${LIB_NAME} ${SOURCES} ${HEADERS})
+target_link_libraries(${LIB_NAME}
+    Qt5::Widgets 
+    Qt5::Network 
+    logger 
+    -ltensorflow-lite
+)
+target_compile_options(${LIB_NAME} PUBLIC -fpic -O2)
