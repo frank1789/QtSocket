@@ -51,7 +51,7 @@ endif()
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Linux" AND "${ARCHITECTURE}" STREQUAL "x86_64")
 
-elseif(${CMAKE_SYSTEM_NAME} MATCHES "Linux" AND "${ARCHITECTURE}" STREQUAL "x86_64")
+elseif(${CMAKE_SYSTEM_NAME} MATCHES "Linux" AND "${ARCHITECTURE}" STREQUAL "armv7l")
 	#-----------------------------------------------------------------------------
 	# Specific Flag for RaspBerry Pi 3 
 	#-----------------------------------------------------------------------------
