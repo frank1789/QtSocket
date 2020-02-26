@@ -54,10 +54,10 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin" AND "${ARCHITECTURE}" STREQUAL "x8
 endif()
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Linux" AND "${ARCHITECTURE}" STREQUAL "aarch64")
-	set(CMAKE_C_FLAGS_DEBUG "-march=native -mtune=cortex-a53 -mfloat-abi=hard -ftree-vectorize -funsafe-math-optimizations -pipe -pthread")
-	set(CMAKE_CXX_FLAGS_DEBUG "-march=native -mtune=cortex-a53 -mfloat-abi=hard -ftree-vectorize -funsafe-math-optimizations -pipe -pthread")
-	set(CMAKE_C_FLAGS_RELEASE "-march=native -mtune=cortex-a53 -mfloat-abi=hard -ftree-vectorize -funsafe-math-optimizations -pipe -pthread")
-	set(CMAKE_CXX_FLAGS_RELEASE "-march=native -mtune=cortex-a53 -mfloat-abi=hard -ftree-vectorize -funsafe-math-optimizations -pipe -pthread")
+	set(CMAKE_C_FLAGS_DEBUG "-march=native -mtune=cortex-a53  -ftree-vectorize -funsafe-math-optimizations -pipe -pthread")
+	set(CMAKE_CXX_FLAGS_DEBUG "-march=native -mtune=cortex-a53  -ftree-vectorize -funsafe-math-optimizations -pipe -pthread")
+	set(CMAKE_C_FLAGS_RELEASE "-march=native -mtune=cortex-a53  -ftree-vectorize -funsafe-math-optimizations -pipe -pthread")
+	set(CMAKE_CXX_FLAGS_RELEASE "-march=native -mtune=cortex-a53  -ftree-vectorize -funsafe-math-optimizations -pipe -pthread")
 
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Linux" AND "${ARCHITECTURE}" STREQUAL "armv7l")
 	#-----------------------------------------------------------------------------
