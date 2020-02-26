@@ -126,4 +126,4 @@ uint8_t* TensorData(TfLiteTensor* tensor, int batch_index) {
   return nullptr;
 }
 
-#endif // MODEL_SUPPORT_FUNCTION_HPP
+#endif  // MODEL_SUPPORT_FUNCTION_HPP
