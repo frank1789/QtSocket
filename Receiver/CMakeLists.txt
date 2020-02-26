@@ -29,11 +29,13 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # Check architecture
 EXECUTE_PROCESS( COMMAND uname -m COMMAND tr -d '\n' OUTPUT_VARIABLE ARCHITECTURE )
 
-set(HEADERS_PATH "${CMAKE_CURRENT_SOURCE_DIR}/vendor/tensorflow-lite/include" CACHE INTERNAL "")
-include_directories(${HEADERS_PATH})
+
 #-------------------------------------------------------------------------------
 # Select external Library
 #-------------------------------------------------------------------------------
+set(HEADERS_PATH "${CMAKE_CURRENT_SOURCE_DIR}/vendor/tensorflow-lite/include" CACHE INTERNAL "")
+include_directories(${HEADERS_PATH})
+
 if (${CMAKE_SYSTEM_NAME} MATCHES "Linux" AND "${ARCHITECTURE}" STREQUAL "aarch64")
 	set(LIBRARYPATH "${CMAKE_CURRENT_SOURCE_DIR}/vendor/tensorflow-lite/aarch64_armv8-a/lib" CACHE INTERNAL "")
     message(STATUS "Detect os: ${CMAKE_SYSTEM_NAME}\tarch: ${ARCHITECTURE}")
@@ -75,6 +77,7 @@ endif()
 # Code coverage
 #-----------------------------------------------------------------------------
 if(COVERAGE)
+	message(STATUS "Coverage: ON")
 	add_library(coverage_config INTERFACE)
 	if(${CMAKE_BUILD_TYPE} STREQUAL "Debug" AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
 	  	message(STATUS "enabled coverage")
@@ -91,6 +94,7 @@ if(COVERAGE)
 	  	endif()
 	endif()
 endif()
+
 
 # Find includes in corresponding build directories
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
