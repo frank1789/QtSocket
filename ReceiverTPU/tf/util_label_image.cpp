@@ -1,128 +1,32 @@
 #include "util_label_image.hpp"
 
-#include <QFile>
-#include <QRegularExpression>
-#include <QString>
-#include <QTextStream>
+std::unordered_map<int, std::string> label{
+    {0, "person"},         {1, "bicycle"},       {2, "car"},
+    {3, "motorcycle"},     {4, "airplane"},      {5, "bus"},
+    {6, "train"},          {7, "truck"},         {8, "boat"},
+    {9, "traffic light"},  {10, "fire hydrant"}, {12, "stop sign"},
+    {13, "parking meter"}, {14, "bench"},        {15, "bird"},
+    {16, "cat"},           {17, "dog"},          {18, "horse"},
+    {19, "sheep"},         {20, "cow"},          {21, "elephant"},
+    {22, "bear"},          {23, "zebra"},        {24, "giraffe"},
+    {26, "backpack"},      {27, "umbrella"},     {30, "handbag"},
+    {31, "tie"},           {32, "suitcase"},     {33, "frisbee"},
+    {34, "skis"},          {35, "snowboard"},    {36, "sports ball"},
+    {37, "kite"},          {38, "baseball bat"}, {39, "baseball glove"},
+    {40, "skateboard"},    {41, "surfboard"},    {42, "tennis racket"},
+    {43, "bottle"},        {45, "wine glass"},   {46, "cup"},
+    {47, "fork"},          {48, "knife"},        {49, "spoon"},
+    {50, "bowl"},          {51, "banana"},       {52, "apple"},
+    {53, "sandwich"},      {54, "orange"},       {55, "broccoli"},
+    {56, "carrot"},        {57, "hot dog"},      {58, "pizza"},
+    {59, "donut"},         {60, "cake"},         {61, "chair"},
+    {62, "couch"},         {63, "potted plant"}, {64, "bed"},
+    {66, "dining table"},  {69, "toilet"},       {71, "tv"},
+    {72, "laptop"},        {73, "mouse"},        {74, "remote"},
+    {75, "keyboard"},      {76, "cell phone"},   {77, "microwave"},
+    {78, "oven"},          {79, "toaster"},      {80, "sink"},
+    {81, "refrigerator"},  {83, "book"},         {84, "clock"},
+    {85, "vase"},          {86, "scissors"},     {87, "teddy bear"},
+    {88, "hair drier"},    {89, "toothbrush"},
 
-#include "../log/instrumentor.h"
-#include "../log/logger.h"
-
-std::tuple<int, std::string> LabelSplitter::coco_label_split(
-    const QString &str) {
-  QString id{""};
-  QString label{""};
-  QString accessor{""};
-  QRegularExpression re;
-  re.setPattern(
-      "(?<id>[0-9]\\d*)\\s*(?<label>[A-z]\\w*)?\\s+(?<accessor>[A-z]\\w+)");
-  QRegularExpressionMatch match = re.match(str);
-  if (match.hasMatch()) {
-    id = match.captured("id");
-    label = match.captured("label");
-    accessor = match.captured("accessor");
-    if (!accessor.isEmpty() && accessor != "") {
-      label = label + " " + accessor;
-    }
-  }
-  return std::make_tuple(id.toUInt(), label.toStdString());
-}
-
-std::tuple<int, std::string> LabelSplitter::imagenet_label_split(
-    const QString &str) {
-  QString id;
-  QString label;
-  QString accessor;
-  QString accessor2;
-  QRegularExpression re;
-  re.setPattern(
-      "(?<id>[0-9]\\d*)\\s*(?<label>[A-z]\\w*)?\\s+(?<accessor>[A-z]\\w*)?\\s+("
-      "?<accessor2>[A-z]\\w*)");
-  QRegularExpressionMatch match = re.match(str);
-  if (match.hasMatch()) {
-    id = match.captured("id");
-    label = match.captured("label");
-    accessor = match.captured("accessor");
-    accessor2 = match.captured("accessor2");
-
-    if (!accessor.isEmpty()) {
-      label += " " + accessor;
-    }
-    if (!accessor2.isEmpty()) {
-      label += " " + accessor2;
-    }
-  }
-  return std::make_tuple(id.toUInt(), label.toStdString());
-}
-
-std::tuple<int, std::string> LabelSplitter::tensorflow_label_map(
-    const QString &str) {
-  QString id;
-  QString label;
-  QString accessor;
-  QRegularExpression re;
-  re.setPattern(
-      "(?<id>[0-9]\\d*)\\s*(?<label>[A-z]\\w*)?\\s+(?<accessor>[A-z]\\w+)");
-  QRegularExpressionMatch match = re.match(str);
-  if (match.hasMatch()) {
-    id = match.captured("id");
-    label = match.captured("label");
-    accessor = match.captured("accessor");
-    if (!accessor.isEmpty()) {
-      label += " " + accessor;
-    }
-  }
-  return std::make_tuple(id.toUInt(), label.toStdString());
-}
-
-std::unordered_map<int, std::string> read_label_file(
-    const std::string &file_path, callback_split split) {
-  std::unordered_map<int, std::string> labels;
-  std::ifstream input_label(file_path);
-  if (!input_label.is_open()) {
-    LOG(ERROR, "failed to open ", file_path.data())
-    std::cerr << "Cannot open file: " << file_path << std::endl;
-    std::abort();
-  } else {
-    std::string line;
-    while (getline(input_label, line)) {
-      int label_id;
-      std::string label_name;
-      std::tie(label_id, label_name) = split(QString::fromStdString(line));
-      labels[label_id] = label_name;
-    }
-  }
-  return labels;
-}
-
-LabelDetection::LabelDetection(const QString &path) : m_filename(path) {
-  if (path.endsWith(".txt")) {
-    m_process_line = LabelSplitter::coco_label_split;
-  } else if (path.endsWith(".pbtxt")) {
-    m_process_line = LabelSplitter::tensorflow_label_map;
-  } else {
-    LOG(ERROR, "unsupported label map %s", path.toStdString().c_str())
-  }
-}
-
-std::unordered_map<int, std::string> LabelDetection::getLabels() {
-  return m_labels;
-}
-
-void LabelDetection::read() {
-  QFile file(m_filename);
-  if (!file.open(QIODevice::ReadOnly)) {
-    LOG(ERROR, "file not exist %s", m_filename.toStdString().c_str())
-    return;
-  }
-
-  QTextStream in(&file);
-  while (!in.atEnd()) {
-    QString line = in.readLine();
-    int label_id;
-    std::string label_name;
-    std::tie(label_id, label_name) = m_process_line(line);
-    LOG(DEBUG, "found label: %4d %s", label_id, label_name.c_str())
-    m_labels[label_id] = label_name;
-  }
-}
+};

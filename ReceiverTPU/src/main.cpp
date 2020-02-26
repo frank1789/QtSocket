@@ -7,6 +7,8 @@
 #include "../tf/util_label_image.hpp"
 #include "mainwindow.hpp"
 
+const QString model_path{"/resources/detect.tflite"};
+
 int main(int argc, char* argv[]) {
 #if PROFILING
   Instrumentor::Get().BeginSession("Profile");
@@ -15,19 +17,10 @@ int main(int argc, char* argv[]) {
   MainWindow w;
   w.setWindowTitle("Receiver");
   w.show();
-  // initiliaze qdialog for setup model and label
-  FindModel m;
-  m.exec();
-  while (m.isVisible()) {
-    m.show();
-  }
-  // get path
-  auto dd = m.getLabelPath();
-  auto zz = m.getModelPath();
-  LabelDetection label(dd);
-  label.read();
-  ModelTensorFlowLite modeltflite(zz);
-  modeltflite.setLabel(label.getLabels());
+  //  initialize model
+  auto path = QApplication::applicationDirPath() + model_path;
+  ModelTensorFlowLite modeltflite(path);
+  modeltflite.setLabel(label);
   QObject::connect(&w, &MainWindow::updateImage, [&modeltflite](QPixmap img) {
     modeltflite.imageAvailable(img);
   });
