@@ -31,8 +31,9 @@ ModelTensorFlowLite::ModelTensorFlowLite() : QObject() {
   wanted_channels = 3;
   has_detection_mask = false;
   kind_network = type_detection::none;
-  numThreads = 1;
+  numThreads = QThread::idealThreadCount();
   LOG(INFO, "ctor model tensorflow lite")
+  LOG(DEBUG, "ideal thread count: %d", QThread::idealThreadCount())
 }
 
 ModelTensorFlowLite::ModelTensorFlowLite(const QString &path)
@@ -45,8 +46,9 @@ ModelTensorFlowLite::ModelTensorFlowLite(const QString &path)
       wanted_channels(3),
       has_detection_mask(false),
       kind_network(type_detection::none),
-      numThreads(1) {
+      numThreads(QThread::idealThreadCount()) {
   LOG(INFO, "ctor model tensorflow lite")
+  LOG(DEBUG, "ideal thread count: %d", QThread::idealThreadCount())
   LOG(DEBUG, "load model from resources %s", path.toStdString().c_str())
   init_model_TFLite(path.toStdString());
 }
