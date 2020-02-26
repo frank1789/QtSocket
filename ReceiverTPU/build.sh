@@ -15,7 +15,7 @@ compile_debug() {
     cmake -D CMAKE_BUILD_TYPE=Debug -D COVERAGE=ON ..
     make -j$(nproc)
     EXECUTABLE=$(find $PWD -name "Receiver")
-    ${EXECUTABLE}
+    ${EXECUTABLE} -platform wayland
 	# Create lcov report capturing coverage info
 	lcov --directory . --capture --output-file coverage.info
 	# filter out system and extra files.
@@ -35,7 +35,7 @@ compile_release() {
     cmake -D CMAKE_BUILD_TYPE=Release ..
     make -j3
     EXECUTABLE=$(find $PWD -name "Receiver")
-    ${EXECUTABLE}
+    ${EXECUTABLE} -platform wayland
 }
 
 clear_old_build() {
