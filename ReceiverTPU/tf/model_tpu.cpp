@@ -116,9 +116,10 @@ void ModelTensorFlowLite::init_model_TFLite(const std::string &path) {
     tpu_context = edgetpu::EdgeTpuManager::GetSingleton()->OpenDevice();
     // Registers edge TPU custom op handler with Tflite resolver.
     resolver.AddCustom(edgetpu::kCustomOp, edgetpu::RegisterCustomOp());
-    tflite::InterpreterBuilder(*model, resolver)(&interpreter);
+    tflite::InterpreterBuilder(*model.get(), resolver)(&interpreter);
     // Binds a context with a specific interpreter.
     interpreter->SetExternalContext(kTfLiteEdgeTpuContext, tpu_context.get());
+    interpreter->SetNumThreads(numThreads);
     if (interpreter->AllocateTensors() != kTfLiteOk) {
       LOG(ERROR, "Failed to allocate tensors.")
       std::cerr << "Failed to allocate tensors.\n";
