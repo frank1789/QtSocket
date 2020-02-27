@@ -116,16 +116,25 @@ void ModelTensorFlowLite::init_model_TFLite(const std::string &path) {
     tpu_context = edgetpu::EdgeTpuManager::GetSingleton()->OpenDevice();
     // Registers edge TPU custom op handler with Tflite resolver.
     resolver.AddCustom(edgetpu::kCustomOp, edgetpu::RegisterCustomOp());
-
     tflite::InterpreterBuilder(*model, resolver)(&interpreter);
     // Binds a context with a specific interpreter.
     interpreter->SetExternalContext(kTfLiteEdgeTpuContext, tpu_context.get());
+    if (interpreter->AllocateTensors() != kTfLiteOk) {
+      LOG(ERROR, "Failed to allocate tensors.")
+      std::cerr << "Failed to allocate tensors.\n";
+      std::abort();
+    }
+    // Find output tensors.
+    if (interpreter->outputs().size() != 4) {
+      LOG(ERROR, "Graph needs to have 4 and only 4 outputs!")
+      std::cerr << "Graph needs to have 4 and only 4 outputs!" << std::endl;
+    }
     //   // Note that all edge TPU context set ups should be done before this
     //   // function is called.
     //   interpreter->AllocateTensors();
     //      .... (Prepare input tensors)
     //   interpreter->Invoke();
-
+    LOG(DEBUG, "TensorFlow loaded, TPU ready")
   } catch (...) {
     LOG(FATAL, "can't load TensorFLow on TPU")
     std::abort();
