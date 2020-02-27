@@ -120,4 +120,5 @@ compile_commands.json
 !ReceiverTPU/vendor/tensorflow-lite/aarch64_armv8-a
 !ReceiverTPU/vendor/tensorflow-lite/rpi_armv7l/lib/libtensorflow-lite.a
 !ReceiverTPU/vendor/tensorflow-lite/osx_x86_64/lib/libtensorflow-lite.a
-
+!/ReceiverTPU/vendor/libedgetpu/lib/aarch64/libedgetpu_arm64_throttled.so
+!/ReceiverTPU/vendor/libedgetpu/lib/aarch64/libedgetpu_arm64.so

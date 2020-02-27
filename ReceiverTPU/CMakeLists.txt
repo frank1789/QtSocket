@@ -42,7 +42,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Linux" AND "${ARCHITECTURE}" STREQUAL "aarch64
     message(STATUS "Set library's directory: ${LIBRARYPATH}")
     link_directories(${LIBRARYPATH})
     include_directories(${CMAKE_SOURCE_DIR}/vendor/libedgetpu)
-    link_directories(${CMAKE_SYSTEM_NAME}/libedgetpu/direct/aarch64)
+    link_directories(${CMAKE_SOURCE_DIR}/vendor/libedgetpu/lib/aarch64)
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Linux" AND "${ARCHITECTURE}" STREQUAL "armv7l")
     set(LIBRARYPATH "${CMAKE_CURRENT_SOURCE_DIR}/vendor/tensorflow-lite/rpi_armv7l/lib" CACHE INTERNAL "")
     message(STATUS "Detect os: ${CMAKE_SYSTEM_NAME}\tarch: ${ARCHITECTURE}")
@@ -53,6 +53,8 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin" AND "${ARCHITECTURE}" STREQUAL "x8
     message(STATUS "Detect os: ${CMAKE_SYSTEM_NAME}\tarch: ${ARCHITECTURE}")
     message(STATUS "Set library's directory: ${LIBRARYPATH}")
     link_directories(${LIBRARYPATH})
+    include_directories(${CMAKE_SOURCE_DIR}/vendor/libedgetpu)
+    link_directories(${CMAKE_SOURCE_DIR}/vendor/libedgetpu/lib/x86_64)
 endif()
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Linux" AND "${ARCHITECTURE}" STREQUAL "aarch64")
