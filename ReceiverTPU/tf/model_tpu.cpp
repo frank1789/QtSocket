@@ -113,29 +113,69 @@ void ModelTensorFlowLite::init_model_TFLite(const std::string &path) {
     if (model == nullptr) {
       LOG(FATAL, "can't load TensorFLow lite model from: %", path.c_str())
     }
+    // TPU open device
     tpu_context = edgetpu::EdgeTpuManager::GetSingleton()->OpenDevice();
-    // Registers edge TPU custom op handler with Tflite resolver.
+    LOG(INFO, "Number of TPUs: %d",
+        edgetpu::EdgeTpuManager::GetSingleton()->EnumerateEdgeTpu().size())
     resolver.AddCustom(edgetpu::kCustomOp, edgetpu::RegisterCustomOp());
-    tflite::InterpreterBuilder(*model.get(), resolver)(&interpreter);
-    // Binds a context with a specific interpreter.
+    // Link model & resolver
+    tflite::InterpreterBuilder builder(*model.get(), resolver);
+    // Check interpreter
+    if (builder(&interpreter) != kTfLiteOk) {
+      LOG(ERROR, "failed to build interpreter")
+    }
+    // TPU context
     interpreter->SetExternalContext(kTfLiteEdgeTpuContext, tpu_context.get());
-    interpreter->SetNumThreads(numThreads);
     if (interpreter->AllocateTensors() != kTfLiteOk) {
-      LOG(ERROR, "Failed to allocate tensors.")
-      std::cerr << "Failed to allocate tensors.\n";
+      LOG(ERROR, "failed to allocate tensor")
       std::abort();
     }
-    // Find output tensors.
-    if (interpreter->outputs().size() != 4) {
-      LOG(ERROR, "Graph needs to have 4 and only 4 outputs!")
-      std::cerr << "Graph needs to have 4 and only 4 outputs!" << std::endl;
+    // Set kind of network
+    kind_network = interpreter->outputs().size() > 1
+                       ? type_detection::object_detection
+                       : type_detection::image_classifier;
+#if LOG_CNN
+    auto i_size = interpreter->inputs().size();
+    auto o_size = interpreter->outputs().size();
+    auto t_size = interpreter->tensors_size();
+
+    qDebug() << "tensors size: " << t_size;
+    qDebug() << "nodes size: " << interpreter->nodes_size();
+    qDebug() << "inputs: " << i_size;
+    qDebug() << "outputs: " << o_size;
+
+    for (int i = 0; i < i_size; i++)
+      qDebug() << "input" << i << "name:" << interpreter->GetInputName(i)
+               << ", type:"
+               << interpreter->tensor(interpreter->inputs()[i])->type;
+
+    for (int i = 0; i < o_size; i++)
+      qDebug() << "output" << i << "name:" << interpreter->GetOutputName(i)
+               << ", type:"
+               << interpreter->tensor(interpreter->outputs()[i])->type;
+#endif
+    // Get input dimension from the input tensor metadata
+    // Assuming one input only
+    int input = interpreter->inputs()[0];
+    TfLiteIntArray *dims = interpreter->tensor(input)->dims;
+
+    // Save outputs
+    outputs.clear();
+    for (unsigned int i = 0; i < interpreter->outputs().size(); i++)
+      outputs.push_back(interpreter->tensor(interpreter->outputs()[i]));
+
+    wanted_height = dims->data[1];
+    wanted_width = dims->data[2];
+    wanted_channels = dims->data[3];
+
+#if LOG_CNN
+    qDebug() << "Wanted height:" << wanted_height;
+    qDebug() << "Wanted width:" << wanted_width;
+    qDebug() << "Wanted channels:" << wanted_channels;
+#endif
+    if (numThreads > 1) {
+      interpreter->SetNumThreads(numThreads);
     }
-    //   // Note that all edge TPU context set ups should be done before this
-    //   // function is called.
-    //   interpreter->AllocateTensors();
-    //      .... (Prepare input tensors)
-    //   interpreter->Invoke();
-    LOG(DEBUG, "TensorFlow loaded, TPU ready")
   } catch (...) {
     LOG(FATAL, "can't load TensorFLow on TPU")
     std::abort();
