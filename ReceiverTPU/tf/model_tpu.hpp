@@ -10,6 +10,8 @@
 #include <memory>
 #include <string>
 
+#include "edgetpu.h"
+
 QT_BEGIN_NAMESPACE
 class QImage;
 class QString;
@@ -86,6 +88,9 @@ class ModelTensorFlowLite : public QObject {
   tflite::StderrReporter error_reporter;
   std::unique_ptr<tflite::Interpreter> interpreter;
   std::vector<TfLiteTensor *> outputs;
+
+  // TPU
+  std::shared_ptr<edgetpu::EdgeTpuContext> tpu_context;
 };
 
 #endif  // MODEL_TPU_HPP

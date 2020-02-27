@@ -16,6 +16,7 @@
 #include "../log/logger.h"
 #include "../src/streamerthread.hpp"
 #include "colormanager.hpp"
+#include "edgetpu.h"
 #include "model_support_function.hpp"
 
 #define LOG_CNN 1
@@ -112,80 +113,21 @@ void ModelTensorFlowLite::init_model_TFLite(const std::string &path) {
     if (model == nullptr) {
       LOG(FATAL, "can't load TensorFLow lite model from: %", path.c_str())
     }
-    // link model and resolver
-    tflite::InterpreterBuilder builder(*model.get(), resolver);
-    // Check interpreter
-    if (builder(&interpreter) != kTfLiteOk) {
-      LOG(ERROR, "interpreter is not ok")
-    }
+    tpu_context = edgetpu::EdgeTpuManager::GetSingleton()->OpenDevice();
+    // Registers edge TPU custom op handler with Tflite resolver.
+    resolver.AddCustom(edgetpu::kCustomOp, edgetpu::RegisterCustomOp());
 
-    // Apply accelaration (Neural Network Android)
-    //    interpreter->UseNNAPI(accelaration);
+    tflite::InterpreterBuilder(*model, resolver)(&interpreter);
+    // Binds a context with a specific interpreter.
+    interpreter->SetExternalContext(kTfLiteEdgeTpuContext, tpu_context.get());
+    //   // Note that all edge TPU context set ups should be done before this
+    //   // function is called.
+    //   interpreter->AllocateTensors();
+    //      .... (Prepare input tensors)
+    //   interpreter->Invoke();
 
-    if (interpreter->AllocateTensors() != kTfLiteOk) {
-      LOG(ERROR, "failed to allocate tensor")
-    }
-
-    // Set kind of network
-    kind_network = interpreter->outputs().size() > 1
-                       ? type_detection::object_detection
-                       : type_detection::image_classifier;
-
-#if LOG_CNN
-    LOG(INFO, "verbose mode enable")
-    auto i_size = interpreter->inputs().size();
-    auto o_size = interpreter->outputs().size();
-    auto t_size = interpreter->tensors_size();
-
-    qDebug() << "tensors size: " << t_size;
-    qDebug() << "nodes size: " << interpreter->nodes_size();
-    qDebug() << "inputs: " << i_size;
-    qDebug() << "outputs: " << o_size;
-
-    for (auto i = 0; i < i_size; i++)
-      qDebug() << "input" << i << "name:" << interpreter->GetInputName(i)
-               << ", type:"
-               << interpreter->tensor(interpreter->inputs()[i])->type;
-
-    for (auto i = 0; i < o_size; i++)
-      qDebug() << "output" << i << "name:" << interpreter->GetOutputName(i)
-               << ", type:"
-               << interpreter->tensor(interpreter->outputs()[i])->type;
-
-    for (auto i = 0; i < t_size; i++) {
-      if (interpreter->tensor(i)->name)
-        qDebug() << i << ":" << interpreter->tensor(i)->name << ","
-                 << interpreter->tensor(i)->bytes << ","
-                 << interpreter->tensor(i)->type << ","
-                 << interpreter->tensor(i)->params.scale << ","
-                 << interpreter->tensor(i)->params.zero_point;
-    }
-#endif
-
-    // Get input dimension from the input tensor metadata
-    // Assuming one input only
-    int input = interpreter->inputs()[0];
-    TfLiteIntArray *dims = interpreter->tensor(input)->dims;
-
-    // Save outputs
-    outputs.clear();
-    for (unsigned int i = 0; i < interpreter->outputs().size(); ++i)
-      outputs.push_back(interpreter->tensor(interpreter->outputs()[i]));
-
-    wanted_height = dims->data[1];
-    wanted_width = dims->data[2];
-    wanted_channels = dims->data[3];
-
-#if LOG_CNN
-    qDebug() << "Wanted height:" << wanted_height;
-    qDebug() << "Wanted width:" << wanted_width;
-    qDebug() << "Wanted channels:" << wanted_channels;
-#endif
-
-    if (numThreads > 1) interpreter->SetNumThreads(numThreads);
-    LOG(INFO, "Tensorflow initialization: OK")
   } catch (...) {
-    LOG(FATAL, "can't load TensorFLow lite model from: %", path.c_str())
+    LOG(FATAL, "can't load TensorFLow on TPU")
     std::abort();
   }
 }
