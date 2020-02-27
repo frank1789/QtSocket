@@ -124,7 +124,6 @@ void ModelTensorFlowLite::init_model_TFLite(const std::string &path) {
     }
 
 #if LOG_CNN
-
     const auto &available_tpus =
         edgetpu::EdgeTpuManager::GetSingleton()->EnumerateEdgeTpu();
     qDebug() << "Number of TPUs: " << available_tpus.size();
@@ -135,14 +134,11 @@ void ModelTensorFlowLite::init_model_TFLite(const std::string &path) {
                << edgetpu.path.c_str();
     qDebug() << "EdgeTPU runtime stack version: "
              << edgetpu_manager->Version().c_str();
-
 #endif
     edgetpu_context = edgetpu_manager->NewEdgeTpuContext().release();
-
     if (edgetpu_context == nullptr) {
       LOG(ERROR, "TPU cannot be found or opened")
-      std::cerr << "TPU cannot be found or opened"
-                << "\n";
+      std::cerr << "TPU cannot be found or opened\n";
       std::abort();
     }
 

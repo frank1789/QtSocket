@@ -54,7 +54,7 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin" AND "${ARCHITECTURE}" STREQUAL "x8
     message(STATUS "Set library's directory: ${LIBRARYPATH}")
     link_directories(${LIBRARYPATH})
     include_directories(${CMAKE_SOURCE_DIR}/vendor/libedgetpu)
-    link_directories(${CMAKE_SOURCE_DIR}/vendor/libedgetpu/lib/x86_64)
+    link_directories(${CMAKE_SOURCE_DIR}/vendor/libedgetpu/direct/aarch64)
 endif()
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Linux" AND "${ARCHITECTURE}" STREQUAL "aarch64")
