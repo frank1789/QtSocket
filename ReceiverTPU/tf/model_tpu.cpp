@@ -114,23 +114,63 @@ void ModelTensorFlowLite::init_model_TFLite(const std::string &path) {
     if (model == nullptr) {
       LOG(FATAL, "can't load TensorFLow lite model from: %", path.c_str())
     }
-    // TPU open device
-    tpu_context = edgetpu::EdgeTpuManager::GetSingleton()->OpenDevice();
-    LOG(INFO, "Number of TPUs: %d",
-        edgetpu::EdgeTpuManager::GetSingleton()->EnumerateEdgeTpu().size())
-    resolver.AddCustom(edgetpu::kCustomOp, edgetpu::RegisterCustomOp());
-    // Link model & resolver
-    interpreter = coral::BuildEdgeTpuInterpreter(*model, tpu_context.get());
-    // TPU context
-    interpreter->SetExternalContext(kTfLiteEdgeTpuContext, tpu_context.get());
-    if (interpreter->AllocateTensors() != kTfLiteOk) {
-      LOG(ERROR, "failed to allocate tensor")
+    // TPU support
+    edgetpu::EdgeTpuContext *edgetpu_context;
+    edgetpu::EdgeTpuManager *edgetpu_manager =
+        edgetpu::EdgeTpuManager::GetSingleton();
+    if (edgetpu_manager == nullptr) {
+      LOG(ERROR, "TPU unsupported on the current platform")
       std::abort();
     }
+
+#if LOG_CNN
+
+    const auto &available_tpus =
+        edgetpu::EdgeTpuManager::GetSingleton()->EnumerateEdgeTpu();
+    qDebug() << "Number of TPUs: " << available_tpus.size();
+    for (auto edgetpu : available_tpus)
+      qDebug() << "TPU:"
+               << (edgetpu.type == edgetpu::DeviceType::kApexUsb ? "USB"
+                                                                 : "PCI")
+               << edgetpu.path.c_str();
+    qDebug() << "EdgeTPU runtime stack version: "
+             << edgetpu_manager->Version().c_str();
+
+#endif
+    edgetpu_context = edgetpu_manager->NewEdgeTpuContext().release();
+
+    if (edgetpu_context == nullptr) {
+      LOG(ERROR, "TPU cannot be found or opened")
+      std::cerr << "TPU cannot be found or opened"
+                << "\n";
+      std::abort();
+    }
+
+    edgetpu_manager->SetVerbosity(0);
+    resolver.AddCustom(edgetpu::kCustomOp, edgetpu::RegisterCustomOp());
+    // Link model & resolver
+    tflite::InterpreterBuilder builder(*model.get(), resolver);
+    // Check interpreter
+    if (builder(&interpreter) != kTfLiteOk) {
+      qDebug() << "Interpreter: ERROR";
+      std::cerr << "interpreter failed to start"
+                << "\n";
+      std::abort();
+    }
+    // TPU context
+    interpreter->SetExternalContext(kTfLiteEdgeTpuContext, edgetpu_context);
+    if (interpreter->AllocateTensors() != kTfLiteOk) {
+      LOG(ERROR, "Allocate tensors: ERROR")
+      std::cerr << "failed to allocate tensor"
+                << "\n";
+      std::abort();
+    }
+
     // Set kind of network
     kind_network = interpreter->outputs().size() > 1
                        ? type_detection::object_detection
                        : type_detection::image_classifier;
+
 #if LOG_CNN
     auto i_size = interpreter->inputs().size();
     auto o_size = interpreter->outputs().size();
@@ -151,6 +191,7 @@ void ModelTensorFlowLite::init_model_TFLite(const std::string &path) {
                << ", type:"
                << interpreter->tensor(interpreter->outputs()[i])->type;
 #endif
+
     // Get input dimension from the input tensor metadata
     // Assuming one input only
     int input = interpreter->inputs()[0];
@@ -158,8 +199,9 @@ void ModelTensorFlowLite::init_model_TFLite(const std::string &path) {
 
     // Save outputs
     outputs.clear();
-    for (unsigned int i = 0; i < interpreter->outputs().size(); i++)
+    for (unsigned int i = 0; i < interpreter->outputs().size(); i++) {
       outputs.push_back(interpreter->tensor(interpreter->outputs()[i]));
+    }
 
     wanted_height = dims->data[1];
     wanted_width = dims->data[2];
@@ -170,11 +212,16 @@ void ModelTensorFlowLite::init_model_TFLite(const std::string &path) {
     qDebug() << "Wanted width:" << wanted_width;
     qDebug() << "Wanted channels:" << wanted_channels;
 #endif
+
     if (numThreads > 1) {
       interpreter->SetNumThreads(numThreads);
     }
+    LOG(INFO, "Tensorflow initialization: OK")
+
   } catch (...) {
-    LOG(FATAL, "can't load TensorFLow on TPU")
+    LOG(FATAL, "something in load model goes wrong")
+    std::cerr << "something in load model goes wrong"
+              << "\n";
     std::abort();
   }
 }
