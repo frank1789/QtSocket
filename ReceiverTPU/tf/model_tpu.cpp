@@ -158,11 +158,11 @@ void ModelTensorFlowLite::init_model_TFLite(const std::string &path) {
     //    }
     // TPU context
     interpreter->SetExternalContext(kTfLiteEdgeTpuContext, &*edgetpu_context);
-    if (interpreter->AllocateTensors() != kTfLiteOk) {
-      LOG(ERROR, "Allocate tensors: ERROR")
-      std::cerr << "failed to allocate tensor\n";
-      std::abort();
-    }
+    //    if (interpreter->AllocateTensors() != kTfLiteOk) {
+    //      LOG(ERROR, "Allocate tensors: ERROR")
+    //      std::cerr << "failed to allocate tensor\n";
+    //      std::abort();
+    //    }
 
     // Set kind of network
     kind_network = interpreter->outputs().size() > 1
