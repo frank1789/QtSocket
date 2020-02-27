@@ -115,7 +115,11 @@ void ModelTensorFlowLite::init_model_TFLite(const std::string &path) {
       LOG(FATAL, "can't load TensorFLow lite model from: %", path.c_str())
     }
     // TPU support
-    edgetpu::EdgeTpuContext *edgetpu_context;
+    std::shared_ptr<edgetpu::EdgeTpuContext> edgetpu_context =
+        edgetpu::EdgeTpuManager::GetSingleton()->OpenDevice();
+    // Build interpreter.
+    std::unique_ptr<tflite::Interpreter> interpreter =
+        coral::BuildEdgeTpuInterpreter(*model, edgetpu_context.get());
     edgetpu::EdgeTpuManager *edgetpu_manager =
         edgetpu::EdgeTpuManager::GetSingleton();
     if (edgetpu_manager == nullptr) {
@@ -135,7 +139,7 @@ void ModelTensorFlowLite::init_model_TFLite(const std::string &path) {
     qDebug() << "EdgeTPU runtime stack version: "
              << edgetpu_manager->Version().c_str();
 #endif
-    edgetpu_context = edgetpu_manager->NewEdgeTpuContext().release();
+    //    edgetpu_context = edgetpu_manager->NewEdgeTpuContext().release();
     if (edgetpu_context == nullptr) {
       LOG(ERROR, "TPU cannot be found or opened")
       std::cerr << "TPU cannot be found or opened\n";
@@ -145,16 +149,16 @@ void ModelTensorFlowLite::init_model_TFLite(const std::string &path) {
     edgetpu_manager->SetVerbosity(0);
     resolver.AddCustom(edgetpu::kCustomOp, edgetpu::RegisterCustomOp());
     // Link model & resolver
-    tflite::InterpreterBuilder builder(*model, resolver);
+    //    tflite::InterpreterBuilder builder(*model, resolver)(&interpreter);
     // Check interpreter
-    if (builder(&interpreter) != kTfLiteOk) {
-      qDebug() << "Interpreter: ERROR";
-      std::cerr << "interpreter failed to start"
-                << "\n";
-      std::abort();
-    }
+    //    if (builder(&interpreter) != kTfLiteOk) {
+    //      qDebug() << "Interpreter: ERROR";
+    //      std::cerr << "interpreter failed to start"
+    //                << "\n";
+    //      std::abort();
+    //    }
     // TPU context
-    interpreter->SetExternalContext(kTfLiteEdgeTpuContext, edgetpu_context);
+    interpreter->SetExternalContext(kTfLiteEdgeTpuContext, &*edgetpu_context);
     if (interpreter->AllocateTensors() != kTfLiteOk) {
       LOG(ERROR, "Allocate tensors: ERROR")
       std::cerr << "failed to allocate tensor\n";
