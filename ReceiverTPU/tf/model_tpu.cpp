@@ -165,9 +165,9 @@ void ModelTensorFlowLite::init_model_TFLite(const std::string &path) {
     //    }
 
     // Set kind of network
-    kind_network = interpreter->outputs().size() > 1
-                       ? type_detection::object_detection
-                       : type_detection::image_classifier;
+    //    kind_network = interpreter->outputs().size() > 1
+    //                       ? type_detection::object_detection
+    //                       : type_detection::image_classifier;
 
     //#if LOG_CNN
     //    auto i_size = interpreter->inputs().size();

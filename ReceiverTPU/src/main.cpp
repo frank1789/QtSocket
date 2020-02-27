@@ -8,7 +8,7 @@
 #include "mainwindow.hpp"
 
 const QString model_path{
-    "/resources/mobilenet_ssd_v2_coco_quant_postprocess_edgetpu.tflite"};
+    "/resources/mobilenet_ssd_v1_coco_quant_postprocess_edgetpu.tflite"};
 
 int main(int argc, char* argv[]) {
 #if PROFILING
