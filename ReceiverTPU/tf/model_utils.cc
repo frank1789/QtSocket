@@ -1,4 +1,4 @@
-#include "src/cpp/examples/model_utils.h"
+#include "model_utils.h"
 
 #include <memory>
 
