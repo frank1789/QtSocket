@@ -62,7 +62,7 @@ def main():
   engine = DetectionEngine(args.model)
   labels = ReadLabelFile(args.label) if args.label else None
   # Open image.
-  tp = TraceProfiler(output=open('/tmp/trace.out', 'wb'))
+  tp = TraceProfiler(output=open('/tmp/trace.out', 'w'))
   with tp.traced():
     img = Image.open(args.input)
     draw = ImageDraw.Draw(img)
