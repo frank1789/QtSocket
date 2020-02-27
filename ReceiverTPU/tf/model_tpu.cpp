@@ -118,8 +118,7 @@ void ModelTensorFlowLite::init_model_TFLite(const std::string &path) {
     std::shared_ptr<edgetpu::EdgeTpuContext> edgetpu_context =
         edgetpu::EdgeTpuManager::GetSingleton()->OpenDevice();
     // Build interpreter.
-    std::unique_ptr<tflite::Interpreter> interpreter =
-        coral::BuildEdgeTpuInterpreter(*model, edgetpu_context.get());
+    interpreter = coral::BuildEdgeTpuInterpreter(*model, edgetpu_context.get());
     edgetpu::EdgeTpuManager *edgetpu_manager =
         edgetpu::EdgeTpuManager::GetSingleton();
     if (edgetpu_manager == nullptr) {
