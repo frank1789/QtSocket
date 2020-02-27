@@ -7,7 +7,8 @@
 #include "../tf/util_label_image.hpp"
 #include "mainwindow.hpp"
 
-const QString model_path{"/resources/detect.tflite"};
+const QString model_path{
+    "/resources/mobilenet_ssd_v2_coco_quant_postprocess_edgetpu.tflite"};
 
 int main(int argc, char* argv[]) {
 #if PROFILING
