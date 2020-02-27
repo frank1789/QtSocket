@@ -157,8 +157,8 @@ void ModelTensorFlowLite::init_model_TFLite(const std::string &path) {
     //      std::abort();
     //    }
     // TPU context
-    interpreter->SetExternalContext(kTfLiteEdgeTpuContext, &*edgetpu_context);
-    //    if (interpreter->AllocateTensors() != kTfLiteOk) {
+    //    interpreter->SetExternalContext(kTfLiteEdgeTpuContext,
+    //    edgetpu_context); if (interpreter->AllocateTensors() != kTfLiteOk) {
     //      LOG(ERROR, "Allocate tensors: ERROR")
     //      std::cerr << "failed to allocate tensor\n";
     //      std::abort();
@@ -169,41 +169,43 @@ void ModelTensorFlowLite::init_model_TFLite(const std::string &path) {
                        ? type_detection::object_detection
                        : type_detection::image_classifier;
 
-#if LOG_CNN
-    auto i_size = interpreter->inputs().size();
-    auto o_size = interpreter->outputs().size();
-    auto t_size = interpreter->tensors_size();
+    //#if LOG_CNN
+    //    auto i_size = interpreter->inputs().size();
+    //    auto o_size = interpreter->outputs().size();
+    //    auto t_size = interpreter->tensors_size();
 
-    qDebug() << "tensors size: " << t_size;
-    qDebug() << "nodes size: " << interpreter->nodes_size();
-    qDebug() << "inputs: " << i_size;
-    qDebug() << "outputs: " << o_size;
+    //    qDebug() << "tensors size: " << t_size;
+    //    qDebug() << "nodes size: " << interpreter->nodes_size();
+    //    qDebug() << "inputs: " << i_size;
+    //    qDebug() << "outputs: " << o_size;
 
-    for (int i = 0; i < i_size; i++)
-      qDebug() << "input" << i << "name:" << interpreter->GetInputName(i)
-               << ", type:"
-               << interpreter->tensor(interpreter->inputs()[i])->type;
+    //    for (int i = 0; i < i_size; i++)
+    //      qDebug() << "input" << i << "name:" << interpreter->GetInputName(i)
+    //               << ", type:"
+    //               << interpreter->tensor(interpreter->inputs()[i])->type;
 
-    for (int i = 0; i < o_size; i++)
-      qDebug() << "output" << i << "name:" << interpreter->GetOutputName(i)
-               << ", type:"
-               << interpreter->tensor(interpreter->outputs()[i])->type;
-#endif
+    //    for (int i = 0; i < o_size; i++)
+    //      qDebug() << "output" << i << "name:" <<
+    //      interpreter->GetOutputName(i)
+    //               << ", type:"
+    //               << interpreter->tensor(interpreter->outputs()[i])->type;
+    //#endif
 
     // Get input dimension from the input tensor metadata
     // Assuming one input only
-    int input = interpreter->inputs()[0];
-    TfLiteIntArray *dims = interpreter->tensor(input)->dims;
+    const auto &required_shape = coral::GetInputShape(*interpreter, 0);
+    //    int input = interpreter->inputs()[0];
+    //    TfLiteIntArray *dims = interpreter->tensor(input)->dims;
 
-    // Save outputs
-    outputs.clear();
-    for (unsigned int i = 0; i < interpreter->outputs().size(); i++) {
-      outputs.push_back(interpreter->tensor(interpreter->outputs()[i]));
-    }
+    //    // Save outputs
+    //    outputs.clear();
+    //    for (unsigned int i = 0; i < interpreter->outputs().size(); i++) {
+    //      outputs.push_back(interpreter->tensor(interpreter->outputs()[i]));
+    //    }
 
-    wanted_height = dims->data[1];
-    wanted_width = dims->data[2];
-    wanted_channels = dims->data[3];
+    wanted_height = required_shape[0];
+    wanted_width = required_shape[1];
+    wanted_channels = required_shape[2];
 
 #if LOG_CNN
     qDebug() << "Wanted height:" << wanted_height;
