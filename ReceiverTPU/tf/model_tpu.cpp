@@ -209,7 +209,7 @@ void ModelTensorFlowLite::init_model_TFLite(const std::string &path) {
 #endif
 
     if (numThreads > 1) {
-      interpreter->SetNumThreads(numThreads);
+      interpreter->SetNumThreads(1);
     }
     LOG(INFO, "Tensorflow initialization: OK")
 
