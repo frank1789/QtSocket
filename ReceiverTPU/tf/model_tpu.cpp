@@ -18,6 +18,7 @@
 #include "colormanager.hpp"
 #include "edgetpu.h"
 #include "model_support_function.hpp"
+#include "model_utils.h"
 
 #define LOG_CNN 1
 
@@ -119,11 +120,7 @@ void ModelTensorFlowLite::init_model_TFLite(const std::string &path) {
         edgetpu::EdgeTpuManager::GetSingleton()->EnumerateEdgeTpu().size())
     resolver.AddCustom(edgetpu::kCustomOp, edgetpu::RegisterCustomOp());
     // Link model & resolver
-    tflite::InterpreterBuilder builder(*model.get(), resolver);
-    // Check interpreter
-    if (builder(&interpreter) != kTfLiteOk) {
-      LOG(ERROR, "failed to build interpreter")
-    }
+    interpreter = coral::BuildEdgeTpuInterpreter(*model, tpu_context.get());
     // TPU context
     interpreter->SetExternalContext(kTfLiteEdgeTpuContext, tpu_context.get());
     if (interpreter->AllocateTensors() != kTfLiteOk) {

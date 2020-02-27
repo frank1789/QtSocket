@@ -12,6 +12,7 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/findmodel.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/model_tpu.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/util_label_image.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/model_utils.cc
 )
 
 add_library(${LIB_NAME} ${SOURCES})
