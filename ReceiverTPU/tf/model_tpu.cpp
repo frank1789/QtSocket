@@ -145,7 +145,7 @@ void ModelTensorFlowLite::init_model_TFLite(const std::string &path) {
     edgetpu_manager->SetVerbosity(0);
     resolver.AddCustom(edgetpu::kCustomOp, edgetpu::RegisterCustomOp());
     // Link model & resolver
-    tflite::InterpreterBuilder builder(*model.get(), resolver);
+    tflite::InterpreterBuilder builder(*model, resolver);
     // Check interpreter
     if (builder(&interpreter) != kTfLiteOk) {
       qDebug() << "Interpreter: ERROR";
@@ -157,8 +157,7 @@ void ModelTensorFlowLite::init_model_TFLite(const std::string &path) {
     interpreter->SetExternalContext(kTfLiteEdgeTpuContext, edgetpu_context);
     if (interpreter->AllocateTensors() != kTfLiteOk) {
       LOG(ERROR, "Allocate tensors: ERROR")
-      std::cerr << "failed to allocate tensor"
-                << "\n";
+      std::cerr << "failed to allocate tensor\n";
       std::abort();
     }
 
