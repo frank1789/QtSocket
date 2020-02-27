@@ -20,6 +20,7 @@ target_link_libraries(${LIB_NAME}
     Qt5::Network 
     logger 
     -ltensorflow-lite
+    -ledgetpu.so.1.0
 )
 if (CMAKE_BUILD_TYPE MATCHES "Debug")
 	target_compile_options(${NAME_PROJECT} PUBLIC -fpic -O0 -g)
