@@ -14,8 +14,7 @@
             "compilerPath": "/usr/bin/clang",
             "cStandard": "c11",
             "cppStandard": "c++17",
-            "intelliSenseMode": "${default}",
-            "compileCommands": "${workspaceFolder}/Receiver/build/compile_commands.json"
+            "intelliSenseMode": "${default}"
         }
     ],
     "version": 4
