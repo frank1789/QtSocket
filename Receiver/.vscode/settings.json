@@ -6,6 +6,7 @@
     "C_Cpp.default.intelliSenseMode": "clang-x64",
     "cmake.configureOnOpen": false,
     "files.associations": {
-        "unordered_map": "cpp"
+        "unordered_map": "cpp",
+        "iosfwd": "cpp"
     }
 }

@@ -128,6 +128,7 @@ find_package(Threads REQUIRED)
 add_subdirectory(src)
 add_subdirectory(log)
 add_subdirectory(tf)
+add_subdirectory(test)
 
 # ----------------------------------------------------------------------------
 # display status message for important variables
@@ -152,3 +153,4 @@ message( STATUS )
 # copy resources
 # ----------------------------------------------------------------------------
 file(INSTALL ${CMAKE_CURRENT_SOURCE_DIR}/resources DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/src)
+file(INSTALL ${CMAKE_CURRENT_SOURCE_DIR}/resources DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/test)
