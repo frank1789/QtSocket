@@ -2,6 +2,13 @@ cmake_minimum_required (VERSION 3.7)
 project(QtTcpSocket LANGUAGES CXX)
 set(NAME_PROJECT "Receiver")
 
+include(cmake/googletest.cmake)
+fetch_googletest(
+    ${PROJECT_SOURCE_DIR}/cmake
+    ${PROJECT_BINARY_DIR}/googletest
+    )
+enable_testing()
+
 #-----------------------------------------------------------------------------
 # check build type
 #-----------------------------------------------------------------------------
