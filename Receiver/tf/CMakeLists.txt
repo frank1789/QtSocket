@@ -11,7 +11,7 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/colormanager.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/findmodel.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/model_tpu.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/labels_utils.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/label_utils.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/labels.cpp
 )
 

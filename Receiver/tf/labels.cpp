@@ -7,6 +7,7 @@
 #include <regex>
 
 #include "logger.h"
+#include "label_utils.hpp"
 
 LabelDetection::LabelDetection(const QString &path) : m_filename(path) {
   if (path.endsWith(".txt")) {
@@ -18,14 +19,14 @@ LabelDetection::LabelDetection(const QString &path) : m_filename(path) {
   }
 }
 
-LabelDetection::LabelDetection(const QString &path)
+LabelDetection::LabelDetection(const std::string &path)
     : m_filename(QString::fromStdString(path)) {
-  if (path.endsWith(".txt")) {
+  if (m_filename.endsWith(".txt")) {
     m_process_line = LabelSplitter::coco_label_split;
-  } else if (path.endsWith(".pbtxt")) {
+  } else if (m_filename.endsWith(".pbtxt")) {
     m_process_line = LabelSplitter::tensorflow_label_map;
   } else {
-    LOG(ERROR, "unsupported label map %s", path.toStdString().c_str())
+    LOG(ERROR, "unsupported label map %s", path.c_str())
   }
 }
 

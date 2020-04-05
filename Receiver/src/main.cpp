@@ -4,7 +4,7 @@
 #include "../log/instrumentor.h"
 #include "../tf/findmodel.hpp"
 #include "../tf/model_tpu.hpp"
-#include "../tf/util_label_image.hpp"
+#include "labels.hpp"
 #include "mainwindow.hpp"
 
 const QString local_model_path{"/resources/detect.tflite"};

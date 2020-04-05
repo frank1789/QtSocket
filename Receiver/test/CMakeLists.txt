@@ -2,6 +2,7 @@ add_executable(
   unit_tests
   test_loadmodel.cpp
   test_labels.cpp
+  test_inference.cpp
 )
 
 target_link_libraries(
@@ -9,6 +10,7 @@ target_link_libraries(
   gtest_main
   Qt5::Widgets
   neuralnetwork
+  coverage
 )
 
 add_test(
