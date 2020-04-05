@@ -127,11 +127,10 @@ if(COVERAGE)
 	set(COVERAGE_CHECK "ON")
 	add_library(coverage INTERFACE)
 	if(${CMAKE_BUILD_TYPE} STREQUAL "Debug" AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-	  	# Add required flags (GCC & LLVM/Clang)
-	  	target_compile_options(coverage INTERFACE
-			-O0        # no optimization
-			-g         # generate debug info
-			-ftest-coverage -fprofile-arcs # sets all required flags
+	  	target_compile_options(coverage INTERFACE	# Add required flags (GCC & LLVM/Clang)
+			-O0        								# no optimization
+			-g         								# generate debug info
+			-ftest-coverage -fprofile-arcs 			# sets all required flags
 	  	)
 	  	if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
 			target_link_options(coverage INTERFACE --coverage)
@@ -140,7 +139,6 @@ if(COVERAGE)
 	  	endif()
 	endif()
 endif()
-
 
 # Find includes in corresponding build directories
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
