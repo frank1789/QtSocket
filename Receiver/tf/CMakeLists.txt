@@ -1,9 +1,8 @@
-# Simple and fast logger for embedded programs C / C ++ interface
-cmake_minimum_required(VERSION 3.7)
+cmake_minimum_required(VERSION 3.16)
 set(LIB_NAME "neuralnetwork")
 
 #-------------------------------------------------------------------------------
-# add library neural network
+# source neural network
 #-------------------------------------------------------------------------------
 set(LIBRARY_TARGET_NAME ${LIB_NAME})
 set(SOURCES
@@ -15,6 +14,18 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/labels.cpp
 )
 
+set(HEADERS 
+    ${CMAKE_CURRENT_SOURCE_DIR}/list_colour.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/colormanager.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/findmodel.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/model_tpu.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/label_utils.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/labels.hpp
+)
+
+#-------------------------------------------------------------------------------
+# neural network library
+#-------------------------------------------------------------------------------
 add_library(${LIB_NAME} "")
 target_link_libraries(${LIB_NAME}
     Qt5::Widgets 
@@ -23,21 +34,13 @@ target_link_libraries(${LIB_NAME}
     -ltensorflow-lite
 )
 
-target_sources(
-    ${LIB_NAME}
-    PUBLIC
-        ${SOURCES}
-    
-        ${CMAKE_CURRENT_SOURCE_DIR}/list_colour.hpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/colormanager.hpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/findmodel.hpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/model_tpu.hpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/label_utils.hpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/labels.hpp
+target_sources(${LIB_NAME}
+    PUBLIC ${SOURCES} ${HEADERS}
 )
 
-target_include_directories(
-    ${LIB_NAME} PUBLIC  ${CMAKE_CURRENT_LIST_DIR})
+target_include_directories(${LIB_NAME} 
+    PUBLIC ${CMAKE_CURRENT_LIST_DIR}
+)
 
 if (CMAKE_BUILD_TYPE MATCHES "Debug")
 	if(COVERAGE)
