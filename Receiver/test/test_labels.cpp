@@ -7,7 +7,7 @@
 
 class Label : public ::testing::Test {
  protected:
-  const std::string label_path = {"/Users/francesco/Documents/Project/tcpsocket/Receiver/build_debug/test/resources/coco_labels.txt"};
+  const std::string label_path = {"../build_debug/test/resources/coco_labels.txt"};
   std::unique_ptr<LabelDetection> label_{nullptr};
 
   void SetUp() {

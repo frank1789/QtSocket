@@ -10,11 +10,11 @@ inline bool exists_file(const std::string& name) {
 }
 
 TEST(LoadFiles, LoadModel) {
-  std::string model{"/Users/francesco/Documents/Project/tcpsocket/Receiver/build_debug/test/resources/detect.tflite"};
+  std::string model{"../build_debug/test/resources/detect.tflite"};
   EXPECT_TRUE(exists_file(model));
 }
 
 TEST(LoadFiles, LoadLabels) {
-  std::string label{"/Users/francesco/Documents/Project/tcpsocket/Receiver/build_debug/test/resources/coco_labels.txt"};
+  std::string label{"../build_debug/test/resources/coco_labels.txt"};
   EXPECT_TRUE(exists_file(label));
 }
