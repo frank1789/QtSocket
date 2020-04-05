@@ -7,7 +7,8 @@ compiler:
   - clang
 
 install:
-  - brew install qt cmake 
+  - brew install qt cmake python
+  - pip3 install --user cpp-coveralls
 
 script:
   - cd Receiver

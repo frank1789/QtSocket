@@ -12,13 +12,23 @@ the communication between the Raspberry Pi 3b and the Google Coral Dev Board.
 
 ## Prerequisites
 
+### Linux - MacOS - Raspbian
+
 * Qt 5.9 or above
 * CMake 3.7 or above (check the raspberry version may differ from the desktop
 	version)
 * gcc or clang compatible C++17
+* _Note: Linux require compile tensorflow lite and add support in CmakeLists_
+
+### Google Coral Dev-Board
+
+* Qt 5.9 or above
+* CMake 3.7 or above (check the raspberry version may differ from the desktop
+	version)
+* gcc or clang compatible C++14
 
 ## Start
-## Execute Program - Receiver
+### Execute Program - Receiver
 
 To compile and run the program run the following commands
  
