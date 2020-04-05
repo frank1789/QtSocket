@@ -36,7 +36,8 @@ compile_debug() {
     # setup cmake
     cmake -D CMAKE_BUILD_TYPE=Debug -D COVERAGE=ON ..
     make -j$(nproc)
-    ./test/unit_tests
+    UNIT_TEST=$(find $PWD -name "unit_tests")
+    ${UNIT_TEST}
     # Create lcov report capturing coverage info
     # filter out system and extra files.
     lcov -d $PWD --capture --output-file coverage.info

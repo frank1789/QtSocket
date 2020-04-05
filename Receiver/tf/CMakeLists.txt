@@ -25,9 +25,9 @@ target_link_libraries(${LIB_NAME}
 
 target_sources(
     ${LIB_NAME}
-    PRIVATE
-        ${SOURCES}
     PUBLIC
+        ${SOURCES}
+    
         ${CMAKE_CURRENT_SOURCE_DIR}/list_colour.hpp
         ${CMAKE_CURRENT_SOURCE_DIR}/colormanager.hpp
         ${CMAKE_CURRENT_SOURCE_DIR}/findmodel.hpp
