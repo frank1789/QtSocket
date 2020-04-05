@@ -1,5 +1,5 @@
-#ifndef UTIL_LABEL_IMAGE_HPP
-#define UTIL_LABEL_IMAGE_HPP
+#ifndef LABEL_UTILS_HPP
+#define LABEL_UTILS_HPP
 
 #include <QFile>
 #include <QObject>
@@ -25,4 +25,4 @@ class LabelSplitter {
 std::unordered_map<int, std::string> read_label_file(
     const std::string &file_path, callback_split split);
 
-#endif  // UTIL_LABEL_IMAGE_HPP
+#endif  // LABEL_UTILS_HPP

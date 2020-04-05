@@ -11,20 +11,37 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/colormanager.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/findmodel.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/model_tpu.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/util_label_image.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/labels_utils.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/labels.cpp
 )
 
-add_library(${LIB_NAME} ${SOURCES} ${HEADERS})
+add_library(${LIB_NAME} "")
 target_link_libraries(${LIB_NAME}
     Qt5::Widgets 
     Qt5::Network 
     logger 
     -ltensorflow-lite
 )
+
+target_sources(
+    ${LIB_NAME}
+    PRIVATE
+        ${SOURCES}
+    PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/list_colour.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/colormanager.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/findmodel.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/model_tpu.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/label_utils.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/labels.hpp
+)
+
+target_include_directories(
+    ${LIB_NAME} PUBLIC  ${CMAKE_CURRENT_LIST_DIR})
+
 if (CMAKE_BUILD_TYPE MATCHES "Debug")
-	target_compile_options(${NAME_PROJECT} PUBLIC -fpic -O0 -g)
 	if(COVERAGE)
-		target_link_libraries(coverage_config)
+		target_link_libraries(coverage)
 	endif()
 	else()
 	target_compile_options(${NAME_PROJECT} PUBLIC -fpic -O2)
