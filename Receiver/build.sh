@@ -2,15 +2,15 @@
 
 # This script provides two functions:
 #   - "compile_debug": check if there are folders containing previous builds.
-#                    Compile the project in debug mode, then once completed, 
+#                    Compile the project in debug mode, then once completed,
 #                    start the unit test.
 #                    Collects information for code coverage.
 #
 #   - "compile_release": check if there are folders containing previous builds.
 #                       Fill in the project and start the executable.
-
+#
 # Args:
-#    - $1 the first argument is optional and is used to activate the debug mode. 
+#    - $1 the first argument is optional and is used to activate the debug mode.
 #      Is required to specify "debug" or "debug" does not accept other arguments.
 #
 # Usage
@@ -39,11 +39,19 @@ compile_debug() {
     ./test/unit_tests
     # Create lcov report capturing coverage info
     # filter out system and extra files.
-    lcov --directory . --capture --output-file coverage.info
-    # To also not include test code in coverage add them with full path to the patterns: '*/tests/*'
-    lcov --remove coverage.info '/usr/*' "${HOME}"'/.cache/*' --output-file coverage.info
+    lcov -d $PWD --capture --output-file coverage.info
+    lcov --remove coverage.info '*/usr/*' \
+        '/.cache/*' \
+        '*/unit_tests_*/*' \
+        '*/googletest/*' \
+        '*Qt*.framework*' \
+        '*Xcode.app*' \
+        '*.moc' \
+        '*moc_*.cpp' \
+        --output-file coverage-filtered.info
     # output coverage data for debugging (optional)
-    lcov --list coverage.info
+    lcov --list coverage-filtered.info
+    genhtml coverage-filtered.info --output-directory out-coverage --show-details
 }
 
 compile_release() {

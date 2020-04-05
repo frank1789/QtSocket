@@ -22,6 +22,7 @@ addons:
 before_install:
   - sudo add-apt-repository -y ppa:beineri/opt-qt-5.14.0-bionic
   - sudo apt-get -qq update
+  - sudo apt-get install -qq mesa-common-dev libglu1-mesa-dev
 
 install:
   - if [ "$CXX" = "g++" ]; then export CXX="g++-9" CC="gcc-9"; fi
