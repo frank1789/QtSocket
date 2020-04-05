@@ -1,17 +1,17 @@
-#ifndef UTIL_LABEL_IMAGE_HPP
-#define UTIL_LABEL_IMAGE_HPP
+#ifndef LABEL_UTILS_HPP
+#define LABEL_UTILS_HPP
 
+#include <QFile>
+#include <QObject>
+#include <QString>
+#include <QTextStream>
 #include <fstream>
 #include <functional>
 #include <string>
 #include <tuple>
 #include <unordered_map>
 
-#include <QObject>
-
-QT_BEGIN_NAMESPACE
-class QString;
-QT_END_NAMESPACE
+#include "logger.h"
 
 using callback_split = std::tuple<int, std::string> (*)(const QString &);
 
@@ -25,18 +25,4 @@ class LabelSplitter {
 std::unordered_map<int, std::string> read_label_file(
     const std::string &file_path, callback_split split);
 
-class LabelDetection {
- public:
-  explicit LabelDetection(const QString &path);
-
-  std::unordered_map<int, std::string> getLabels();
-
-  void read();
-
- private:
-  QString m_filename;
-  std::unordered_map<int, std::string> m_labels;
-  callback_split m_process_line;
-};
-
-#endif  // UTIL_LABEL_IMAGE_HPP
+#endif  // LABEL_UTILS_HPP

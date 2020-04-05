@@ -31,6 +31,10 @@ class ModelTensorFlowLite : public QObject {
   explicit ModelTensorFlowLite();
   explicit ModelTensorFlowLite(const QString &path);
 
+  void LoadModelFromFile(const std::string &path){init_model_TFLite(path);}
+
+  void LoadModelFromFile(const QString &path){init_model_TFLite(path.toStdString());}
+
   void run(QImage image);
 
   void setInput(QImage image);
