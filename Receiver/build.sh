@@ -13,7 +13,7 @@
 #    - $1 the first argument is optional and is used to activate the debug mode.
 #      Is required to specify "debug" or "debug" does not accept other arguments.
 #
-# Usage
+# Usage:
 #
 # compile in debug mode:
 # $./build.sh debug

@@ -1,12 +1,15 @@
 cmake_minimum_required (VERSION 3.16)
-project(QtTcpSocket LANGUAGES CXX)
+project(QtTcpSocket LANGUAGES C CXX)
 set(NAME_PROJECT "Receiver")
 
+#-----------------------------------------------------------------------------
+# load cmake module
+#-----------------------------------------------------------------------------
 include(cmake/googletest.cmake)
 fetch_googletest(
     ${PROJECT_SOURCE_DIR}/cmake
     ${PROJECT_BINARY_DIR}/googletest
-    )
+)
 enable_testing()
 
 #-----------------------------------------------------------------------------
@@ -36,7 +39,6 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # Check architecture
 EXECUTE_PROCESS( COMMAND uname -m COMMAND tr -d '\n' OUTPUT_VARIABLE ARCHITECTURE )
 
-
 #-------------------------------------------------------------------------------
 # Select external Library
 #-------------------------------------------------------------------------------
@@ -61,15 +63,53 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin" AND "${ARCHITECTURE}" STREQUAL "x8
 endif()
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Linux" AND "${ARCHITECTURE}" STREQUAL "x86_64")
-
+	#-----------------------------------------------------------------------------
+	# Specific Flag for Linux Desktop
+	#-----------------------------------------------------------------------------	
+	set(CMAKE_C_FLAGS_DEBUG "-march=native -pthread")
+	set(CMAKE_CXX_FLAGS_DEBUG "-march=native -pthread")
+	set(CMAKE_C_FLAGS_RELEASE "-march=native -pthread")
+	set(CMAKE_CXX_FLAGS_RELEASE "-march=native -pthread")
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Linux" AND "${ARCHITECTURE}" STREQUAL "armv7l")
 	#-----------------------------------------------------------------------------
 	# Specific Flag for RaspBerry Pi 3 
 	#-----------------------------------------------------------------------------
-	set(CMAKE_C_FLAGS_DEBUG "-march=armv8-a+crc -mtune=cortex-a53 -mfpu=crypto-neon-fp-armv8 -mfloat-abi=hard -ftree-vectorize -funsafe-math-optimizations -pipe -pthread")
-	set(CMAKE_CXX_FLAGS_DEBUG "-march=armv8-a+crc -mtune=cortex-a53 -mfpu=crypto-neon-fp-armv8 -mfloat-abi=hard -ftree-vectorize -funsafe-math-optimizations -pipe -pthread")
-	set(CMAKE_C_FLAGS_RELEASE "-march=armv8-a+crc -mtune=cortex-a53 -mfpu=crypto-neon-fp-armv8 -mfloat-abi=hard -ftree-vectorize -funsafe-math-optimizations -pipe -pthread")
-	set(CMAKE_CXX_FLAGS_RELEASE "-march=armv8-a+crc -mtune=cortex-a53 -mfpu=crypto-neon-fp-armv8 -mfloat-abi=hard -ftree-vectorize -funsafe-math-optimizations -pipe -pthread")
+	set(CMAKE_C_FLAGS_DEBUG "-march=armv8-a+crc 
+		-mtune=cortex-a53 
+		-mfpu=crypto-neon-fp-armv8 
+		-mfloat-abi=hard 
+		-ftree-vectorize 
+		-funsafe-math-optimizations 
+		-pipe 
+		-pthread"
+	)
+	set(CMAKE_CXX_FLAGS_DEBUG "-march=armv8-a+crc 
+		-mtune=cortex-a53 
+		-mfpu=crypto-neon-fp-armv8 
+		-mfloat-abi=hard 
+		-ftree-vectorize 
+		-funsafe-math-optimizations 
+		-pipe 
+		-pthread"
+	)
+	set(CMAKE_C_FLAGS_RELEASE "-march=armv8-a+crc 
+		-mtune=cortex-a53 
+		-mfpu=crypto-neon-fp-armv8 
+		-mfloat-abi=hard 
+		-ftree-vectorize 
+		-funsafe-math-optimizations 
+		-pipe 
+		-pthread"
+	)
+	set(CMAKE_CXX_FLAGS_RELEASE "-march=armv8-a+crc 
+		-mtune=cortex-a53 
+		-mfpu=crypto-neon-fp-armv8 
+		-mfloat-abi=hard 
+		-ftree-vectorize 
+		-funsafe-math-optimizations 
+		-pipe 
+		-pthread"
+	)
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin" AND "${ARCHITECTURE}" STREQUAL "x86_64")
 	#-----------------------------------------------------------------------------
 	# Specific Flag for MacOS
@@ -84,10 +124,9 @@ endif()
 # Code coverage
 #-----------------------------------------------------------------------------
 if(COVERAGE)
-	message(STATUS "Coverage: ON")
+	set(COVERAGE_CHECK "ON")
 	add_library(coverage INTERFACE)
 	if(${CMAKE_BUILD_TYPE} STREQUAL "Debug" AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-	  	message(STATUS "enabled coverage")
 	  	# Add required flags (GCC & LLVM/Clang)
 	  	target_compile_options(coverage INTERFACE
 			-O0        # no optimization
@@ -151,6 +190,7 @@ message( STATUS "C flags (Release): \t${CMAKE_C_FLAGS} ${CMAKE_C_FLAGS_RELEASE}"
 message( STATUS "C flags (Debug): \t${CMAKE_C_FLAGS} ${CMAKE_C_FLAGS_DEBUG}")
 message( STATUS "C++ flags (Release):\t${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_RELEASE}")
 message( STATUS "C++ flags (Debug):\t${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_DEBUG}")
+message( STATUS "Coverage:\t${COVERAGE_CHECK}")
 message( STATUS "CMAKE_BINARY_DIR:\t${CMAKE_BINARY_DIR}")
 message( STATUS )
 message( STATUS "Change a value with: cmake -D<Variable>=<Value> .." )
