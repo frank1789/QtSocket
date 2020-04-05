@@ -1,12 +1,13 @@
 language: cpp
 os:
   - osx
+osx_image: xcode11.3
 
 compiler:
   - clang
 
 install:
-  - brew install qt cmake python
+  - brew install lcov
   - pip3 install --user cpp-coveralls
 
 script:
