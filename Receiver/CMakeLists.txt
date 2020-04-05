@@ -85,19 +85,19 @@ endif()
 #-----------------------------------------------------------------------------
 if(COVERAGE)
 	message(STATUS "Coverage: ON")
-	add_library(coverage_config INTERFACE)
+	add_library(coverage INTERFACE)
 	if(${CMAKE_BUILD_TYPE} STREQUAL "Debug" AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
 	  	message(STATUS "enabled coverage")
 	  	# Add required flags (GCC & LLVM/Clang)
-	  	target_compile_options(coverage_config INTERFACE
+	  	target_compile_options(coverage INTERFACE
 			-O0        # no optimization
 			-g         # generate debug info
 			-ftest-coverage -fprofile-arcs # sets all required flags
 	  	)
 	  	if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
-			target_link_options(coverage_config INTERFACE --coverage)
+			target_link_options(coverage INTERFACE --coverage)
 	  	else()
-			target_link_libraries(coverage_config INTERFACE --coverage)
+			target_link_libraries(coverage INTERFACE --coverage)
 	  	endif()
 	endif()
 endif()
