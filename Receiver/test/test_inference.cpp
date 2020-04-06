@@ -24,20 +24,46 @@ class InferenceTestCase : public ::testing::Test {
 };
 
 TEST_F(InferenceTestCase, GraceHooper){
-  const QString img_path{"../build_debug/testdata/grace_hopper.bmp"};
-  QImage img(img_path);
+  const QImage img("../build_debug/test/testdata/grace_hopper.bmp");
+  ASSERT_TRUE(!img.isNull());
   model_tflite.setInput(img);
 }
 
 TEST_F(InferenceTestCase, Dog) {
-  const QString img_path{"../build_debug/testdata/dog_1.jpg"};
-  QImage img(img_path);
+  const QImage img("../build_debug/test/testdata/dog_1.jpeg");
+  ASSERT_TRUE(!img.isNull());
   model_tflite.setInput(img);
+  
+  
+  
+  
+  
+  
+
+
+  // img_directory.setFilter(QDir::Files);
+  // QFileInfoList entries = img_directory.entryInfoList(QDir::AllEntries);
+  // EXPECT_GT(entries.size(), 0);
+  // qDebug() << entries.size();
+  // if (entries.size() != 0) {
+
+    // qDebug() << entries.at(qrand() % entries.size()).absoluteFilePath();
+
+  // }
+
+
+
+
+
+  // QImage img(img_path);
+  // ASSERT_TRUE(img.isNull());
+  // model_tflite.setInput(img);
 }
 
 
 TEST_F(InferenceTestCase, Cat) {
-  const QString img_path{"../build_debug/testdata/cat_1.jpg"};
-  QImage img(img_path);
+  const QImage img("../build_debug/test/testdata/cat_1.jpg");
+  ASSERT_TRUE(!img.isNull());
   model_tflite.setInput(img);
+  
 }

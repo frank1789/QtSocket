@@ -18,7 +18,7 @@
 #include "colormanager.hpp"
 #include "model_support_function.hpp"
 
-#define LOG_CNN 1
+#define LOG_CNN 0
 
 constexpr float min_threshold{0.6f};
 
