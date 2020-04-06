@@ -4,7 +4,6 @@
 #include <tensorflow/lite/kernels/internal/tensor.h>
 #include <tensorflow/lite/kernels/internal/tensor_utils.h>
 
-#include <QApplication>
 #include <QDebug>
 #include <QDir>
 #include <QDirIterator>
@@ -12,9 +11,8 @@
 #include <QFileInfo>
 #include <QImage>
 
-#include "../log/instrumentor.h"
-#include "../log/logger.h"
-#include "../src/streamerthread.hpp"
+#include "instrumentor.h"
+#include "logger.h"
 #include "colormanager.hpp"
 #include "model_support_function.hpp"
 
@@ -76,18 +74,11 @@ void ModelTensorFlowLite::imageAvailable(QImage image) {
 
 void ModelTensorFlowLite::run(QImage image) {
   LOG(DEBUG, "run inference tflite")
-  StopWatch tm;
   PROFILE_FUNCTION();
-  // check input
-  if (image.isNull()) {
-    LOG(WARN, "check image is not valid: %s\nthen return",
-        image.isNull() ? "true" : "false")
-    return;
-  }
   setInput(image);
   // perform inference
   if (interpreter->Invoke() != kTfLiteOk) {
-    LOG(ERROR, "failde to invoke intepreter")
+    LOG(ERROR, "failed to invoke interpreter")
     return;
   }
   // check if classifier or object detection
