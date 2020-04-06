@@ -8,7 +8,7 @@ class InferenceTestCase : public ::testing::Test {
  protected:
   const std::string label_path{"../build_debug/test/resources/coco_labels.txt"};
   const std::string model_path{"../build_debug/test/resources/detect.tflite"};
-  ModelTensorFlowLite model_tflite;
+  
 
   void SetUp() {
     LabelDetection label(label_path);
@@ -21,18 +21,20 @@ class InferenceTestCase : public ::testing::Test {
     // code here will be called just after the test completes
     // ok to through exceptions from here if need be
   }
+  public:
+  ModelTensorFlowLite model_tflite;
 };
 
 TEST_F(InferenceTestCase, GraceHooper){
   const QImage img("../build_debug/test/testdata/grace_hopper.bmp");
-  ASSERT_TRUE(!img.isNull());
+  ASSERT_FALSE(img.isNull());
   model_tflite.setInput(img);
 }
 
 TEST_F(InferenceTestCase, Dog) {
   const QImage img("../build_debug/test/testdata/dog_1.jpeg");
-  ASSERT_TRUE(!img.isNull());
-  model_tflite.setInput(img);
+  ASSERT_FALSE(img.isNull());
+  // model_tflite.setInput(img);
   
   
   
@@ -63,7 +65,7 @@ TEST_F(InferenceTestCase, Dog) {
 
 TEST_F(InferenceTestCase, Cat) {
   const QImage img("../build_debug/test/testdata/cat_1.jpg");
-  ASSERT_TRUE(!img.isNull());
+  ASSERT_FALSE(img.isNull());
   model_tflite.setInput(img);
   
 }
