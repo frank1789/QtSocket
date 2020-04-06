@@ -33,7 +33,7 @@ TEST_F(InferenceTestCase, GraceHooper){
 }
 
 TEST_F(InferenceTestCase, Dog) {
-  const QImage img("../build_debug/test/testdata/dog_1.jpeg");
+  const QImage img("../build_debug/test/testdata/dog_2.jpg");
   ASSERT_FALSE(img.isNull());
   // model_tflite.setInput(img);
   
