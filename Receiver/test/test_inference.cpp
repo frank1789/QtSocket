@@ -29,7 +29,6 @@ class InferenceTestCase : public ::testing::Test {
 TEST_F(InferenceTestCase, GraceHooper){
   const QImage img("../build_debug/test/testdata/grace_hopper.bmp");
   ASSERT_FALSE(img.isNull());
-  // auto pixmap = QPixmap::fromImage(img);
   model_tflite.imageAvailable(img);
 }
 
