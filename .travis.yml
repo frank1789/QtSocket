@@ -8,7 +8,7 @@ compiler:
 
 install:
   - brew install lcov
-  - pip3 install --user cpp-coveralls
+  - pip3 install cpp-coveralls
 
 script:
   - cd Receiver
