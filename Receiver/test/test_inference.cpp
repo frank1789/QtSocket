@@ -23,4 +23,21 @@ class InferenceTestCase : public ::testing::Test {
   }
 };
 
-TEST_F(InferenceTestCase, Person) {}
+TEST_F(InferenceTestCase, GraceHooper){
+  const QString img_path{"../build_debug/testdata/grace_hopper.bmp"};
+  QImage img(img_path);
+  model_tflite.setInput(img);
+}
+
+TEST_F(InferenceTestCase, Dog) {
+  const QString img_path{"../build_debug/testdata/dog_1.jpg"};
+  QImage img(img_path);
+  model_tflite.setInput(img);
+}
+
+
+TEST_F(InferenceTestCase, Cat) {
+  const QString img_path{"../build_debug/testdata/cat_1.jpg"};
+  QImage img(img_path);
+  model_tflite.setInput(img);
+}
