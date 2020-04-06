@@ -66,6 +66,14 @@ void ModelTensorFlowLite::imageAvailable(QPixmap image) {
   }
 }
 
+void ModelTensorFlowLite::imageAvailable(QImage image) {
+  if (!image.isNull()) {
+    LOG(DEBUG, "image not null: %s", !image.isNull() ? "true" : "false")
+    QImage input = image.convertToFormat(QImage::Format_RGB888);
+    run(input);
+  }
+}
+
 void ModelTensorFlowLite::run(QImage image) {
   LOG(DEBUG, "run inference tflite")
   StopWatch tm;

@@ -38,8 +38,9 @@ int main(int argc, char* argv[]) {
   label.read();
   ModelTensorFlowLite model_tflite(model_path);
   model_tflite.setLabel(label.getLabels());
-  QObject::connect(&w, &MainWindow::updateImage, &model_tflite,
-                   &ModelTensorFlowLite::imageAvailable);
+  QObject::connect(
+      &w, &MainWindow::updateImage,
+      [&model_tflite](QPixmap pixmap) { model_tflite.imageAvailable(pixmap); });
 
   auto r = a.exec();
 #if PROFILING

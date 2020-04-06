@@ -46,6 +46,7 @@ class ModelTensorFlowLite : public QObject {
   QString getLabel(int i);
  public slots:
   void imageAvailable(QPixmap image);
+  void imageAvailable(QImage image);
 
  private:
   //  methods

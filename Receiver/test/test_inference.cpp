@@ -1,5 +1,6 @@
 #include <QImage>
 #include <QObject>
+#include <QPixmap>
 
 #include "gtest/gtest.h"
 #include "labels.hpp"
@@ -28,7 +29,8 @@ class InferenceTestCase : public ::testing::Test {
 TEST_F(InferenceTestCase, GraceHooper){
   const QImage img("../build_debug/test/testdata/grace_hopper.bmp");
   ASSERT_FALSE(img.isNull());
-  model_tflite.setInput(img);
+  // auto pixmap = QPixmap::fromImage(img);
+  model_tflite.imageAvailable(img);
 }
 
 TEST_F(InferenceTestCase, Dog) {
