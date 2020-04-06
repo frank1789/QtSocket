@@ -26,6 +26,12 @@ struct result_t {
   QList<QImage> masks;
 };
 
+struct Res {
+  QString label;
+  int index;
+  double score;
+};
+
 class ModelTensorFlowLite : public QObject {
  public:
   explicit ModelTensorFlowLite();
@@ -44,6 +50,11 @@ class ModelTensorFlowLite : public QObject {
 
   void setLabel(const std::unordered_map<int, std::string> &l);
   QString getLabel(int i);
+
+  std::vector<Res> getResults();
+ 
+ 
+ 
  public slots:
   void imageAvailable(QPixmap image);
   void imageAvailable(QImage image);
@@ -82,6 +93,8 @@ class ModelTensorFlowLite : public QObject {
   int numThreads;
 
   result_t m_result;
+
+  std::vector<Res> resu;
 
   std::unordered_map<int, std::string> m_labels;
 

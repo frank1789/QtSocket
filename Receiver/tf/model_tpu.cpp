@@ -328,6 +328,7 @@ bool ModelTensorFlowLite::get_object_outputs() {
       //      result->caption.append(label);
       //      result->confidences.append(static_cast<double>(score));
       //      result->box.append(box);
+      resu.push_back({label, cls, static_cast<double>(score)});
       status = true;
     }
   }
@@ -338,4 +339,11 @@ QString ModelTensorFlowLite::getLabel(int i) {
   std::unordered_map<int, std::string>::iterator it = m_labels.find(i);
   LOG(DEBUG, "search for class %d, found %s", i, it->second.c_str())
   return QString::fromStdString(it->second);
+}
+
+
+
+std::vector<Res> ModelTensorFlowLite::getResults() {
+  return resu;
+
 }

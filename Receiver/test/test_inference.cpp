@@ -30,6 +30,22 @@ TEST_F(InferenceTestCase, GraceHooper){
   const QImage img("../build_debug/test/testdata/grace_hopper.bmp");
   ASSERT_FALSE(img.isNull());
   model_tflite.imageAvailable(img);
+  auto results = model_tflite.getResults();
+  EXPECT_GT(results.size(), 0);
+  
+  // // labels
+  // EXPECT_EQ(, "military uniform");
+  // EXPECT_EQ(, "Windsor tie");
+  // EXPECT_EQ(, "bulletproof vest");
+  // EXPECT_EQ(, "cornet, horn, trumpet, trump");
+  // EXPECT_EQ(, "drumstick";
+  
+  // // scores
+  // EXPECT_EG(, 0.860174);
+  // EXPECT_EG(, 0.0481017);
+  // EXPECT_EG(, 0.00786704);
+  // EXPECT_EG(, 0.00644932);
+  // EXPECT_EG(, 0.00608029);
 }
 
 TEST_F(InferenceTestCase, Dog) {
