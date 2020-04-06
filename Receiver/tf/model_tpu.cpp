@@ -18,10 +18,10 @@
 
 #define LOG_CNN 0
 
-constexpr float min_threshold{0.6f};
+constexpr float kMinimumThreshold{0.6f};
 
 ModelTensorFlowLite::ModelTensorFlowLite() : QObject() {
-  threshold = min_threshold;
+  threshold = kMinimumThreshold;
   img_height = 512;
   img_width = 512;
   wanted_height = 0;
@@ -36,7 +36,7 @@ ModelTensorFlowLite::ModelTensorFlowLite() : QObject() {
 
 ModelTensorFlowLite::ModelTensorFlowLite(const QString &path)
     : QObject(),
-      threshold(min_threshold),
+      threshold(kMinimumThreshold),
       img_height(512),
       img_width(512),
       wanted_height(0),
