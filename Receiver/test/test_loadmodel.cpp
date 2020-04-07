@@ -47,7 +47,7 @@ TEST(LoadFiles, ErrorFiles) {
   const std::string label_path = write_dummy_file("false.rtf");
   std::unique_ptr<LabelDetection> label_{nullptr};
   label_ = std::make_unique<LabelDetection>(label_path);
-  EXPECT_DEATH(label_->read();, ".*");
+  ASSERT_DEATH(label_->read();, ".*");
 }
 
 TEST(LoadFiles, EmptyFiles) {
