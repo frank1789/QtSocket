@@ -12,7 +12,7 @@
 QT_BEGIN_NAMESPACE
 class QImage;
 class QString;
-class QByteArray;
+class QPixmap;
 QT_END_NAMESPACE
 
 enum type_detection { none = -1, image_classifier = 1, object_detection = 2 };

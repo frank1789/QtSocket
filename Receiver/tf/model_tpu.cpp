@@ -3,6 +3,7 @@
 #include <QDebug>
 #include <QImage>
 #include <QThread>
+#include <QPixmap>
 
 #include "colormanager.hpp"
 #include "instrumentor.h"
