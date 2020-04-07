@@ -3,6 +3,7 @@
 | Master  | Develop  |
 |:-------:|:--------:|
 [![Build Status](https://travis-ci.org/frank1789/QtSocket.svg?branch=master)](https://travis-ci.org/frank1789/QtSocket) |  [![Build Status](https://travis-ci.org/frank1789/QtSocket.svg?branch=develop)](https://travis-ci.org/frank1789/QtSocket) | 
+| [![Coverage Status](https://coveralls.io/repos/github/frank1789/QtSocket/badge.svg?branch=master)](https://coveralls.io/github/frank1789/QtSocket?branch=master) | [![Coverage Status](https://coveralls.io/repos/github/frank1789/QtSocket/badge.svg?branch=develop)](https://coveralls.io/github/frank1789/QtSocket?branch=develop) |
 
 This program connects to a TCP socket allowing the reception of a streaming
 image from the main program available in the repository

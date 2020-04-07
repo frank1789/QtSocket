@@ -4,9 +4,10 @@
 #include "gtest/gtest.h"
 #include "labels.hpp"
 
-class GenericLabels : public ::testing::Test {
+class ImagenetLabels : public ::testing::Test {
  protected:
-  const std::string label_path = {"../build_debug/test/resources/labels.txt"};
+  const std::string label_path = {
+      "../build_debug/test/resources/imagenet_labels.txt"};
   std::unique_ptr<LabelDetection> label_{nullptr};
 
   void SetUp() {
@@ -31,7 +32,7 @@ class GenericLabels : public ::testing::Test {
   }
 };
 
-TEST_F(GenericLabels, AllClass) {
+TEST_F(ImagenetLabels, AllClass) {
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 0), 0);
   EXPECT_EQ(getLabel(label_->getLabels(), 0), "background");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 1), 1);
@@ -113,7 +114,6 @@ TEST_F(GenericLabels, AllClass) {
   EXPECT_EQ(getLabel(label_->getLabels(), 31), "bullfrog, Rana catesbeiana");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 32), 32);
   EXPECT_EQ(getLabel(label_->getLabels(), 32), "tree frog, tree-frog");
-
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 33), 33);
   EXPECT_EQ(getLabel(label_->getLabels(), 33),
             "tailed frog, bell toad, ribbed toad, tailed toad, Ascaphus trui");
@@ -121,9 +121,9 @@ TEST_F(GenericLabels, AllClass) {
   EXPECT_EQ(getLabel(label_->getLabels(), 34),
             "loggerhead, loggerhead turtle, Caretta caretta");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 35), 35);
-  EXPECT_EQ(getLabel(label_->getLabels(), 35),
-            "leatherback turtle, leatherback, leathery turtle, Dermochelys "
-            "coriacea");
+  EXPECT_EQ(
+      getLabel(label_->getLabels(), 35),
+      "leatherback turtle, leatherback, leathery turtle, Dermochelys coriacea");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 36), 36);
   EXPECT_EQ(getLabel(label_->getLabels(), 36), "mud turtle");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 37), 37);
@@ -296,11 +296,10 @@ TEST_F(GenericLabels, AllClass) {
             "Ornithorhynchus anatinus");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 105), 105);
   EXPECT_EQ(getLabel(label_->getLabels(), 105), "wallaby, brush kangaroo");
-
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 106), 106);
-  EXPECT_EQ(getLabel(label_->getLabels(), 106),
-            "koala, koala bear, kangaroo bear, native bear, Phascolarctos "
-            "cinereus");
+  EXPECT_EQ(
+      getLabel(label_->getLabels(), 106),
+      "koala, koala bear, kangaroo bear, native bear, Phascolarctos cinereus");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 107), 107);
   EXPECT_EQ(getLabel(label_->getLabels(), 107), "wombat");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 108), 108);
@@ -335,15 +334,14 @@ TEST_F(GenericLabels, AllClass) {
   EXPECT_EQ(getLabel(label_->getLabels(), 120), "rock crab, Cancer irroratus");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 121), 121);
   EXPECT_EQ(getLabel(label_->getLabels(), 121), "fiddler crab");
-
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 122), 122);
   EXPECT_EQ(getLabel(label_->getLabels(), 122),
             "king crab, Alaska crab, Alaskan king crab, Alaska king crab, "
             "Paralithodes camtschatica");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 123), 123);
-  EXPECT_EQ(getLabel(label_->getLabels(), 123),
-            "American lobster, Northern lobster, Maine lobster, Homarus "
-            "americanus");
+  EXPECT_EQ(
+      getLabel(label_->getLabels(), 123),
+      "American lobster, Northern lobster, Maine lobster, Homarus americanus");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 124), 124);
   EXPECT_EQ(getLabel(label_->getLabels(), 124),
             "spiny lobster, langouste, rock lobster, crawfish, crayfish, sea "
@@ -597,9 +595,9 @@ TEST_F(GenericLabels, AllClass) {
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 235), 235);
   EXPECT_EQ(getLabel(label_->getLabels(), 235), "Rottweiler");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 236), 236);
-  EXPECT_EQ(getLabel(label_->getLabels(), 236),
-            "German shepherd, German shepherd dog, German police dog, "
-            "alsatian");
+  EXPECT_EQ(
+      getLabel(label_->getLabels(), 236),
+      "German shepherd, German shepherd dog, German police dog, alsatian");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 237), 237);
   EXPECT_EQ(getLabel(label_->getLabels(), 237), "Doberman, Doberman pinscher");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 238), 238);
@@ -714,7 +712,6 @@ TEST_F(GenericLabels, AllClass) {
   EXPECT_EQ(getLabel(label_->getLabels(), 285), "Siamese cat, Siamese");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 286), 286);
   EXPECT_EQ(getLabel(label_->getLabels(), 286), "Egyptian cat");
-
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 287), 287);
   EXPECT_EQ(getLabel(label_->getLabels(), 287),
             "cougar, puma, catamount, mountain lion, painter, panther, Felis "
@@ -740,16 +737,13 @@ TEST_F(GenericLabels, AllClass) {
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 295), 295);
   EXPECT_EQ(getLabel(label_->getLabels(), 295),
             "brown bear, bruin, Ursus arctos");
-
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 296), 296);
-  EXPECT_EQ(getLabel(label_->getLabels(), 296),
-            "American black bear, black bear, Ursus americanus, "
-            "Euarctos americanus");
-
+  EXPECT_EQ(
+      getLabel(label_->getLabels(), 296),
+      "American black bear, black bear, Ursus americanus, Euarctos americanus");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 297), 297);
   EXPECT_EQ(getLabel(label_->getLabels(), 297),
-            "ice bear, polar bear, Ursus Maritimus, Thalarctos "
-            "maritimus");
+            "ice bear, polar bear, Ursus Maritimus, Thalarctos maritimus");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 298), 298);
   EXPECT_EQ(getLabel(label_->getLabels(), 298),
             "sloth bear, Melursus ursinus, Ursus ursinus");
@@ -761,8 +755,7 @@ TEST_F(GenericLabels, AllClass) {
   EXPECT_EQ(getLabel(label_->getLabels(), 301), "tiger beetle");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 302), 302);
   EXPECT_EQ(getLabel(label_->getLabels(), 302),
-            "ladybug, ladybeetle, lady beetle, ladybird, ladybird "
-            "beetle");
+            "ladybug, ladybeetle, lady beetle, ladybird, ladybird beetle");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 303), 303);
   EXPECT_EQ(getLabel(label_->getLabels(), 303),
             "ground beetle, carabid beetle");
@@ -802,8 +795,7 @@ TEST_F(GenericLabels, AllClass) {
   EXPECT_EQ(getLabel(label_->getLabels(), 319), "lacewing, lacewing fly");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 320), 320);
   EXPECT_EQ(getLabel(label_->getLabels(), 320),
-            "dragonfly, darning needle, devil's darning needle, sewing "
-            "needle, "
+            "dragonfly, darning needle, devil's darning needle, sewing needle, "
             "snake feeder, snake doctor, mosquito hawk, skeeter hawk");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 321), 321);
   EXPECT_EQ(getLabel(label_->getLabels(), 321), "damselfly");
@@ -813,8 +805,7 @@ TEST_F(GenericLabels, AllClass) {
   EXPECT_EQ(getLabel(label_->getLabels(), 323), "ringlet, ringlet butterfly");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 324), 324);
   EXPECT_EQ(getLabel(label_->getLabels(), 324),
-            "monarch, monarch butterfly, milkweed butterfly, "
-            "Danaus plexippus");
+            "monarch, monarch butterfly, milkweed butterfly, Danaus plexippus");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 325), 325);
   EXPECT_EQ(getLabel(label_->getLabels(), 325), "cabbage butterfly");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 326), 326);
@@ -873,8 +864,7 @@ TEST_F(GenericLabels, AllClass) {
   EXPECT_EQ(getLabel(label_->getLabels(), 349), "ram, tup");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 350), 350);
   EXPECT_EQ(getLabel(label_->getLabels(), 350),
-            "bighorn, bighorn sheep, cimarron, Rocky Mountain "
-            "bighorn, Rocky "
+            "bighorn, bighorn sheep, cimarron, Rocky Mountain bighorn, Rocky "
             "Mountain sheep, Ovis canadensis");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 351), 351);
   EXPECT_EQ(getLabel(label_->getLabels(), 351), "ibex, Capra ibex");
@@ -967,21 +957,20 @@ TEST_F(GenericLabels, AllClass) {
   EXPECT_EQ(getLabel(label_->getLabels(), 387),
             "African elephant, Loxodonta africana");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 388), 388);
-  EXPECT_EQ(getLabel(label_->getLabels(), 388),
-            "lesser panda, red panda, panda, bear cat, cat bear, "
-            "Ailurus fulgens");
+  EXPECT_EQ(
+      getLabel(label_->getLabels(), 388),
+      "lesser panda, red panda, panda, bear cat, cat bear, Ailurus fulgens");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 389), 389);
-  EXPECT_EQ(getLabel(label_->getLabels(), 389),
-            "giant panda, panda, panda bear, coon bear, Ailuropoda "
-            "melanoleuca");
+  EXPECT_EQ(
+      getLabel(label_->getLabels(), 389),
+      "giant panda, panda, panda bear, coon bear, Ailuropoda melanoleuca");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 390), 390);
   EXPECT_EQ(getLabel(label_->getLabels(), 390), "barracouta, snoek");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 391), 391);
   EXPECT_EQ(getLabel(label_->getLabels(), 391), "eel");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 392), 392);
   EXPECT_EQ(getLabel(label_->getLabels(), 392),
-            "coho, cohoe, coho salmon, blue jack, silver salmon, "
-            "Oncorhynchus "
+            "coho, cohoe, coho salmon, blue jack, silver salmon, Oncorhynchus "
             "kisutch");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 393), 393);
   EXPECT_EQ(getLabel(label_->getLabels(), 393),
@@ -1012,8 +1001,7 @@ TEST_F(GenericLabels, AllClass) {
   EXPECT_EQ(getLabel(label_->getLabels(), 403), "acoustic guitar");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 404), 404);
   EXPECT_EQ(getLabel(label_->getLabels(), 404),
-            "aircraft carrier, carrier, flattop, attack aircraft "
-            "carrier");
+            "aircraft carrier, carrier, flattop, attack aircraft carrier");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 405), 405);
   EXPECT_EQ(getLabel(label_->getLabels(), 405), "airliner");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 406), 406);
@@ -1039,8 +1027,7 @@ TEST_F(GenericLabels, AllClass) {
   EXPECT_EQ(getLabel(label_->getLabels(), 414), "assault rifle, assault gun");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 415), 415);
   EXPECT_EQ(getLabel(label_->getLabels(), 415),
-            "backpack, back pack, knapsack, packsack, rucksack, "
-            "haversack");
+            "backpack, back pack, knapsack, packsack, rucksack, haversack");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 416), 416);
   EXPECT_EQ(getLabel(label_->getLabels(), 416), "bakery, bakeshop, bakehouse");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 417), 417);
@@ -1089,8 +1076,7 @@ TEST_F(GenericLabels, AllClass) {
             "bathtub, bathing tub, bath, tub");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 437), 437);
   EXPECT_EQ(getLabel(label_->getLabels(), 437),
-            "beach wagon, station wagon, wagon, estate car, beach "
-            "waggon, "
+            "beach wagon, station wagon, wagon, estate car, beach waggon, "
             "station waggon, waggon");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 438), 438);
   EXPECT_EQ(getLabel(label_->getLabels(), 438),
@@ -1188,8 +1174,7 @@ TEST_F(GenericLabels, AllClass) {
   EXPECT_EQ(getLabel(label_->getLabels(), 480), "car wheel");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 481), 481);
   EXPECT_EQ(getLabel(label_->getLabels(), 481),
-            "cash machine, cash dispenser, automated teller machine, "
-            "automatic "
+            "cash machine, cash dispenser, automated teller machine, automatic "
             "teller machine, automated teller, automatic teller, ATM");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 482), 482);
   EXPECT_EQ(getLabel(label_->getLabels(), 482), "cassette");
@@ -1204,17 +1189,16 @@ TEST_F(GenericLabels, AllClass) {
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 487), 487);
   EXPECT_EQ(getLabel(label_->getLabels(), 487), "cello, violoncello");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 488), 488);
-  EXPECT_EQ(getLabel(label_->getLabels(), 488),
-            "cellular telephone, cellular phone, cellphone, "
-            "cell, mobile phone");
+  EXPECT_EQ(
+      getLabel(label_->getLabels(), 488),
+      "cellular telephone, cellular phone, cellphone, cell, mobile phone");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 489), 489);
   EXPECT_EQ(getLabel(label_->getLabels(), 489), "chain");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 490), 490);
   EXPECT_EQ(getLabel(label_->getLabels(), 490), "chainlink fence");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 491), 491);
   EXPECT_EQ(getLabel(label_->getLabels(), 491),
-            "chain mail, ring mail, mail, chain armor, chain "
-            "armour, ring "
+            "chain mail, ring mail, mail, chain armor, chain armour, ring "
             "armor, ring armour");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 492), 492);
   EXPECT_EQ(getLabel(label_->getLabels(), 492), "chain saw, chainsaw");
@@ -1231,9 +1215,9 @@ TEST_F(GenericLabels, AllClass) {
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 498), 498);
   EXPECT_EQ(getLabel(label_->getLabels(), 498), "church, church building");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 499), 499);
-  EXPECT_EQ(getLabel(label_->getLabels(), 499),
-            "cinema, movie theater, movie theatre, movie house, "
-            "picture palace");
+  EXPECT_EQ(
+      getLabel(label_->getLabels(), 499),
+      "cinema, movie theater, movie theatre, movie house, picture palace");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 500), 500);
   EXPECT_EQ(getLabel(label_->getLabels(), 500),
             "cleaver, meat cleaver, chopper");
@@ -1429,8 +1413,7 @@ TEST_F(GenericLabels, AllClass) {
   EXPECT_EQ(getLabel(label_->getLabels(), 589), "hamper");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 590), 590);
   EXPECT_EQ(getLabel(label_->getLabels(), 590),
-            "hand blower, blow dryer, blow drier, hair dryer, "
-            "hair drier");
+            "hand blower, blow dryer, blow drier, hair dryer, hair drier");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 591), 591);
   EXPECT_EQ(getLabel(label_->getLabels(), 591),
             "hand-held computer, hand-held microcomputer");
@@ -1522,11 +1505,10 @@ TEST_F(GenericLabels, AllClass) {
   EXPECT_EQ(getLabel(label_->getLabels(), 631), "Loafer");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 632), 632);
   EXPECT_EQ(getLabel(label_->getLabels(), 632), "lotion");
-
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 633), 633);
-  EXPECT_EQ(getLabel(label_->getLabels(), 633),
-            "loudspeaker, speaker, speaker unit, loudspeaker "
-            "system, speaker system");
+  EXPECT_EQ(
+      getLabel(label_->getLabels(), 633),
+      "loudspeaker, speaker, speaker unit, loudspeaker system, speaker system");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 634), 634);
   EXPECT_EQ(getLabel(label_->getLabels(), 634), "loupe, jeweler's loupe");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 635), 635);
@@ -1740,11 +1722,9 @@ TEST_F(GenericLabels, AllClass) {
             "Polaroid camera, Polaroid Land camera");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 734), 734);
   EXPECT_EQ(getLabel(label_->getLabels(), 734), "pole");
-
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 735), 735);
   EXPECT_EQ(getLabel(label_->getLabels(), 735),
-            "police van, police wagon, paddy wagon, patrol "
-            "wagon, wagon, black "
+            "police van, police wagon, paddy wagon, patrol wagon, wagon, black "
             "Maria");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 736), 736);
   EXPECT_EQ(getLabel(label_->getLabels(), 736), "poncho");
@@ -1986,11 +1966,9 @@ TEST_F(GenericLabels, AllClass) {
   EXPECT_EQ(getLabel(label_->getLabels(), 846), "syringe");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 847), 847);
   EXPECT_EQ(getLabel(label_->getLabels(), 847), "table lamp");
-
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 848), 848);
   EXPECT_EQ(getLabel(label_->getLabels(), 848),
-            "tank, army tank, armored combat vehicle, "
-            "armoured combat vehicle");
+            "tank, army tank, armored combat vehicle, armoured combat vehicle");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 849), 849);
   EXPECT_EQ(getLabel(label_->getLabels(), 849), "tape player");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 850), 850);
@@ -2033,11 +2011,9 @@ TEST_F(GenericLabels, AllClass) {
   EXPECT_EQ(getLabel(label_->getLabels(), 866), "toyshop");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 867), 867);
   EXPECT_EQ(getLabel(label_->getLabels(), 867), "tractor");
-
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 868), 868);
   EXPECT_EQ(getLabel(label_->getLabels(), 868),
-            "trailer truck, tractor trailer, trucking "
-            "rig, rig, articulated "
+            "trailer truck, tractor trailer, trucking rig, rig, articulated "
             "lorry, semi");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 869), 869);
   EXPECT_EQ(getLabel(label_->getLabels(), 869), "tray");
@@ -2099,8 +2075,7 @@ TEST_F(GenericLabels, AllClass) {
   EXPECT_EQ(getLabel(label_->getLabels(), 896), "warplane, military plane");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 897), 897);
   EXPECT_EQ(getLabel(label_->getLabels(), 897),
-            "washbasin, handbasin, washbowl, lavabo, "
-            "wash-hand basin");
+            "washbasin, handbasin, washbowl, lavabo, wash-hand basin");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 898), 898);
   EXPECT_EQ(getLabel(label_->getLabels(), 898),
             "washer, automatic washer, washing machine");
@@ -2134,8 +2109,7 @@ TEST_F(GenericLabels, AllClass) {
   EXPECT_EQ(getLabel(label_->getLabels(), 912), "wool, woolen, woollen");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 913), 913);
   EXPECT_EQ(getLabel(label_->getLabels(), 913),
-            "worm fence, snake fence, snake-rail fence, "
-            "Virginia fence");
+            "worm fence, snake fence, snake-rail fence, Virginia fence");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 914), 914);
   EXPECT_EQ(getLabel(label_->getLabels(), 914), "wreck");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 915), 915);
@@ -2156,8 +2130,7 @@ TEST_F(GenericLabels, AllClass) {
             "traffic light, traffic signal, stoplight");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 922), 922);
   EXPECT_EQ(getLabel(label_->getLabels(), 922),
-            "book jacket, dust cover, dust jacket, dust "
-            "wrapper");
+            "book jacket, dust cover, dust jacket, dust wrapper");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 923), 923);
   EXPECT_EQ(getLabel(label_->getLabels(), 923), "menu");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 924), 924);
@@ -2292,8 +2265,7 @@ TEST_F(GenericLabels, AllClass) {
   EXPECT_EQ(getLabel(label_->getLabels(), 986), "daisy");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 987), 987);
   EXPECT_EQ(getLabel(label_->getLabels(), 987),
-            "yellow lady's slipper, yellow lady-slipper, "
-            "Cypripedium "
+            "yellow lady's slipper, yellow lady-slipper, Cypripedium "
             "calceolus, Cypripedium parviflorum");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 988), 988);
   EXPECT_EQ(getLabel(label_->getLabels(), 988), "corn");
@@ -2316,8 +2288,7 @@ TEST_F(GenericLabels, AllClass) {
   EXPECT_EQ(getLabel(label_->getLabels(), 996), "earthstar");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 997), 997);
   EXPECT_EQ(getLabel(label_->getLabels(), 997),
-            "hen-of-the-woods, hen of the woods, "
-            "Polyporus frondosus, Grifola "
+            "hen-of-the-woods, hen of the woods, Polyporus frondosus, Grifola "
             "frondosa");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 998), 998);
   EXPECT_EQ(getLabel(label_->getLabels(), 998), "bolete");
@@ -2326,4 +2297,4 @@ TEST_F(GenericLabels, AllClass) {
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 1000), 1000);
   EXPECT_EQ(getLabel(label_->getLabels(), 1000),
             "toilet tissue, toilet paper, bathroom tissue");
-}
+};

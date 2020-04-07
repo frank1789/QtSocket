@@ -1,19 +1,18 @@
 #ifndef MODEL_TPU_HPP
 #define MODEL_TPU_HPP
 
-#include <tensorflow/lite/interpreter.h>
-#include <tensorflow/lite/kernels/register.h>
-#include <tensorflow/lite/model.h>
-
 #include <QObject>
-#include <QThread>
 #include <memory>
 #include <string>
+
+#include "tensorflow/lite/interpreter.h"
+#include "tensorflow/lite/kernels/register.h"
+#include "tensorflow/lite/model.h"
 
 QT_BEGIN_NAMESPACE
 class QImage;
 class QString;
-class QByteArray;
+class QPixmap;
 QT_END_NAMESPACE
 
 enum type_detection { none = -1, image_classifier = 1, object_detection = 2 };
@@ -37,15 +36,17 @@ class ModelTensorFlowLite : public QObject {
   explicit ModelTensorFlowLite();
   explicit ModelTensorFlowLite(const QString &path);
 
-  void LoadModelFromFile(const std::string &path){init_model_TFLite(path);}
+  void LoadModelFromFile(const std::string &path) { init_model_TFLite(path); }
 
-  void LoadModelFromFile(const QString &path){init_model_TFLite(path.toStdString());}
+  void LoadModelFromFile(const QString &path) {
+    init_model_TFLite(path.toStdString());
+  }
 
   void run(QImage image);
 
   void setInput(QImage image);
 
-  bool get_classifier_output(std::vector<std::pair<float, int> > *top_results);
+  bool get_classifier_output(std::vector<std::pair<float, int>> *top_results);
   bool get_object_outputs();
 
   void setLabel(const std::unordered_map<int, std::string> &l);
@@ -53,11 +54,8 @@ class ModelTensorFlowLite : public QObject {
 
   std::vector<Res> getResults();
 
-
   std::vector<std::pair<float, int>> getResultClassification() const;
- 
- 
- 
+
  public slots:
   void imageAvailable(QPixmap image);
   void imageAvailable(QImage image);

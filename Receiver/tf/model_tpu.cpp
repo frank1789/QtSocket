@@ -1,20 +1,17 @@
 #include "model_tpu.hpp"
 
-#include <tensorflow/lite/examples/label_image/get_top_n_impl.h>
-#include <tensorflow/lite/kernels/internal/tensor.h>
-#include <tensorflow/lite/kernels/internal/tensor_utils.h>
-
 #include <QDebug>
-#include <QDir>
-#include <QDirIterator>
-#include <QFileDialog>
-#include <QFileInfo>
 #include <QImage>
+#include <QPixmap>
+#include <QThread>
 
+#include "colormanager.hpp"
 #include "instrumentor.h"
 #include "logger.h"
-#include "colormanager.hpp"
 #include "model_support_function.hpp"
+#include "tensorflow/lite/examples/label_image/get_top_n_impl.h"
+#include "tensorflow/lite/kernels/internal/tensor.h"
+#include "tensorflow/lite/kernels/internal/tensor_utils.h"
 
 constexpr float kMinimumThreshold{0.01f};
 
@@ -83,7 +80,6 @@ void ModelTensorFlowLite::run(QImage image) {
   LOG(DEBUG, "detect network: %d", kind_network)
   switch (kind_network) {
     case type_detection::image_classifier: {
-      
       if (!get_classifier_output(&top_results)) {
         LOG(DEBUG, "empty result")
         return;
@@ -295,8 +291,9 @@ bool ModelTensorFlowLite::get_object_outputs() {
           for (int k = 0; k < mask.width(); k++) {
             auto index = i * dim1 * dim2 + j * dim2 + k;
             auto check = detection_masks[index] >= MASK_THRESHOLD;
-            auto fill =
-                (check == true) ? cm.getColor(QString::fromStdString(label)) : QColor(Qt::transparent);
+            auto fill = (check == true)
+                            ? cm.getColor(QString::fromStdString(label))
+                            : QColor(Qt::transparent);
             mask.setPixel(k, j, fill.rgba());
           }
         }
@@ -326,7 +323,8 @@ bool ModelTensorFlowLite::get_object_outputs() {
       //      result->caption.append(label);
       //      result->confidences.append(static_cast<double>(score));
       //      result->box.append(box);
-      resu.push_back({QString::fromStdString(label), cls, static_cast<double>(score)});
+      resu.push_back(
+          {QString::fromStdString(label), cls, static_cast<double>(score)});
       status = true;
     }
   }
@@ -339,14 +337,9 @@ std::string ModelTensorFlowLite::getLabel(int i) {
   return it->second;
 }
 
+std::vector<Res> ModelTensorFlowLite::getResults() { return resu; }
 
-
-std::vector<Res> ModelTensorFlowLite::getResults() {
-  return resu;
-
-}
-
-
-std::vector<std::pair<float, int>> ModelTensorFlowLite::getResultClassification() const {
+std::vector<std::pair<float, int>>
+ModelTensorFlowLite::getResultClassification() const {
   return top_results;
 }
