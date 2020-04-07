@@ -6,7 +6,6 @@
 # Icon must end with two \r
 Icon
 
-
 # Thumbnails
 ._*
 
@@ -114,6 +113,7 @@ compile_commands.json
 
 *build*
 
+# exclude from .gitignore
 !Receiver/vendor/tensorflow-lite/aarch64_armv8-a
 !Receiver/vendor/tensorflow-lite/rpi_armv7l/lib/libtensorflow-lite.a
 !Receiver/vendor/tensorflow-lite/osx_x86_64/lib/libtensorflow-lite.a
