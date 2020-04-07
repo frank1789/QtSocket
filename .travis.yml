@@ -8,6 +8,7 @@ compiler:
 
 install:
   - brew install lcov
+  - gem install  coveralls-lcov
   - pip3 install cpp-coveralls
 
 script:
@@ -15,15 +16,8 @@ script:
   - ./build.sh debug
 
 after_success:
-  - coveralls -r $PWD/Receiver/build_debug --gcov-options '\-lp' -E ".*CMakeFiles.*"
-    # -e usr \
-    # -e .cache \
-    # -e unit_tests_ \
-    # -e googletest \
-    # -e .framework \
-    # -e Xcode.app \
-    # -e moc \
-    # -e moc_
+  - COVERAGE_FILES=$(find $PWD -name "coverage-filtered.info")
+  - coveralls-lcov ${COVERAGE_FILES}
 
 notifications:
   email:
