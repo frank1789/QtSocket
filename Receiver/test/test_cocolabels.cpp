@@ -32,7 +32,7 @@ class CocoLabels : public ::testing::Test {
   }
 };
 
-TEST_F(CocoLabels, allclass) {
+TEST_F(CocoLabels, AllClass) {
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 0), 0);
   EXPECT_EQ(getLabel(label_->getLabels(), 0), "person");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 1), 1);
