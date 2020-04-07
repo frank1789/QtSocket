@@ -5,8 +5,7 @@
 
 #include "logger.h"
 
-std::tuple<int, std::string> LabelSplitter::coco_label_split(
-    const QString &str) {
+std::tuple<int, std::string> LabelSplitter::CocoLabel(const QString &str) {
   QString id{""};
   QString label{""};
   QString accessor{""};
@@ -27,8 +26,7 @@ std::tuple<int, std::string> LabelSplitter::coco_label_split(
   return std::make_tuple(id.toUInt(), trimmed);
 }
 
-std::tuple<int, std::string> LabelSplitter::imagenet_label_split(
-    const QString &str) {
+std::tuple<int, std::string> LabelSplitter::ImagenetLabel(const QString &str) {
   QString id;
   QString label;
   QString accessor;
@@ -56,26 +54,36 @@ std::tuple<int, std::string> LabelSplitter::imagenet_label_split(
   return std::make_tuple(id.toUInt(), trimmed);
 }
 
-std::tuple<int, std::string> LabelSplitter::tensorflow_label_map(
-    const QString &str) {
+std::tuple<int, std::string> LabelSplitter::TensorflowLabel(const QString &str) {
   QString id;
   QString label;
-  QString accessor;
-  QRegularExpression re;
-  re.setPattern(
-      "(?<id>[0-9]\\d*)\\s*(?<label>[A-z]\\w*)?\\s+(?<accessor>[A-z]\\w+)");
+  // search for index
+  {QRegularExpression re("id\\W+(?<id>[0-9]\\d*)");
+  QRegularExpressionMatch match = re.match(str);
+  if (match.hasMatch()) {
+    id = match.captured("id");
+  }}
+  // search for label
+  {QRegularExpression re("name\\W+(?P<label>(.*))");
+  QRegularExpressionMatch match = re.match(str);
+  if (match.hasMatch()){
+    label = match.captured("label");
+    label = label.trimmed();
+    }}
+  return std::make_tuple(id.toUInt(), label.toStdString());
+}
+
+std::tuple<int, std::string> LabelSplitter::GenericLabel(const QString &str) {
+  QString id;
+  QString label;
+  QRegularExpression re("(?P<id>\\d+)\\W(?P<label>(.*))");
   QRegularExpressionMatch match = re.match(str);
   if (match.hasMatch()) {
     id = match.captured("id");
     label = match.captured("label");
-    accessor = match.captured("accessor");
-    if (!accessor.isEmpty()) {
-      label += " " + accessor;
-    }
+    label = label.trimmed();
   }
-  auto trimmed = std::regex_replace(label.toStdString(),
-                                    std::regex("^ +| +$|( ) +"), "$1");
-  return std::make_tuple(id.toUInt(), trimmed);
+  return std::make_tuple(id.toUInt(), label.toStdString());
 }
 
 std::unordered_map<int, std::string> read_label_file(

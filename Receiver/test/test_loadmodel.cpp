@@ -28,3 +28,8 @@ TEST(LoadFiles, LoadLabels) {
   std::string label{"../build_debug/test/resources/labels.txt"};
   EXPECT_TRUE(exists_file(label));
 }
+
+TEST(LoadFiles, LoadPbtxt) {
+  std::string label{"../build_debug/test/resources/label_map.pbtxt"};
+  EXPECT_TRUE(exists_file(label));
+}

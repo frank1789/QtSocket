@@ -17,9 +17,10 @@ using callback_split = std::tuple<int, std::string> (*)(const QString &);
 
 class LabelSplitter {
  public:
-  static std::tuple<int, std::string> coco_label_split(const QString &str);
-  static std::tuple<int, std::string> imagenet_label_split(const QString &str);
-  static std::tuple<int, std::string> tensorflow_label_map(const QString &str);
+  static std::tuple<int, std::string> CocoLabel(const QString &str);
+  static std::tuple<int, std::string> ImagenetLabel(const QString &str);
+  static std::tuple<int, std::string> TensorflowLabel(const QString &str);
+  static std::tuple<int, std::string> GenericLabel(const QString &str);
 };
 
 std::unordered_map<int, std::string> read_label_file(

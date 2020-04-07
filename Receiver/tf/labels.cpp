@@ -6,27 +6,36 @@
 #include <QTextStream>
 #include <regex>
 
-#include "logger.h"
 #include "label_utils.hpp"
+#include "logger.h"
 
 LabelDetection::LabelDetection(const QString &path) : m_filename(path) {
-  if (path.endsWith(".txt")) {
-    m_process_line = LabelSplitter::coco_label_split;
-  } else if (path.endsWith(".pbtxt")) {
-    m_process_line = LabelSplitter::tensorflow_label_map;
-  } else {
-    LOG(ERROR, "unsupported label map %s", path.toStdString().c_str())
-  }
+  IdentifyTypeFile();
 }
 
 LabelDetection::LabelDetection(const std::string &path)
     : m_filename(QString::fromStdString(path)) {
-  if (m_filename.endsWith(".txt")) {
-    m_process_line = LabelSplitter::coco_label_split;
-  } else if (m_filename.endsWith(".pbtxt")) {
-    m_process_line = LabelSplitter::tensorflow_label_map;
+      IdentifyTypeFile();
+    }
+
+void LabelDetection::IdentifyTypeFile() {
+  if (m_filename.endsWith(".txt") && m_filename.contains("imagenet")) {
+    m_process_line = LabelSplitter::ImagenetLabel;
+  }
+
+  else if (m_filename.endsWith(".txt") && m_filename.contains("coco")) {
+    m_process_line = LabelSplitter::CocoLabel;
+  }
+  
+  else if (m_filename.endsWith(".txt") && !m_filename.contains("imagenet") && !m_filename.contains("coco")) {
+    m_process_line = LabelSplitter::GenericLabel;
+  }
+
+  else if (m_filename.endsWith(".pbtxt")) {
+    m_process_line = LabelSplitter::TensorflowLabel;
   } else {
-    LOG(ERROR, "unsupported label map %s", path.c_str())
+    LOG(FATAL, "file unsupported")
+    std::abort();
   }
 }
 
