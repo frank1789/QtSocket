@@ -15,8 +15,8 @@ LabelDetection::LabelDetection(const QString &path) : m_filename(path) {
 
 LabelDetection::LabelDetection(const std::string &path)
     : m_filename(QString::fromStdString(path)) {
-      IdentifyTypeFile();
-    }
+  IdentifyTypeFile();
+}
 
 void LabelDetection::IdentifyTypeFile() {
   if (m_filename.endsWith(".txt") && m_filename.contains("imagenet")) {
@@ -26,14 +26,13 @@ void LabelDetection::IdentifyTypeFile() {
   else if (m_filename.endsWith(".txt") && m_filename.contains("coco")) {
     m_process_line = LabelSplitter::CocoLabel;
   }
-  
-  else if (m_filename.endsWith(".txt") && !m_filename.contains("imagenet") && !m_filename.contains("coco")) {
+
+  else if (m_filename.endsWith(".txt") && !m_filename.contains("imagenet") &&
+           !m_filename.contains("coco")) {
     m_process_line = LabelSplitter::GenericLabel;
   }
 
-  else if (m_filename.endsWith(".pbtxt")) {
-    m_process_line = LabelSplitter::TensorflowLabel;
-  } else {
+  else {
     LOG(FATAL, "file unsupported")
     std::abort();
   }
@@ -49,7 +48,6 @@ void LabelDetection::read() {
     LOG(ERROR, "file not exist %s", m_filename.toStdString().c_str())
     return;
   }
-
   QTextStream in(&file);
   while (!in.atEnd()) {
     QString line = in.readLine();

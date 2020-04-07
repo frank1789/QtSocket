@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <string>
+#include <unordered_map>
 
 #include "label_utils.hpp"
 

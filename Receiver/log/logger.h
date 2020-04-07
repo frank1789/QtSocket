@@ -12,8 +12,7 @@ extern "C" {
 #include <stdarg.h>
 #include <stdio.h>
 
-
-#define LOGGER 1
+#define LOGGER 0
 #if LOGGER
 #define LOGGER_GEN 1
 #define LOGGER_UI 1

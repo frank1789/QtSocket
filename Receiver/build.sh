@@ -41,7 +41,8 @@ compile_debug() {
     # Create lcov report capturing coverage info
     # filter out system and extra files.
     lcov -d $PWD --capture --output-file coverage.info
-    lcov --remove coverage.info '*/usr/*' \
+    lcov --remove coverage.info \
+        '*/usr/*' \
         '/.cache/*' \
         '*/unit_tests_*/*' \
         '*/googletest/*' \

@@ -3,6 +3,10 @@ os:
   - osx
 osx_image: xcode11.3
 
+cache: 
+  directories:
+    - $HOME
+
 compiler:
   - clang
 
@@ -15,4 +19,17 @@ script:
   - ./build.sh debug
 
 after_success:
-  - coveralls -r .. --gcov-options '\-lp' -E ".*CMakeFiles.*"
+  - coveralls -r $PWD/Receiver/build_debug --gcov-options '\-lp' -E ".*CMakeFiles.*"
+    # -e usr \
+    # -e .cache \
+    # -e unit_tests_ \
+    # -e googletest \
+    # -e .framework \
+    # -e Xcode.app \
+    # -e moc \
+    # -e moc_
+
+notifications:
+  email:
+    on_success: change
+    on_failure: always

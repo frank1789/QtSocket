@@ -21,9 +21,8 @@ std::tuple<int, std::string> LabelSplitter::CocoLabel(const QString &str) {
       label = label + " " + accessor;
     }
   }
-  auto trimmed = std::regex_replace(label.toStdString(),
-                                    std::regex("^ +| +$|( ) +"), "$1");
-  return std::make_tuple(id.toUInt(), trimmed);
+  label = label.trimmed();
+  return std::make_tuple(id.toUInt(), label.toStdString());
 }
 
 std::tuple<int, std::string> LabelSplitter::ImagenetLabel(const QString &str) {
@@ -41,7 +40,6 @@ std::tuple<int, std::string> LabelSplitter::ImagenetLabel(const QString &str) {
     label = match.captured("label");
     accessor = match.captured("accessor");
     accessor2 = match.captured("accessor2");
-
     if (!accessor.isEmpty()) {
       label += " " + accessor;
     }
@@ -49,27 +47,7 @@ std::tuple<int, std::string> LabelSplitter::ImagenetLabel(const QString &str) {
       label += " " + accessor2;
     }
   }
-  auto trimmed = std::regex_replace(label.toStdString(),
-                                    std::regex("^ +| +$|( ) +"), "$1");
-  return std::make_tuple(id.toUInt(), trimmed);
-}
-
-std::tuple<int, std::string> LabelSplitter::TensorflowLabel(const QString &str) {
-  QString id;
-  QString label;
-  // search for index
-  {QRegularExpression re("id\\W+(?<id>[0-9]\\d*)");
-  QRegularExpressionMatch match = re.match(str);
-  if (match.hasMatch()) {
-    id = match.captured("id");
-  }}
-  // search for label
-  {QRegularExpression re("name\\W+(?P<label>(.*))");
-  QRegularExpressionMatch match = re.match(str);
-  if (match.hasMatch()){
-    label = match.captured("label");
-    label = label.trimmed();
-    }}
+  label = label.trimmed();
   return std::make_tuple(id.toUInt(), label.toStdString());
 }
 
@@ -84,22 +62,4 @@ std::tuple<int, std::string> LabelSplitter::GenericLabel(const QString &str) {
     label = label.trimmed();
   }
   return std::make_tuple(id.toUInt(), label.toStdString());
-}
-
-std::unordered_map<int, std::string> read_label_file(
-    const std::string &file_path, callback_split split) {
-  std::unordered_map<int, std::string> labels;
-  std::ifstream input_label(file_path);
-  if (!input_label.is_open()) {
-    LOG(ERROR, "failed to open ", file_path.data())
-    std::cerr << "Cannot open file: " << file_path << std::endl;
-    std::abort();
-  } else {
-    std::string line;
-    while (getline(input_label, line)) {
-      auto [label_id, label_name] = split(QString::fromStdString(line));
-      labels[label_id] = label_name;
-    }
-  }
-  return labels;
 }

@@ -6,6 +6,10 @@
 #include "labels.hpp"
 #include "model_tpu.hpp"
 
+//////////////////////////////////////////////////////////////////////////////
+/// GitHub example case
+//////////////////////////////////////////////////////////////////////////////
+
 class Inference : public ::testing::Test {
  protected:
   const std::string mobilenet{
@@ -32,22 +36,23 @@ TEST_F(Inference, GraceHooper) {
   const QImage img("../build_debug/test/testdata/grace_hopper.bmp");
   ASSERT_FALSE(img.isNull());
   model_tflite.imageAvailable(img);
-  auto results = model_tflite.getResults();
+  auto results = model_tflite.getResultClassification();
   EXPECT_GT(results.size(), 0);
+  EXPECT_EQ(results.size(), 5);
 
   // labels
-  // EXPECT_EQ(, "military uniform");
+  EXPECT_EQ(model_tflite.getLabel(results[0].second), "military uniform");
   // EXPECT_EQ(, "Windsor tie");
   // EXPECT_EQ(, "bulletproof vest");
   // EXPECT_EQ(, "cornet, horn, trumpet, trump");
   // EXPECT_EQ(, "drumstick";
 
   // scores
-  // EXPECT_EG(, 0.860174);
-  // EXPECT_EG(, 0.0481017);
-  // EXPECT_EG(, 0.00786704);
-  // EXPECT_EG(, 0.00644932);
-  // EXPECT_EG(, 0.00608029);
+  EXPECT_GE(results[0].first, 0.860174);
+  EXPECT_GE(results[1].first, 0.0481017);
+  EXPECT_GE(results[2].first, 0.00786704);
+  EXPECT_GE(results[3].first, 0.00644932);
+  EXPECT_GE(results[4].first, 0.00608029);
 }
 
 //////////////////////////////////////////////////////////////////////////////

@@ -49,9 +49,12 @@ class ModelTensorFlowLite : public QObject {
   bool get_object_outputs();
 
   void setLabel(const std::unordered_map<int, std::string> &l);
-  QString getLabel(int i);
+  std::string getLabel(int i);
 
   std::vector<Res> getResults();
+
+
+  std::vector<std::pair<float, int>> getResultClassification() const;
  
  
  
@@ -95,6 +98,8 @@ class ModelTensorFlowLite : public QObject {
   result_t m_result;
 
   std::vector<Res> resu;
+
+  std::vector<std::pair<float, int>> top_results;
 
   std::unordered_map<int, std::string> m_labels;
 
