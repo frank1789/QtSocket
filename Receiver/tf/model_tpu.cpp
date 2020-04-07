@@ -4,7 +4,6 @@
 #include <tensorflow/lite/kernels/internal/tensor.h>
 #include <tensorflow/lite/kernels/internal/tensor_utils.h>
 
-#include <QApplication>
 #include <QDebug>
 #include <QDir>
 #include <QDirIterator>
@@ -12,18 +11,15 @@
 #include <QFileInfo>
 #include <QImage>
 
-#include "../log/instrumentor.h"
-#include "../log/logger.h"
-#include "../src/streamerthread.hpp"
+#include "instrumentor.h"
+#include "logger.h"
 #include "colormanager.hpp"
 #include "model_support_function.hpp"
 
-#define LOG_CNN 1
-
-constexpr float min_threshold{0.6f};
+constexpr float kMinimumThreshold{0.01f};
 
 ModelTensorFlowLite::ModelTensorFlowLite() : QObject() {
-  threshold = min_threshold;
+  threshold = kMinimumThreshold;
   img_height = 512;
   img_width = 512;
   wanted_height = 0;
@@ -38,7 +34,7 @@ ModelTensorFlowLite::ModelTensorFlowLite() : QObject() {
 
 ModelTensorFlowLite::ModelTensorFlowLite(const QString &path)
     : QObject(),
-      threshold(min_threshold),
+      threshold(kMinimumThreshold),
       img_height(512),
       img_width(512),
       wanted_height(0),
@@ -66,27 +62,28 @@ void ModelTensorFlowLite::imageAvailable(QPixmap image) {
   }
 }
 
+void ModelTensorFlowLite::imageAvailable(QImage image) {
+  if (!image.isNull()) {
+    LOG(DEBUG, "image not null: %s", !image.isNull() ? "true" : "false")
+    QImage input = image.convertToFormat(QImage::Format_RGB888);
+    run(input);
+  }
+}
+
 void ModelTensorFlowLite::run(QImage image) {
   LOG(DEBUG, "run inference tflite")
-  StopWatch tm;
   PROFILE_FUNCTION();
-  // check input
-  if (image.isNull()) {
-    LOG(WARN, "check image is not valid: %s\nthen return",
-        image.isNull() ? "true" : "false")
-    return;
-  }
   setInput(image);
   // perform inference
   if (interpreter->Invoke() != kTfLiteOk) {
-    LOG(ERROR, "failde to invoke intepreter")
+    LOG(ERROR, "failed to invoke interpreter")
     return;
   }
   // check if classifier or object detection
   LOG(DEBUG, "detect network: %d", kind_network)
   switch (kind_network) {
     case type_detection::image_classifier: {
-      std::vector<std::pair<float, int>> top_results;
+      
       if (!get_classifier_output(&top_results)) {
         LOG(DEBUG, "empty result")
         return;
@@ -131,7 +128,7 @@ void ModelTensorFlowLite::init_model_TFLite(const std::string &path) {
                        ? type_detection::object_detection
                        : type_detection::image_classifier;
 
-#if LOG_CNN
+#if LOGGER_CNN
     LOG(INFO, "verbose mode enable")
     auto i_size = interpreter->inputs().size();
     auto o_size = interpreter->outputs().size();
@@ -176,7 +173,7 @@ void ModelTensorFlowLite::init_model_TFLite(const std::string &path) {
     wanted_width = dims->data[2];
     wanted_channels = dims->data[3];
 
-#if LOG_CNN
+#if LOGGER_CNN
     qDebug() << "Wanted height:" << wanted_height;
     qDebug() << "Wanted width:" << wanted_width;
     qDebug() << "Wanted channels:" << wanted_channels;
@@ -274,11 +271,11 @@ bool ModelTensorFlowLite::get_object_outputs() {
       // Check minimum score
       if (score < threshold) {
         LOG(WARN, "low score: %3.3lf, class %s", static_cast<double>(score),
-            getLabel(cls).toStdString().c_str())
+            getLabel(cls).c_str())
         break;
       }
       // Get class label
-      const QString label = getLabel(cls);
+      const auto label = getLabel(cls);
       // Get coordinates
       const float top = detection_boxes[4 * i] * img_height;
       const float left = detection_boxes[4 * i + 1] * img_width;
@@ -299,7 +296,7 @@ bool ModelTensorFlowLite::get_object_outputs() {
             auto index = i * dim1 * dim2 + j * dim2 + k;
             auto check = detection_masks[index] >= MASK_THRESHOLD;
             auto fill =
-                (check == true) ? cm.getColor(label) : QColor(Qt::transparent);
+                (check == true) ? cm.getColor(QString::fromStdString(label)) : QColor(Qt::transparent);
             mask.setPixel(k, j, fill.rgba());
           }
         }
@@ -324,19 +321,32 @@ bool ModelTensorFlowLite::get_object_outputs() {
         //        result->masks.append(maskScaled);
       }
       // Append data
-      LOG(DEBUG, "label: %s, score: %3.3lf", label.toStdString().c_str(),
+      LOG(DEBUG, "label: %s, score: %3.3lf", label.c_str(),
           static_cast<double>(score))
       //      result->caption.append(label);
       //      result->confidences.append(static_cast<double>(score));
       //      result->box.append(box);
+      resu.push_back({QString::fromStdString(label), cls, static_cast<double>(score)});
       status = true;
     }
   }
   return status;
 }
 
-QString ModelTensorFlowLite::getLabel(int i) {
+std::string ModelTensorFlowLite::getLabel(int i) {
   std::unordered_map<int, std::string>::iterator it = m_labels.find(i);
   LOG(DEBUG, "search for class %d, found %s", i, it->second.c_str())
-  return QString::fromStdString(it->second);
+  return it->second;
+}
+
+
+
+std::vector<Res> ModelTensorFlowLite::getResults() {
+  return resu;
+
+}
+
+
+std::vector<std::pair<float, int>> ModelTensorFlowLite::getResultClassification() const {
+  return top_results;
 }

@@ -12,23 +12,15 @@ extern "C" {
 #include <stdarg.h>
 #include <stdio.h>
 
-#ifndef LOGGER
-#define LOGGER 1
+#define LOGGER 0
+#if LOGGER
 #define LOGGER_GEN 1
 #define LOGGER_UI 1
-#endif  // LOGGER
-
-#if LOGGER_UI
+#define LOGGER_CNN 1
 #define LOG(LEVEL, ...) logger(LEVEL, __FILE__, __LINE__, __VA_ARGS__);
 #else
 #define LOG(LEVEL, ...)
-#endif
-
-#if LOGGER_GEN
-#define LOG(LEVEL, ...) logger(LEVEL, __FILE__, __LINE__, __VA_ARGS__);
-#else
-#define LOG(LEVEL, ...)
-#endif
+#endif 
 
 // define constant color hex
 extern const char RED[];

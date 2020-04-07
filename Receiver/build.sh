@@ -13,7 +13,7 @@
 #    - $1 the first argument is optional and is used to activate the debug mode.
 #      Is required to specify "debug" or "debug" does not accept other arguments.
 #
-# Usage
+# Usage:
 #
 # compile in debug mode:
 # $./build.sh debug
@@ -41,7 +41,8 @@ compile_debug() {
     # Create lcov report capturing coverage info
     # filter out system and extra files.
     lcov -d $PWD --capture --output-file coverage.info
-    lcov --remove coverage.info '*/usr/*' \
+    lcov --remove coverage.info \
+        '*/usr/*' \
         '/.cache/*' \
         '*/unit_tests_*/*' \
         '*/googletest/*' \

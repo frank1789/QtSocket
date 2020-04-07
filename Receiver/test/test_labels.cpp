@@ -1,6 +1,5 @@
 #include <string>
 #include <memory>
-#include <QCoreApplication>
 
 #include "gtest/gtest.h"
 #include "labels.hpp"
