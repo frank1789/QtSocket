@@ -3,7 +3,6 @@ add_executable(
   test_loadmodel.cpp
   test_labels.cpp
   test_genericlabels.cpp
-  test_tensorflowlabels.cpp
   test_inference.cpp
 )
 
