@@ -1,6 +1,7 @@
 #include <QImage>
 #include <QObject>
 #include <QPixmap>
+#include <QString>
 
 #include "gtest/gtest.h"
 #include "labels.hpp"
@@ -61,8 +62,8 @@ TEST_F(Inference, GraceHooper) {
 
 class InferenceTestCase : public ::testing::Test {
  protected:
-  const std::string label_path{"../build_debug/test/resources/coco_labels.txt"};
-  const std::string model_path{"../build_debug/test/resources/detect.tflite"};
+  const QString label_path{"../build_debug/test/resources/coco_labels.txt"};
+  const QString model_path{"../build_debug/test/resources/detect.tflite"};
 
   void SetUp() {
     LabelDetection label(label_path);
