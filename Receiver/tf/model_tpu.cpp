@@ -18,7 +18,7 @@
 
 #define LOG_CNN 0
 
-constexpr float kMinimumThreshold{0.6f};
+constexpr float kMinimumThreshold{0.01f};
 
 ModelTensorFlowLite::ModelTensorFlowLite() : QObject() {
   threshold = kMinimumThreshold;

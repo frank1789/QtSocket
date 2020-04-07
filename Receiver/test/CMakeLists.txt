@@ -2,6 +2,7 @@ add_executable(
   unit_tests
   test_loadmodel.cpp
   test_labels.cpp
+  test_genericlabels.cpp
   test_inference.cpp
 )
 

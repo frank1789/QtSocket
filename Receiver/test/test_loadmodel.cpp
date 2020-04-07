@@ -14,7 +14,17 @@ TEST(LoadFiles, LoadModel) {
   EXPECT_TRUE(exists_file(model));
 }
 
-TEST(LoadFiles, LoadLabels) {
+TEST(LoadFiles, LoadModelMobileNet) {
+  std::string model{"../build_debug/test/resources/mobilenet_v1_1.0_224.tflite"};
+  EXPECT_TRUE(exists_file(model));
+}
+
+TEST(LoadFiles, LoadCocoLabels) {
   std::string label{"../build_debug/test/resources/coco_labels.txt"};
+  EXPECT_TRUE(exists_file(label));
+}
+
+TEST(LoadFiles, LoadLabels) {
+  std::string label{"../build_debug/test/resources/labels.txt"};
   EXPECT_TRUE(exists_file(label));
 }
