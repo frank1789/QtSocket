@@ -2,8 +2,8 @@
 
 #include <QDebug>
 #include <QImage>
-#include <QThread>
 #include <QPixmap>
+#include <QThread>
 
 #include "colormanager.hpp"
 #include "instrumentor.h"
