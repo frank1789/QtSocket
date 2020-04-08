@@ -113,8 +113,11 @@ class InferenceTestCase : public ::testing::Test {
 
   QImage readImageFile(const QString &filename){
     QFile file(filename);
-    file.open(QIODevice::ReadOnly);
-    return QImage::fromData(file.readAll());
+    if(!file.open(QIODevice::ReadOnly))
+      std::exit(-1);
+
+    auto img = QImage::fromData(file.readAll());
+    return img;
   }
 
   
@@ -230,8 +233,8 @@ TEST_F(InferenceTestCase, Cat3) {
   const QString cat_file("../build_debug/test/testdata/cat_3.jpg");
   auto img = readImageFile(cat_file);
   ASSERT_FALSE(img.isNull());
-  ASSERT_EQ(img.height(), 260);
-  ASSERT_EQ(img.width(), 402);
+  ASSERT_EQ(img.height(), 710);
+  ASSERT_EQ(img.width(), 836);
   model_tflite.imageAvailable(img);
   auto results = model_tflite.getResults();
   EXPECT_GT(results.size(), 0);
