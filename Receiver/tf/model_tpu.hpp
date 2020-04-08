@@ -17,6 +17,9 @@ QT_END_NAMESPACE
 
 enum type_detection { none = -1, image_classifier = 1, object_detection = 2 };
 
+
+enum class TypeDetection {ImageClassifier, ObjectDetection};
+
 struct result_t {
   // Results
   QList<QString> caption;
@@ -36,6 +39,9 @@ class ModelTensorFlowLite : public QObject {
   explicit ModelTensorFlowLite();
   explicit ModelTensorFlowLite(const QString &path);
 
+
+  void InitializeModelTFLite(const std::string &path);
+
   void LoadModelFromFile(const std::string &path) { init_model_TFLite(path); }
 
   void LoadModelFromFile(const QString &path) {
@@ -43,6 +49,9 @@ class ModelTensorFlowLite : public QObject {
   }
 
   void run(QImage image);
+
+  void RunInference(const QImage &image);
+  void ModelTensorFlowLite::ClassifierOutput();
 
   void setInput(QImage image);
 

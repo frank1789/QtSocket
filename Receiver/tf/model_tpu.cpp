@@ -13,7 +13,9 @@
 #include "tensorflow/lite/kernels/internal/tensor.h"
 #include "tensorflow/lite/kernels/internal/tensor_utils.h"
 
-constexpr float kMinimumThreshold{0.01f};
+constexpr float kMinimumThreshold{0.001f};
+
+constexpr float kThreshold{0.001f};
 
 ModelTensorFlowLite::ModelTensorFlowLite() : QObject() {
   threshold = kMinimumThreshold;
@@ -29,21 +31,93 @@ ModelTensorFlowLite::ModelTensorFlowLite() : QObject() {
   LOG(DEBUG, "ideal thread count: %d", QThread::idealThreadCount())
 }
 
-ModelTensorFlowLite::ModelTensorFlowLite(const QString &path)
-    : QObject(),
-      threshold(kMinimumThreshold),
-      img_height(512),
-      img_width(512),
-      wanted_height(0),
-      wanted_width(0),
-      wanted_channels(3),
-      has_detection_mask(false),
-      kind_network(type_detection::none),
-      numThreads(QThread::idealThreadCount()) {
-  LOG(INFO, "ctor model tensorflow lite")
-  LOG(DEBUG, "ideal thread count: %d", QThread::idealThreadCount())
-  LOG(DEBUG, "load model from resources %s", path.toStdString().c_str())
-  init_model_TFLite(path.toStdString());
+void ModelTensorFlowLite::InitializeModelTFLite(const std::string &path) {
+  // open model and assign error reporter
+  try {
+    model =
+        tflite::FlatBufferModel::BuildFromFile(path.c_str(), &error_reporter);
+    if (model == nullptr) {
+      LOG(FATAL, "can't load TensorFLow lite model from: %", path.c_str())
+    }
+    // link model and resolver
+    tflite::InterpreterBuilder builder(*model.get(), resolver);
+    // Check interpreter
+    if (builder(&interpreter) != kTfLiteOk) {
+      LOG(ERROR, "interpreter is not ok")
+    }
+
+    // Apply accelaration (Neural Network Android)
+    //    interpreter->UseNNAPI(accelaration);
+
+    if (interpreter->AllocateTensors() != kTfLiteOk) {
+      LOG(ERROR, "failed to allocate tensor")
+    }
+
+    if (interpreter->outputs().size() > 1) {
+      kind_network = TypeDetection::ObjectDetection;
+    } else {
+      kind_network = TypeDetection::ImageClassifier;
+    }
+
+    // Get input dimension from the input tensor metadata
+    // Assuming one input only
+    int input = interpreter->inputs()[0];
+    TfLiteIntArray *dims = interpreter->tensor(input)->dims;
+
+    // Save outputs
+    outputs.clear();
+    for (unsigned int i = 0; i < interpreter->outputs().size(); ++i) {
+      outputs.push_back(interpreter->tensor(interpreter->outputs()[i]));
+    }
+
+    wanted_height = dims->data[1];
+    wanted_width = dims->data[2];
+    wanted_channels = dims->data[3];
+
+    if (numThreads > 1) {
+      interpreter->SetNumThreads(numThreads);
+    }
+    LOG(INFO, "Tensorflow initialization: OK")
+
+#if LOGGER_CNN
+    LOG(INFO, "verbose mode enable")
+    auto i_size = interpreter->inputs().size();
+    auto o_size = interpreter->outputs().size();
+    auto t_size = interpreter->tensors_size();
+
+    qDebug() << "tensors size: " << t_size;
+    qDebug() << "nodes size: " << interpreter->nodes_size();
+    qDebug() << "inputs: " << i_size;
+    qDebug() << "outputs: " << o_size;
+
+    for (auto i = 0; i < i_size; i++)
+      qDebug() << "input" << i << "name:" << interpreter->GetInputName(i)
+               << ", type:"
+               << interpreter->tensor(interpreter->inputs()[i])->type;
+
+    for (auto i = 0; i < o_size; i++)
+      qDebug() << "output" << i << "name:" << interpreter->GetOutputName(i)
+               << ", type:"
+               << interpreter->tensor(interpreter->outputs()[i])->type;
+
+    for (auto i = 0; i < t_size; i++) {
+      if (interpreter->tensor(i)->name)
+        qDebug() << i << ":" << interpreter->tensor(i)->name << ","
+                 << interpreter->tensor(i)->bytes << ","
+                 << interpreter->tensor(i)->type << ","
+                 << interpreter->tensor(i)->params.scale << ","
+                 << interpreter->tensor(i)->params.zero_point;
+    }
+
+    qDebug() << "Wanted height:" << wanted_height;
+    qDebug() << "Wanted width:" << wanted_width;
+    qDebug() << "Wanted channels:" << wanted_channels;
+#endif
+
+  } catch (...) {
+    LOG(FATAL, "can't load TensorFLow lite model from: %", path.c_str())
+    std::abort();
+  }
 }
 
 void ModelTensorFlowLite::setLabel(
@@ -65,6 +139,40 @@ void ModelTensorFlowLite::imageAvailable(QImage image) {
     QImage input = image.convertToFormat(QImage::Format_RGB888);
     run(input);
   }
+}
+
+
+void ModelTensorFlowLite::RunInference(const QImage &image) {
+  PROFILE_FUNCTION();
+  const std::vector<int> inputs = interpreter->inputs();
+  const std::vector<int> outputs = interpreter->outputs();
+  // detect kind input
+  int input = interpreter->inputs()[0];
+  auto input_type = interpreter->tensor(input)->type;
+    switch (input_type) {
+    case kTfLiteFloat32:
+      resize<float>(interpreter->typed_tensor<float>(input), in.data(),
+                    image_height, image_width, image_channels, wanted_height,
+                    wanted_width, wanted_channels, s);
+      break;
+    case kTfLiteInt8:
+      resize<int8_t>(interpreter->typed_tensor<int8_t>(input), in.data(),
+                     image_height, image_width, image_channels, wanted_height,
+                     wanted_width, wanted_channels, s);
+      break;
+    case kTfLiteUInt8:
+      resize<uint8_t>(interpreter->typed_tensor<uint8_t>(input), in.data(),
+                      image_height, image_width, image_channels, wanted_height,
+                      wanted_width, wanted_channels, s);
+      break;
+    default:
+      LOG(FATAL, "cannot handle input type %s yet", interpreter->tensor(input)->type)
+      std::exit(-1);
+  }
+
+
+
+
 }
 
 void ModelTensorFlowLite::run(QImage image) {
@@ -342,4 +450,32 @@ std::vector<Res> ModelTensorFlowLite::getResults() { return resu; }
 std::vector<std::pair<float, int>>
 ModelTensorFlowLite::getResultClassification() const {
   return top_results;
+}
+
+
+void ModelTensorFlowLite::ClassifierOutput(){
+  int output = interpreter->outputs()[0];
+  TfLiteIntArray* output_dims = interpreter->tensor(output)->dims;
+  // assume output dims to be something like (1, 1, ... ,size)
+  auto output_size = output_dims->data[output_dims->size - 1];
+  switch (interpreter->tensor(output)->type) {
+    case kTfLiteFloat32:
+      get_top_n<float>(interpreter->typed_output_tensor<float>(0), output_size,
+                       s->number_of_results, threshold, &top_results,
+                       s->input_type);
+      break;
+    case kTfLiteInt8:
+      get_top_n<int8_t>(interpreter->typed_output_tensor<int8_t>(0),
+                        output_size, s->number_of_results, threshold,
+                        &top_results, s->input_type);
+      break;
+    case kTfLiteUInt8:
+      get_top_n<uint8_t>(interpreter->typed_output_tensor<uint8_t>(0),
+                         output_size, s->number_of_results, threshold,
+                         &top_results, s->input_type);
+      break;
+    default:
+      LOG(FATAL, "cannot handle output type %s yet", interpreter->tensor(output)->type)
+      std::exit(-1);
+  }
 }
