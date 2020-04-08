@@ -37,18 +37,15 @@ struct Res {
 class ModelTensorFlowLite : public QObject {
  public:
   explicit ModelTensorFlowLite();
-  explicit ModelTensorFlowLite(const QString &path);
+  // explicit ModelTensorFlowLite(const QString &path);
 
 
   void InitializeModelTFLite(const std::string &path);
 
-  void LoadModelFromFile(const std::string &path) { init_model_TFLite(path); }
+  void LoadModelFromFile(const std::string &path);
+  void LoadModelFromFile(const QString &path);
 
-  void LoadModelFromFile(const QString &path) {
-    init_model_TFLite(path.toStdString());
-  }
-
-  void run(QImage image);
+  // void run(QImage image);
 
   void RunInference(const QImage &image);
   void ClassifierOutput();
