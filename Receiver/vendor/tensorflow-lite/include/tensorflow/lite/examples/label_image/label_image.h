@@ -26,7 +26,7 @@ struct Settings {
   bool verbose = false;
   bool accel = false;
   bool old_accel = false;
-  bool input_floating = false;
+  TfLiteType input_type = kTfLiteFloat32;
   bool profiling = false;
   bool allow_fp16 = false;
   bool gl_backend = false;
