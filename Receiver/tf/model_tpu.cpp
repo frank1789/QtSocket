@@ -50,11 +50,7 @@ void ModelTensorFlowLite::InitializeModelTFLite(const std::string &path) {
       LOG(FATAL, "can't load TensorFLow lite model from: %", path.c_str())
     }
     // link model and resolver
-    tflite::InterpreterBuilder builder(*model.get(), resolver);
-    // Check interpreter
-    if (builder(&interpreter) != kTfLiteOk) {
-      LOG(ERROR, "interpreter is not ok")
-    }
+    tflite::InterpreterBuilder(*model.get(), resolver)(&interpreter);
 
     // Apply accelaration (Neural Network Android)
     //    interpreter->UseNNAPI(accelaration);
@@ -155,7 +151,7 @@ void ModelTensorFlowLite::RunInference(const QImage &image) {
   PROFILE_FUNCTION();
   // convert image to buffer
   auto sz = image.sizeInBytes();
-  auto in = std::make_unique<unsigned char[]>(sz);
+  auto in = std::make_unique<uint8_t[]>(sz);
   memcpy(in.get(), image.bits(), sz);
 
   const std::vector<int> inputs = interpreter->inputs();
@@ -184,6 +180,16 @@ void ModelTensorFlowLite::RunInference(const QImage &image) {
           interpreter->tensor(input)->type)
       std::exit(-1);
   }
+
+      for (int i = 0; i < 2; i++) {
+      if (interpreter->Invoke() != kTfLiteOk) {
+        LOG(FATAL, "Failed to invoke tflite!")
+      }
+    }
+
+
+
+  ClassifierOutput();
 }
 
 // void ModelTensorFlowLite::run(QImage image) {
@@ -331,38 +337,38 @@ void ModelTensorFlowLite::RunInference(const QImage &image) {
 //   }
 // }
 
-bool ModelTensorFlowLite::get_classifier_output(
-    std::vector<std::pair<float, int>> *top_results) {
-  bool status{false};
-  const int output_size = 1000;
-  const size_t num_results = 5;
-  // Assume one output
-  if (interpreter->outputs().size() > 0) {
-    int output = interpreter->outputs()[0];
-    switch (interpreter->tensor(output)->type) {
-      case kTfLiteFloat32: {
-        tflite::label_image::get_top_n<float>(
-            interpreter->typed_output_tensor<float>(0), output_size,
-            num_results, threshold, top_results, true);
-        status = true;
-        break;
-      }
-      case kTfLiteUInt8: {
-        tflite::label_image::get_top_n<uint8_t>(
-            interpreter->typed_output_tensor<uint8_t>(0), output_size,
-            num_results, threshold, top_results, false);
-        status = true;
-        break;
-      }
-      default: {
-        LOG(ERROR, "Cannot handle output type %s yet",
-            interpreter->tensor(output)->type)
-        status = false;
-      }
-    }
-  }
-  return status;
-}
+// bool ModelTensorFlowLite::get_classifier_output(
+//     std::vector<std::pair<float, int>> *top_results) {
+//   bool status{false};
+//   const int output_size = 1000;
+//   const size_t num_results = 5;
+//   // Assume one output
+//   if (interpreter->outputs().size() > 0) {
+//     int output = interpreter->outputs()[0];
+//     switch (interpreter->tensor(output)->type) {
+//       case kTfLiteFloat32: {
+//         tflite::label_image::get_top_n<float>(
+//             interpreter->typed_output_tensor<float>(0), output_size,
+//             num_results, threshold, top_results, true);
+//         status = true;
+//         break;
+//       }
+//       case kTfLiteUInt8: {
+//         tflite::label_image::get_top_n<uint8_t>(
+//             interpreter->typed_output_tensor<uint8_t>(0), output_size,
+//             num_results, threshold, top_results, false);
+//         status = true;
+//         break;
+//       }
+//       default: {
+//         LOG(ERROR, "Cannot handle output type %s yet",
+//             interpreter->tensor(output)->type)
+//         status = false;
+//       }
+//     }
+//   }
+//   return status;
+// }
 
 bool ModelTensorFlowLite::get_object_outputs() {
   bool status{false};
