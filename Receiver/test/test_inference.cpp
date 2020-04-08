@@ -96,21 +96,27 @@ class InferenceTestCase : public ::testing::Test {
  protected:
   const QString label_path{"../build_debug/test/resources/coco_labels.txt"};
   const QString model_path{"../build_debug/test/resources/detect.tflite"};
+  ModelTensorFlowLite model_tflite;
 
-  void SetUp() {
+  void SetUp() override {
     LabelDetection label(label_path);
     label.read();
     model_tflite.LoadModelFromFile(model_path);
     model_tflite.setLabel(label.getLabels());
   }
 
-  void TearDown() {
+  void TearDown() override {
     // code here will be called just after the test completes
     // ok to through exceptions from here if need be
   }
 
- public:
-  ModelTensorFlowLite model_tflite;
+  QImage readImageFile(const QString &filename){
+    QFile file(filename);
+    file.open(QIODevice::ReadOnly);
+    return QImage::fromData(file.readAll());
+  }
+
+  
 };
 
 TEST_F(InferenceTestCase, Dog) {
@@ -135,10 +141,77 @@ TEST_F(InferenceTestCase, Dog) {
   // model_tflite.setInput(img);
 }
 
-TEST_F(InferenceTestCase, Cat) {
-  const QImage img("../build_debug/test/testdata/cat_1.jpg");
+TEST_F(InferenceTestCase, Cat1) {
+  const QString cat_file("../build_debug/test/testdata/cat_1.jpg");
+  auto img = readImageFile(cat_file);
   ASSERT_FALSE(img.isNull());
+  ASSERT_EQ(img.height(), 1800);
+  ASSERT_EQ(img.width(), 1200);
   model_tflite.imageAvailable(img);
   auto results = model_tflite.getResults();
   EXPECT_GT(results.size(), 0);
+  // labels
+  // EXPECT_EQ(model_tflite.getLabel(results[0].second), "cat");
+  // scores
+  // EXPECT_GE(results[0].first, 0.01);
+}
+
+TEST_F(InferenceTestCase, Cat2) {
+  const QString cat_file("../build_debug/test/testdata/cat_2.jpg");
+  auto img = readImageFile(cat_file);
+  ASSERT_FALSE(img.isNull());
+  ASSERT_EQ(img.height(), 400);
+  ASSERT_EQ(img.width(), 600);
+  model_tflite.imageAvailable(img);
+  auto results = model_tflite.getResults();
+  EXPECT_GT(results.size(), 0);
+  // labels
+  // EXPECT_EQ(model_tflite.getLabel(results[0].second), "cat");
+  // scores
+  // EXPECT_GE(results[0].first, 0.01);
+}
+
+TEST_F(InferenceTestCase, Cat3) {
+  const QString cat_file("../build_debug/test/testdata/cat_3.jpg");
+  auto img = readImageFile(cat_file);
+  ASSERT_FALSE(img.isNull());
+  ASSERT_EQ(img.height(), 260);
+  ASSERT_EQ(img.width(), 402);
+  model_tflite.imageAvailable(img);
+  auto results = model_tflite.getResults();
+  EXPECT_GT(results.size(), 0);
+  // labels
+  // EXPECT_EQ(model_tflite.getLabel(results[0].second), "cat");
+  // scores
+  // EXPECT_GE(results[0].first, 0.01);
+}
+
+TEST_F(InferenceTestCase, Cat4) {
+  const QString cat_file("../build_debug/test/testdata/cat_4.jpg");
+  auto img = readImageFile(cat_file);
+  ASSERT_FALSE(img.isNull());
+  ASSERT_EQ(img.height(), 700);
+  ASSERT_EQ(img.width(), 1600);
+  model_tflite.imageAvailable(img);
+  auto results = model_tflite.getResults();
+  EXPECT_GT(results.size(), 0);
+  // labels
+  // EXPECT_EQ(model_tflite.getLabel(results[0].second), "cat");
+  // scores
+  // EXPECT_GE(results[0].first, 0.01);
+}
+
+TEST_F(InferenceTestCase, Cat5) {
+  const QString cat_file("../build_debug/test/testdata/cat_5.jpg");
+  auto img = readImageFile(cat_file);
+  ASSERT_FALSE(img.isNull());
+  ASSERT_EQ(img.height(), 678);
+  ASSERT_EQ(img.width(), 800);
+  model_tflite.imageAvailable(img);
+  auto results = model_tflite.getResults();
+  EXPECT_GT(results.size(), 0);
+  // labels
+  // EXPECT_EQ(model_tflite.getLabel(results[0].second), "cat");
+  // scores
+  // EXPECT_GE(results[0].first, 0.01);
 }
