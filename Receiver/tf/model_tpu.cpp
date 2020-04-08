@@ -188,8 +188,11 @@ void ModelTensorFlowLite::RunInference(const QImage &image) {
     }
 
 
-
-  ClassifierOutput();
+  if (kind_network == type_detection::image_classifier)
+  {ClassifierOutput();}
+  else{
+    get_object_outputs();
+  }
 }
 
 // void ModelTensorFlowLite::run(QImage image) {
