@@ -12,6 +12,7 @@
 
 #include <QDebug>
 
+#include "tensorflow/lite/builtin_op_data.h"
 #include "tensorflow/lite/error_reporter.h"
 #include "tensorflow/lite/graph_info.h"
 #include "tensorflow/lite/interpreter.h"
@@ -19,16 +20,14 @@
 #include "tensorflow/lite/kernels/internal/tensor_utils.h"
 #include "tensorflow/lite/kernels/register.h"
 #include "tensorflow/lite/model.h"
-#include "tensorflow/lite/builtin_op_data.h"
-#include "tensorflow/lite/interpreter.h"
-#include "tensorflow/lite/kernels/register.h"
 #include "tensorflow/lite/string_util.h"
-
 
 using namespace tflite;
 
 template <class T>
-void resize(T* out, uint8_t* in, int image_height, int image_width, int image_channels, int wanted_height, int wanted_width, int wanted_channels, TfLiteType input_type) {
+void resize(T* out, uint8_t* in, int image_height, int image_width,
+            int image_channels, int wanted_height, int wanted_width,
+            int wanted_channels, TfLiteType input_type) {
   int number_of_pixels = image_height * image_width * image_channels;
   std::unique_ptr<Interpreter> interpreter(new Interpreter);
 
@@ -44,17 +43,25 @@ void resize(T* out, uint8_t* in, int image_height, int image_width, int image_ch
 
   // set parameters of tensors
   TfLiteQuantizationParams quant;
-  interpreter->SetTensorParametersReadWrite(0, kTfLiteFloat32, "input", {1, image_height, image_width, image_channels}, quant);
-  interpreter->SetTensorParametersReadWrite(1, kTfLiteInt32, "new_size", {2}, quant);
-  interpreter->SetTensorParametersReadWrite(2, kTfLiteFloat32, "output", {1, wanted_height, wanted_width, wanted_channels}, quant);
+  interpreter->SetTensorParametersReadWrite(
+      0, kTfLiteFloat32, "input",
+      {1, image_height, image_width, image_channels}, quant);
+  interpreter->SetTensorParametersReadWrite(1, kTfLiteInt32, "new_size", {2},
+                                            quant);
+  interpreter->SetTensorParametersReadWrite(
+      2, kTfLiteFloat32, "output",
+      {1, wanted_height, wanted_width, wanted_channels}, quant);
 
   ops::builtin::BuiltinOpResolver resolver;
-  const TfLiteRegistration* resize_op = resolver.FindOp(BuiltinOperator_RESIZE_BILINEAR, 1);
-  auto* params = reinterpret_cast<TfLiteResizeBilinearParams*>(malloc(sizeof(TfLiteResizeBilinearParams)));
+  const TfLiteRegistration* resize_op =
+      resolver.FindOp(BuiltinOperator_RESIZE_BILINEAR, 1);
+  auto* params = reinterpret_cast<TfLiteResizeBilinearParams*>(
+      malloc(sizeof(TfLiteResizeBilinearParams)));
   params->align_corners = false;
   // params->half_pixel_centers = false;
   // params->
-  interpreter->AddNodeWithParameters({0, 1}, {2}, nullptr, 0, params, resize_op, nullptr);
+  interpreter->AddNodeWithParameters({0, 1}, {2}, nullptr, 0, params, resize_op,
+                                     nullptr);
 
   interpreter->AllocateTensors();
 
@@ -73,7 +80,6 @@ void resize(T* out, uint8_t* in, int image_height, int image_width, int image_ch
 
   auto output = interpreter->typed_tensor<float>(2);
   auto output_number_of_pixels = wanted_height * wanted_width * wanted_channels;
-
 
   float input_mean = 127.5f;
   float input_std = 127.5f;
@@ -94,30 +100,6 @@ void resize(T* out, uint8_t* in, int image_height, int image_width, int image_ch
     }
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ///
 ///-----------------------------------------------------------------------------------------------------------------------

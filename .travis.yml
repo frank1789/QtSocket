@@ -12,8 +12,8 @@ install:
   - pip3 install cpp-coveralls
 
 script:
-  - cd Receiver
-  - ./build.sh debug
+  - cd ReceiverTPU && ./build.sh && cd ..
+  - cd Receiver && ./build.sh debug && cd ..
 
 after_success:
   - COVERAGE_FILES=$(find $PWD -name "coverage-filtered.info")
