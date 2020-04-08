@@ -2,10 +2,13 @@
 #include <QObject>
 #include <QPixmap>
 #include <QString>
+#include <vector>
 
 #include "gtest/gtest.h"
 #include "labels.hpp"
 #include "model_tpu.hpp"
+#include "tensorflow/lite/examples/label_image/bitmap_helpers.h"
+#include "tensorflow/lite/examples/label_image/label_image.h"
 
 //////////////////////////////////////////////////////////////////////////////
 /// GitHub example case
@@ -35,25 +38,53 @@ class Inference : public ::testing::Test {
 
 TEST_F(Inference, GraceHooper) {
   const QImage img("../build_debug/test/testdata/grace_hopper.bmp");
+  // check dimension
+  ASSERT_EQ(img.height(), 606);
+  ASSERT_EQ(img.width(), 517);
+  
+  // input
+  auto sz = img.sizeInBytes();
+  auto input = std::make_unique<uint8_t[]>(sz);
+  memcpy(input.get(), img.bits(), sz);
+  
+  // output
+  tflite::label_image::Settings s;
+  s.input_type = kTfLiteUInt8;
+  
+  // ASSERT_EQ(img.channels, 3);
+  std::vector<uint8_t> output(606 * 517 * 3);
+  tflite::label_image::resize<uint8_t>(output.data(), input.get(), 606, 517, 3, 214, 214, 3, &s);
+  ASSERT_EQ(output[0], 0x15);
+  ASSERT_EQ(output[214 * 214 * 3 - 1], 0x11);
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   ASSERT_FALSE(img.isNull());
-  model_tflite.imageAvailable(img);
-  auto results = model_tflite.getResultClassification();
-  EXPECT_GT(results.size(), 0);
-  EXPECT_EQ(results.size(), 5);
+  // model_tflite.imageAvailable(img);
+  // auto results = model_tflite.getResultClassification();
+  // EXPECT_EQ(results.size(), 0);
+  // EXPECT_LE(results.size(), 5);
 
   // labels
-  EXPECT_EQ(model_tflite.getLabel(results[0].second), "military uniform");
+  // EXPECT_EQ(model_tflite.getLabel(results[0].second), "military uniform");
   // EXPECT_EQ(, "Windsor tie");
   // EXPECT_EQ(, "bulletproof vest");
   // EXPECT_EQ(, "cornet, horn, trumpet, trump");
   // EXPECT_EQ(, "drumstick";
 
   // scores
-  EXPECT_GE(results[0].first, 0.860174);
-  EXPECT_GE(results[1].first, 0.0481017);
-  EXPECT_GE(results[2].first, 0.00786704);
-  EXPECT_GE(results[3].first, 0.00644932);
-  EXPECT_GE(results[4].first, 0.00608029);
+  // EXPECT_GE(results[0].first, 0.860174);
+  // EXPECT_GE(results[1].first, 0.0481017);
+  // EXPECT_GE(results[2].first, 0.00786704);
+  // EXPECT_GE(results[3].first, 0.00644932);
+  // EXPECT_GE(results[4].first, 0.00608029);
 }
 
 //////////////////////////////////////////////////////////////////////////////
