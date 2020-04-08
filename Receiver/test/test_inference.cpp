@@ -120,27 +120,81 @@ class InferenceTestCase : public ::testing::Test {
   
 };
 
-TEST_F(InferenceTestCase, Dog) {
-  // const QImage img("../build_debug/test/testdata/dog_2.jpg");
-  // ASSERT_FALSE(img.isNull());
-  // model_tflite.imageAvailable(img);
-  // auto results = model_tflite.getResults();
-  // EXPECT_GT(results.size(), 0);
-
-  // img_directory.setFilter(QDir::Files);
-  // QFileInfoList entries = img_directory.entryInfoList(QDir::AllEntries);
-  // EXPECT_GT(entries.size(), 0);
-  // qDebug() << entries.size();
-  // if (entries.size() != 0) {
-
-  // qDebug() << entries.at(qrand() % entries.size()).absoluteFilePath();
-
-  // }
-
-  // QImage img(img_path);
-  // ASSERT_TRUE(img.isNull());
-  // model_tflite.setInput(img);
+TEST_F(InferenceTestCase, Dog1) {
+  const QString dog_file("../build_debug/test/testdata/dog_1.jpg");
+  auto img = readImageFile(dog_file);
+  ASSERT_FALSE(img.isNull());
+  ASSERT_EQ(img.height(), 248);
+  ASSERT_EQ(img.width(), 203);
+  model_tflite.imageAvailable(img);
+  auto results = model_tflite.getResults();
+  EXPECT_GT(results.size(), 0);
+  // labels
+  // EXPECT_EQ(model_tflite.getLabel(results[0].second), "dog");
+  // scores
+  // EXPECT_GE(results[0].first, 0.01);
 }
+
+TEST_F(InferenceTestCase, Dog2) {
+  const QString dog_file("../build_debug/test/testdata/dog_2.jpg");
+  auto img = readImageFile(dog_file);
+  ASSERT_FALSE(img.isNull());
+  ASSERT_EQ(img.height(), 485);
+  ASSERT_EQ(img.width(), 729);
+  model_tflite.imageAvailable(img);
+  auto results = model_tflite.getResults();
+  EXPECT_GT(results.size(), 0);
+  // labels
+  // EXPECT_EQ(model_tflite.getLabel(results[0].second), "dog");
+  // scores
+  // EXPECT_GE(results[0].first, 0.01);
+}
+
+TEST_F(InferenceTestCase, Dog3) {
+  const QString dog_file("../build_debug/test/testdata/dog_3.jpg");
+  auto img = readImageFile(dog_file);
+  ASSERT_FALSE(img.isNull());
+  ASSERT_EQ(img.height(), 1385);
+  ASSERT_EQ(img.width(), 1385);
+  model_tflite.imageAvailable(img);
+  auto results = model_tflite.getResults();
+  EXPECT_GT(results.size(), 0);
+  // labels
+  // EXPECT_EQ(model_tflite.getLabel(results[0].second), "dog");
+  // scores
+  // EXPECT_GE(results[0].first, 0.01);
+}
+
+TEST_F(InferenceTestCase, Dog4) {
+  const QString dog_file("../build_debug/test/testdata/dog_4.jpg");
+  auto img = readImageFile(dog_file);
+  ASSERT_FALSE(img.isNull());
+  ASSERT_EQ(img.height(), 478);
+  ASSERT_EQ(img.width(), 640);
+  model_tflite.imageAvailable(img);
+  auto results = model_tflite.getResults();
+  EXPECT_GT(results.size(), 0);
+  // labels
+  // EXPECT_EQ(model_tflite.getLabel(results[0].second), "dog");
+  // scores
+  // EXPECT_GE(results[0].first, 0.01);
+}
+
+TEST_F(InferenceTestCase, Dog5) {
+  const QString dog_file("../build_debug/test/testdata/dog_5.jpg");
+  auto img = readImageFile(dog_file);
+  ASSERT_FALSE(img.isNull());
+  ASSERT_EQ(img.height(), 500);
+  ASSERT_EQ(img.width(), 750);
+  model_tflite.imageAvailable(img);
+  auto results = model_tflite.getResults();
+  EXPECT_GT(results.size(), 0);
+  // labels
+  // EXPECT_EQ(model_tflite.getLabel(results[0].second), "dog");
+  // scores
+  // EXPECT_GE(results[0].first, 0.01);
+}
+
 
 TEST_F(InferenceTestCase, Cat1) {
   const QString cat_file("../build_debug/test/testdata/cat_1.jpg");
