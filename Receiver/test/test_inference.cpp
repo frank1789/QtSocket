@@ -3,6 +3,7 @@
 #include <QPixmap>
 #include <QString>
 #include <vector>
+#include <QFile>
 
 #include "gtest/gtest.h"
 #include "labels.hpp"
