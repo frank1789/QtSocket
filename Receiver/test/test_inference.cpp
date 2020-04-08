@@ -50,6 +50,7 @@ TEST_F(Inference, GraceHooper) {
   // output
   tflite::label_image::Settings s;
   s.input_type = kTfLiteUInt8;
+  s.model_name = mobilenet;
   
   // ASSERT_EQ(img.channels, 3);
   std::vector<uint8_t> output(606 * 517 * 3);
