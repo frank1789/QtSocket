@@ -36,7 +36,7 @@ int main(int argc, char* argv[]) {
   }
   LabelDetection label(label_path);
   label.read();
-  ModelTensorFlowLite model_tflite(model_path);
+  ModelTensorFlowLite model_tflite; model_tflite.LoadModelFromFile(model_path);
   model_tflite.setLabel(label.getLabels());
   QObject::connect(
       &w, &MainWindow::updateImage,

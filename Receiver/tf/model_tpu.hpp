@@ -18,7 +18,7 @@ QT_END_NAMESPACE
 enum type_detection { none = -1, image_classifier = 1, object_detection = 2 };
 
 
-enum class TypeDetection {ImageClassifier, ObjectDetection};
+enum class TypeDetection : int {ImageClassifier, ObjectDetection};
 
 struct result_t {
   // Results
@@ -51,7 +51,7 @@ class ModelTensorFlowLite : public QObject {
   void run(QImage image);
 
   void RunInference(const QImage &image);
-  void ModelTensorFlowLite::ClassifierOutput();
+  void ClassifierOutput();
 
   void setInput(QImage image);
 

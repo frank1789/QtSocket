@@ -12,6 +12,9 @@
 #include "tensorflow/lite/examples/label_image/get_top_n_impl.h"
 #include "tensorflow/lite/kernels/internal/tensor.h"
 #include "tensorflow/lite/kernels/internal/tensor_utils.h"
+#include "tensorflow/lite/examples/label_image/bitmap_helpers_impl.h"
+
+namespace tfclassif = tflite::label_image;
 
 constexpr float kMinimumThreshold{0.001f};
 
@@ -54,9 +57,9 @@ void ModelTensorFlowLite::InitializeModelTFLite(const std::string &path) {
     }
 
     if (interpreter->outputs().size() > 1) {
-      kind_network = TypeDetection::ObjectDetection;
+      // kind_network = TypeDetection::ObjectDetection;
     } else {
-      kind_network = TypeDetection::ImageClassifier;
+      // kind_network = TypeDetection::ImageClassifier;
     }
 
     // Get input dimension from the input tensor metadata
@@ -129,7 +132,7 @@ void ModelTensorFlowLite::imageAvailable(QPixmap image) {
   if (!image.isNull()) {
     LOG(DEBUG, "image not null: %s", !image.isNull() ? "true" : "false")
     QImage input = image.toImage().convertToFormat(QImage::Format_RGB888);
-    run(input);
+    RunInference(input);
   }
 }
 
@@ -137,13 +140,21 @@ void ModelTensorFlowLite::imageAvailable(QImage image) {
   if (!image.isNull()) {
     LOG(DEBUG, "image not null: %s", !image.isNull() ? "true" : "false")
     QImage input = image.convertToFormat(QImage::Format_RGB888);
-    run(input);
+    RunInference(input);
   }
 }
 
 
 void ModelTensorFlowLite::RunInference(const QImage &image) {
   PROFILE_FUNCTION();
+  // convert image to buffer
+  auto sz = image.sizeInBytes();
+  auto in = std::make_unique<unsigned char[]>(sz);
+  memcpy(in.get(), image.bits(), sz);
+
+
+
+
   const std::vector<int> inputs = interpreter->inputs();
   const std::vector<int> outputs = interpreter->outputs();
   // detect kind input
@@ -151,19 +162,19 @@ void ModelTensorFlowLite::RunInference(const QImage &image) {
   auto input_type = interpreter->tensor(input)->type;
     switch (input_type) {
     case kTfLiteFloat32:
-      resize<float>(interpreter->typed_tensor<float>(input), in.data(),
-                    image_height, image_width, image_channels, wanted_height,
-                    wanted_width, wanted_channels, s);
+      resize<float>(interpreter->typed_tensor<float>(input), in.get(),
+                    img_height, img_width, m_num_channels, wanted_height,
+                    wanted_width, wanted_channels, input_type);
       break;
     case kTfLiteInt8:
-      resize<int8_t>(interpreter->typed_tensor<int8_t>(input), in.data(),
-                     image_height, image_width, image_channels, wanted_height,
-                     wanted_width, wanted_channels, s);
+      resize<int8_t>(interpreter->typed_tensor<int8_t>(input), in.get(),
+                     img_height, img_width, m_num_channels, wanted_height,
+                     wanted_width, wanted_channels, input_type);
       break;
     case kTfLiteUInt8:
-      resize<uint8_t>(interpreter->typed_tensor<uint8_t>(input), in.data(),
-                      image_height, image_width, image_channels, wanted_height,
-                      wanted_width, wanted_channels, s);
+      resize<uint8_t>(interpreter->typed_tensor<uint8_t>(input), in.get(),
+                      img_height, img_width, m_num_channels, wanted_height,
+                      wanted_width, wanted_channels, input_type);
       break;
     default:
       LOG(FATAL, "cannot handle input type %s yet", interpreter->tensor(input)->type)
@@ -458,21 +469,23 @@ void ModelTensorFlowLite::ClassifierOutput(){
   TfLiteIntArray* output_dims = interpreter->tensor(output)->dims;
   // assume output dims to be something like (1, 1, ... ,size)
   auto output_size = output_dims->data[output_dims->size - 1];
+  auto number_of_results = 5;
+  auto input_type = interpreter->tensor(output)->type;
   switch (interpreter->tensor(output)->type) {
     case kTfLiteFloat32:
-      get_top_n<float>(interpreter->typed_output_tensor<float>(0), output_size,
-                       s->number_of_results, threshold, &top_results,
-                       s->input_type);
+      tfclassif::get_top_n<float>(interpreter->typed_output_tensor<float>(0), output_size,
+                       number_of_results, threshold, &top_results,
+                       input_type);
       break;
     case kTfLiteInt8:
-      get_top_n<int8_t>(interpreter->typed_output_tensor<int8_t>(0),
-                        output_size, s->number_of_results, threshold,
-                        &top_results, s->input_type);
+      tfclassif::get_top_n<int8_t>(interpreter->typed_output_tensor<int8_t>(0),
+                        output_size, number_of_results, threshold,
+                        &top_results, input_type);
       break;
     case kTfLiteUInt8:
-      get_top_n<uint8_t>(interpreter->typed_output_tensor<uint8_t>(0),
-                         output_size, s->number_of_results, threshold,
-                         &top_results, s->input_type);
+      tfclassif::get_top_n<uint8_t>(interpreter->typed_output_tensor<uint8_t>(0),
+                         output_size, number_of_results, threshold,
+                         &top_results, input_type);
       break;
     default:
       LOG(FATAL, "cannot handle output type %s yet", interpreter->tensor(output)->type)
