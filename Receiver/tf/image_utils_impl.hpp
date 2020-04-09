@@ -2,6 +2,7 @@
 #define IMAGE_UTILS_IMPL_HPP
 
 #include <cstdlib>
+
 #include "tensorflow/lite/builtin_op_data.h"
 #include "tensorflow/lite/error_reporter.h"
 #include "tensorflow/lite/graph_info.h"

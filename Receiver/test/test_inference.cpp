@@ -42,36 +42,9 @@ TEST_F(Inference, GraceHooper) {
   ASSERT_FALSE(img.isNull());
   ASSERT_EQ(img.height(), 606);
   ASSERT_EQ(img.width(), 517);
-  // input
-  // auto sz = img.sizeInBytes();
-  // auto input = std::make_unique<uint8_t[]>(sz);
-  // memcpy(input.get(), img.bits(), sz);
-  
-  // output
-  // tflite::label_image::Settings s;
-  // s.input_type = kTfLiteUInt8;
-  // s.model_name = mobilenet;
-  
-  // ASSERT_EQ(img.channels, 3);
-  // std::vector<uint8_t> output(606 * 517 * 3);
-  // tflite::label_image::resize<uint8_t>(output.data(), input.get(), 606, 517, 3, 214, 214, 3, &s);
-  // ASSERT_EQ(output[0], 0x15);
-  // ASSERT_EQ(output[214 * 214 * 3 - 1], 0x11);
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
   model_tflite.imageAvailable(img);
   auto results = model_tflite.getResultClassification();
-  EXPECT_EQ(results.size(), 0);
-  EXPECT_LE(results.size(), 5);
+  EXPECT_EQ(results.size(), 5);
 
   // labels
   EXPECT_EQ(model_tflite.getLabel(results[0].second), "military uniform");
@@ -94,7 +67,7 @@ TEST_F(Inference, GraceHooper) {
 
 class InferenceTestCase : public ::testing::Test {
  protected:
-  const QString label_path{"./build_debug/test/resources/coco_labels.txt"};
+  const QString label_path{"../build_debug/test/resources/coco_labels.txt"};
   const QString model_path{"../build_debug/test/resources/detect.tflite"};
   ModelTensorFlowLite model_tflite;
 

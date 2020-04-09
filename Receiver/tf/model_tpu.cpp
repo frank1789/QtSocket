@@ -159,7 +159,6 @@ void ModelTensorFlowLite::RunInference(const QImage &image) {
   int input = interpreter->inputs()[0];
   TfLiteType input_type = interpreter->tensor(input)->type;
   LOG(DEBUG, "detect input type")
-  std::cout << interpreter->tensor(input)->type << "\n";
   switch (input_type) {
     case kTfLiteFloat32:
       LOG(DEBUG, "case kTfLiteFloat32")
@@ -186,8 +185,6 @@ void ModelTensorFlowLite::RunInference(const QImage &image) {
           interpreter->tensor(input)->type)
       std::exit(-1);
   }
-  LOG(DEBUG, "exit switch")
-
   for (int i = 0; i < 2; i++) {
     interpreter->Invoke();
     if (interpreter->Invoke() != kTfLiteOk) {
