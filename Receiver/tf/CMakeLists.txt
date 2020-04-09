@@ -12,6 +12,7 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/model_tpu.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/label_utils.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/labels.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/object_detection.cpp
 )
 
 set(HEADERS 
@@ -25,6 +26,7 @@ set(HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/tensordata.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/image_utils_impl.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/image_utils.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/object_detection.hpp
 )
 
 #-------------------------------------------------------------------------------

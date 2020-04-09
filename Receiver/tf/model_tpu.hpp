@@ -8,6 +8,7 @@
 #include "tensorflow/lite/interpreter.h"
 #include "tensorflow/lite/kernels/register.h"
 #include "tensorflow/lite/model.h"
+#include "object_detection.hpp"
 
 QT_BEGIN_NAMESPACE
 class QImage;
@@ -47,11 +48,12 @@ class ModelTensorFlowLite : public QObject {
   void setLabel(const std::unordered_map<int, std::string> &l);
   std::string getLabel(int i);
 
-  std::vector<Res> getResults();
+  std::vector<std::tuple<int, float, QRectF> > getResults() const;
 
   std::vector<std::pair<float, int>> getResultClassification() const;
 
- public slots:
+  void ObjectOutput(const QImage img);
+public slots:
   void imageAvailable(QPixmap image);
   void imageAvailable(QImage image);
 
@@ -74,14 +76,10 @@ class ModelTensorFlowLite : public QObject {
 
   // thread
   int num_threads_;
-
-  result_t m_result;
-
-  std::vector<Res> resu;
-
   std::vector<std::pair<float, int>> top_results;
-
   std::unordered_map<int, std::string> m_labels;
+
+  std::unique_ptr<ObjectDetection> object_detect_{nullptr};
 
   // model
   std::unique_ptr<tflite::FlatBufferModel> model{nullptr};
