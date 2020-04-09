@@ -17,7 +17,7 @@ void StreamerThread::run() {
   socket->write(new char[4]{1, 2, 3, 4});
   QMutexLocker locker(&mutex);
   QByteArray buffer;
-  while (m_quit == false) {
+  while (!m_quit) {
     if (socket->waitForReadyRead(3000)) {
       buffer.append(socket->readAll());
       msleep(350);

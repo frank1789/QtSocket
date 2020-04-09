@@ -1,9 +1,7 @@
 #include "object_detection.hpp"
 
-
-
-#include <QRectF>
 #include <QImage>
+#include <QRectF>
 
 #include "tensordata.hpp"
 
@@ -24,22 +22,25 @@ void ObjectDetection::SearchObject(const std::vector<TfLiteTensor *> &outputs,
       if (cls == 0) continue;  // in general class 0 is background
       auto score = static_cast<float>(detection_scores_.get()[i]);
       if (score < threshold) {
-        LOG(WARN, "low score: %f, class %d", score, cls)
+        LOG(LevelAlert::W, "low score: ", score, ", class ", cls)
         break;
       }
 
       // get corners coordinates
-      const auto top =      static_cast<qreal>(detection_boxes_.get()[4 * i] * img.height());
-      const auto left =     static_cast<qreal>(detection_boxes_.get()[4 * i + 1] * img.width());
-      const auto bottom =   static_cast<qreal>(detection_boxes_.get()[4 * i + 2] * img.height());
-      const auto right =    static_cast<qreal>(detection_boxes_.get()[4 * i + 3] * img.width());
+      const auto top =
+          static_cast<qreal>(detection_boxes_.get()[4 * i] * img.height());
+      const auto left =
+          static_cast<qreal>(detection_boxes_.get()[4 * i + 1] * img.width());
+      const auto bottom =
+          static_cast<qreal>(detection_boxes_.get()[4 * i + 2] * img.height());
+      const auto right =
+          static_cast<qreal>(detection_boxes_.get()[4 * i + 3] * img.width());
       QRectF box(left, top, right - left, bottom - top);
-      LOG(DEBUG, "find score: %f, class %d", score, cls)
-      class_box_.push_back(std::make_tuple(cls, score, box));
+      LOG(LevelAlert::D, "find score: ", score, ", class: ", cls)
+      class_box_.emplace_back(std::make_tuple(cls, score, box));
     }
   }
 }
-
 
 std::vector<std::tuple<int, float, QRectF>> ObjectDetection::getResult() const {
   return class_box_;

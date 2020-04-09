@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QtNetwork>
+
 #include "streamerthread.hpp"
 
 QT_BEGIN_NAMESPACE

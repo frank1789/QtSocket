@@ -11,7 +11,7 @@
 #include <QString>
 #include <QVBoxLayout>
 
-#include "../log/logger.h"
+#include "logger.h"
 #include "ui_mainwindow.h"
 
 MainWindow::MainWindow(QWidget *parent)
@@ -19,7 +19,7 @@ MainWindow::MainWindow(QWidget *parent)
   ui->setupUi(this);
 
   // init central widget
-  QWidget *widget = new QWidget;
+  auto *widget = new QWidget;
   setCentralWidget(widget);
 
   // init complete group
@@ -59,7 +59,7 @@ MainWindow::~MainWindow() {
 
 QGridLayout *MainWindow::create_label_preview() {
 #if LOGGER_UI
-  LOG(INFO, "make preview label ui.")
+  LOG(LevelAlert::I, "make preview label ui.")
 #endif
   // create horizontal layout
   auto m_group_label = new QGridLayout;
