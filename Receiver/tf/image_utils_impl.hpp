@@ -4,13 +4,8 @@
 #include <cstdlib>
 
 #include "tensorflow/lite/builtin_op_data.h"
-#include "tensorflow/lite/error_reporter.h"
-#include "tensorflow/lite/graph_info.h"
 #include "tensorflow/lite/interpreter.h"
-#include "tensorflow/lite/kernels/internal/tensor.h"
-#include "tensorflow/lite/kernels/internal/tensor_utils.h"
 #include "tensorflow/lite/kernels/register.h"
-#include "tensorflow/lite/model.h"
 #include "tensorflow/lite/string_util.h"
 
 template <typename T, typename U>
