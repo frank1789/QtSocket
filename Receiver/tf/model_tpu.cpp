@@ -9,7 +9,7 @@
 #include "image_utils.hpp"
 #include "instrumentor.h"
 #include "logger.h"
-#include "model_support_function.hpp"
+#include "tensordata.hpp"
 #include "tensorflow/lite/examples/label_image/bitmap_helpers_impl.h"
 #include "tensorflow/lite/examples/label_image/get_top_n_impl.h"
 #include "tensorflow/lite/kernels/internal/tensor.h"
@@ -17,23 +17,20 @@
 
 namespace tfclassif = tflite::label_image;
 
-constexpr float kMinimumThreshold{0.001f};
-
 constexpr float kThreshold{0.001f};
+constexpr float kMaskThreshold{0.3f};
 
 ModelTensorFlowLite::ModelTensorFlowLite()
     : QObject(),
-      threshold(kMinimumThreshold),
       img_height(512),
       img_width(512),
-      wanted_height(0),
-      wanted_width(0),
-      wanted_channels(3),
-      has_detection_mask(false),
-      kind_network(type_detection::none),
-      numThreads(QThread::idealThreadCount()) {
+      wanted_height_(0),
+      wanted_width_(0),
+      wanted_channels_(3),
+      has_detection_mask_(false),
+      num_threads_(QThread::idealThreadCount()) {
   LOG(INFO, "ctor model tensorflow lite")
-  LOG(DEBUG, "ideal thread count: %d", numThreads)
+  LOG(DEBUG, "ideal thread count: %d", num_threads_)
 }
 
 void ModelTensorFlowLite::LoadModelFromFile(const std::string &path) {
@@ -63,9 +60,9 @@ void ModelTensorFlowLite::InitializeModelTFLite(const std::string &path) {
     }
 
     if (interpreter->outputs().size() > 1) {
-      kind_network = type_detection::object_detection;
+      kind_network_ = TypeDetection::ObjectDetection;
     } else {
-      kind_network = type_detection::image_classifier;
+      kind_network_ = TypeDetection::ImageClassifier;
     }
 
     // Get input dimension from the input tensor metadata
@@ -78,13 +75,13 @@ void ModelTensorFlowLite::InitializeModelTFLite(const std::string &path) {
     for (unsigned int i = 0; i < interpreter->outputs().size(); ++i) {
       outputs.push_back(interpreter->tensor(interpreter->outputs()[i]));
     }
-
-    wanted_height = dims->data[1];
-    wanted_width = dims->data[2];
-    wanted_channels = dims->data[3];
-
-    if (numThreads > 1) {
-      interpreter->SetNumThreads(numThreads);
+    // set desire tensor image
+    wanted_height_ = dims->data[1];
+    wanted_width_ = dims->data[2];
+    wanted_channels_ = dims->data[3];
+    // set number threads
+    if (num_threads_ > 1) {
+      interpreter->SetNumThreads(num_threads_);
     }
     LOG(INFO, "Tensorflow initialization: OK")
 
@@ -118,9 +115,9 @@ void ModelTensorFlowLite::InitializeModelTFLite(const std::string &path) {
                  << interpreter->tensor(i)->params.zero_point;
     }
 
-    qDebug() << "Wanted height:" << wanted_height;
-    qDebug() << "Wanted width:" << wanted_width;
-    qDebug() << "Wanted channels:" << wanted_channels;
+    qDebug() << "wanted height:" << wanted_height_;
+    qDebug() << "wanted width:" << wanted_width_;
+    qDebug() << "wanted channels:" << wanted_channels_;
 #endif
 
   } catch (...) {
@@ -146,15 +143,13 @@ void ModelTensorFlowLite::imageAvailable(QImage image) {
   if (!image.isNull()) {
     LOG(DEBUG, "image not null: %s", !image.isNull() ? "true" : "false")
     QImage input = image.convertToFormat(QImage::Format_RGB888);
-    RunInference(image);
+    RunInference(input);
   }
 }
 
 void ModelTensorFlowLite::RunInference(const QImage &image) {
   LOG(DEBUG, "RunInference")
   PROFILE_FUNCTION();
-  // const std::vector<int> inputs = interpreter->inputs();
-  // const std::vector<int> outputs = interpreter->outputs();
   // detect kind input
   int input = interpreter->inputs()[0];
   TfLiteType input_type = interpreter->tensor(input)->type;
@@ -163,21 +158,21 @@ void ModelTensorFlowLite::RunInference(const QImage &image) {
     case kTfLiteFloat32:
       LOG(DEBUG, "case kTfLiteFloat32")
       resize_image<float>(interpreter->typed_tensor<float>(input), image.bits(),
-                          img_height, img_width, m_num_channels, wanted_height,
-                          wanted_width, wanted_channels, input_type);
+                          img_height, img_width, m_num_channels, wanted_height_,
+                          wanted_width_, wanted_channels_, input_type);
       break;
     case kTfLiteInt8:
       LOG(DEBUG, "case kTfLiteInt8")
       resize_image<int8_t>(interpreter->typed_tensor<int8_t>(input),
                            image.bits(), img_height, img_width, m_num_channels,
-                           wanted_height, wanted_width, wanted_channels,
+                           wanted_height_, wanted_width_, wanted_channels_,
                            input_type);
       break;
     case kTfLiteUInt8:
       LOG(DEBUG, "case kTfLiteUInt8")
       resize_image<uint8_t>(interpreter->typed_tensor<uint8_t>(input),
                             image.bits(), img_height, img_width, m_num_channels,
-                            wanted_height, wanted_width, wanted_channels,
+                            wanted_height_, wanted_width_, wanted_channels_,
                             input_type);
       break;
     default:
@@ -192,10 +187,17 @@ void ModelTensorFlowLite::RunInference(const QImage &image) {
     }
   }
 
-  if (kind_network == type_detection::image_classifier) {
-    ClassifierOutput();
-  } else {
-    get_object_outputs();
+  switch (kind_network_) {
+    case TypeDetection::ImageClassifier:
+      ClassifierOutput();
+      break;
+
+    case TypeDetection::ObjectDetection:
+      get_object_outputs();
+      break;
+
+    default:
+      break;
   }
 }
 
@@ -385,7 +387,7 @@ bool ModelTensorFlowLite::get_object_outputs() {
     const float *detection_classes = TensorData<float>(outputs[1], 0);
     const float *detection_scores = TensorData<float>(outputs[2], 0);
     const float *detection_boxes = TensorData<float>(outputs[0], 0);
-    const float *detection_masks = !has_detection_mask || outputs.size() < 5
+    const float *detection_masks = !has_detection_mask_ || outputs.size() < 5
                                        ? nullptr
                                        : TensorData<float>(outputs[4], 0);
     ColorManager cm;
@@ -398,7 +400,7 @@ bool ModelTensorFlowLite::get_object_outputs() {
       // Get score
       auto score = detection_scores[i];
       // Check minimum score
-      if (score < threshold) {
+      if (score < kThreshold) {
         LOG(WARN, "low score: %3.3lf, class %s", static_cast<double>(score),
             getLabel(cls).c_str())
         break;
@@ -423,7 +425,7 @@ bool ModelTensorFlowLite::get_object_outputs() {
         for (int j = 0; j < mask.height(); j++) {
           for (int k = 0; k < mask.width(); k++) {
             auto index = i * dim1 * dim2 + j * dim2 + k;
-            auto check = detection_masks[index] >= MASK_THRESHOLD;
+            auto check = detection_masks[index] >= kMaskThreshold;
             auto fill = (check == true)
                             ? cm.getColor(QString::fromStdString(label))
                             : QColor(Qt::transparent);
@@ -487,18 +489,18 @@ void ModelTensorFlowLite::ClassifierOutput() {
   switch (interpreter->tensor(output)->type) {
     case kTfLiteFloat32:
       tfclassif::get_top_n<float>(interpreter->typed_output_tensor<float>(0),
-                                  output_size, number_of_results, threshold,
+                                  output_size, number_of_results, kThreshold,
                                   &top_results, input_type);
       break;
     case kTfLiteInt8:
       tfclassif::get_top_n<int8_t>(interpreter->typed_output_tensor<int8_t>(0),
-                                   output_size, number_of_results, threshold,
+                                   output_size, number_of_results, kThreshold,
                                    &top_results, input_type);
       break;
     case kTfLiteUInt8:
       tfclassif::get_top_n<uint8_t>(
           interpreter->typed_output_tensor<uint8_t>(0), output_size,
-          number_of_results, threshold, &top_results, input_type);
+          number_of_results, kThreshold, &top_results, input_type);
       break;
     default:
       LOG(FATAL, "cannot handle output type %s yet",

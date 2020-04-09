@@ -1,8 +1,9 @@
 #ifndef TENSOR_DATA_HPP
 #define TENSOR_DATA_HPP
 
-#include "tensordata_impl.hpp"
+#include <cstdint>
 
+#include "tensordata_impl.hpp"
 
 template <typename T>
 T* TensorData(TfLiteTensor* tensor, int batch_index);
@@ -16,4 +17,4 @@ int8_t* TensorData(TfLiteTensor* tensor, int batch_index);
 template <>
 uint8_t* TensorData(TfLiteTensor* tensor, int batch_index);
 
-#endif // TENSOR_DATA_HPP
+#endif  // TENSOR_DATA_HPP

@@ -15,7 +15,7 @@ class QString;
 class QPixmap;
 QT_END_NAMESPACE
 
-enum class TypeDetection : int {ImageClassifier, ObjectDetection};
+enum class TypeDetection : int { ImageClassifier, ObjectDetection };
 
 struct result_t {
   // Results
@@ -58,19 +58,20 @@ class ModelTensorFlowLite : public QObject {
  private:
   //  methods
   void init_model_TFLite(const std::string &path);
-  bool getObjectOutputsTFLite(QStringList &captions, QList<double> &confidences, QList<QRectF> &locations, QList<QImage> &masks);
+  bool getObjectOutputsTFLite(QStringList &captions, QList<double> &confidences,
+                              QList<QRectF> &locations, QList<QImage> &masks);
 
   // input image properties
   const int m_num_channels{3};
   int img_height, img_width;
-  // size tensor image desired 
+  // size tensor image desired
   int wanted_height_;
-  int wanted_width_; 
+  int wanted_width_;
   int wanted_channels_;
   // detection mask
   bool has_detection_mask_;
   TypeDetection kind_network_{TypeDetection::ObjectDetection};
-  
+
   // thread
   unsigned int num_threads_;
 
