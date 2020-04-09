@@ -164,17 +164,17 @@ void ModelTensorFlowLite::RunInference(const QImage &image) {
     case kTfLiteFloat32:
       resize_image<float>(interpreter->typed_tensor<float>(input), image.bits(),
                     img_height, img_width, m_num_channels, wanted_height,
-                    wanted_width, wanted_channels);
+                    wanted_width, wanted_channels, input_type);
       break;
     case kTfLiteInt8:
       resize_image<int8_t>(interpreter->typed_tensor<int8_t>(input), image.bits(),
                      img_height, img_width, m_num_channels, wanted_height,
-                     wanted_width, wanted_channels);
+                     wanted_width, wanted_channels, input_type);
       break;
     case kTfLiteUInt8:
       resize_image<uint8_t>(interpreter->typed_tensor<uint8_t>(input), image.bits(),
                       img_height, img_width, m_num_channels, wanted_height,
-                      wanted_width, wanted_channels);
+                      wanted_width, wanted_channels, input_type);
       break;
     default:
       LOG(FATAL, "cannot handle input type %s yet",

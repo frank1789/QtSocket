@@ -15,7 +15,7 @@
 template <typename T, typename U>
 void resize_image(T* out, U* in, int image_height, int image_width,
                   int image_channels, int wanted_height, int wanted_width,
-                  int wanted_channels) {
+                  int wanted_channels, TfLiteType input_type) {
   int number_of_pixels = image_height * image_width * image_channels;
   std::unique_ptr<tflite::Interpreter> interpreter(new tflite::Interpreter);
 
