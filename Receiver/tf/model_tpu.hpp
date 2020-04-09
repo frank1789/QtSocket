@@ -73,7 +73,7 @@ class ModelTensorFlowLite : public QObject {
   TypeDetection kind_network_{TypeDetection::ObjectDetection};
 
   // thread
-  unsigned int num_threads_;
+  int num_threads_;
 
   result_t m_result;
 
