@@ -15,50 +15,48 @@
 /// GitHub example case
 //////////////////////////////////////////////////////////////////////////////
 
-// class Inference : public ::testing::Test {
-//  protected:
-//   const std::string mobilenet{"./build_debug/test/resources/mobilenet_v1_1.0_224.tflite"};
-//   const std::string mobnet_label{"./build_debug/test/resources/labels.txt"};
+class Inference : public ::testing::Test {
+ protected:
+  const std::string mobilenet{"../build_debug/test/resources/mobilenet_v1_1.0_224.tflite"};
+  const std::string mobnet_label{"../build_debug/test/resources/labels.txt"};
 
-//   void SetUp() {
-//     LabelDetection label(mobnet_label);
-//     label.read();
-//     model_tflite.LoadModelFromFile(mobilenet);
-//     model_tflite.setLabel(label.getLabels());
-//   }
+  void SetUp() {
+    LabelDetection label(mobnet_label);
+    label.read();
+    model_tflite.LoadModelFromFile(mobilenet);
+    model_tflite.setLabel(label.getLabels());
+  }
 
-//   void TearDown() {
-//     // code here will be called just after the test completes
-//     // ok to through exceptions from here if need be
-//   }
+  void TearDown() {
+    // code here will be called just after the test completes
+    // ok to through exceptions from here if need be
+  }
 
-//  public:
-//   ModelTensorFlowLite model_tflite;
-// };
+ public:
+  ModelTensorFlowLite model_tflite;
+};
 
-// TEST_F(Inference, GraceHooper) {
-//   const QImage img("./build_debug/test/testdata/grace_hopper.bmp");
-//   // check dimension
-//   ASSERT_EQ(img.height(), 606);
-//   ASSERT_EQ(img.width(), 517);
+TEST_F(Inference, GraceHooper) {
+  const QImage img("../build_debug/test/testdata/grace_hopper.bmp");
+  // check dimension
+  ASSERT_FALSE(img.isNull());
+  ASSERT_EQ(img.height(), 606);
+  ASSERT_EQ(img.width(), 517);
+  // input
+  // auto sz = img.sizeInBytes();
+  // auto input = std::make_unique<uint8_t[]>(sz);
+  // memcpy(input.get(), img.bits(), sz);
   
-//   // input
-//   auto sz = img.sizeInBytes();
-//   auto input = std::make_unique<uint8_t[]>(sz);
-//   memcpy(input.get(), img.bits(), sz);
+  // output
+  // tflite::label_image::Settings s;
+  // s.input_type = kTfLiteUInt8;
+  // s.model_name = mobilenet;
   
-//   // output
-//   tflite::label_image::Settings s;
-//   s.input_type = kTfLiteUInt8;
-//   s.model_name = mobilenet;
-  
-//   // ASSERT_EQ(img.channels, 3);
-//   std::vector<uint8_t> output(606 * 517 * 3);
-//   tflite::label_image::resize<uint8_t>(output.data(), input.get(), 606, 517, 3, 214, 214, 3, &s);
-//   ASSERT_EQ(output[0], 0x15);
-//   ASSERT_EQ(output[214 * 214 * 3 - 1], 0x11);
-  
-  
+  // ASSERT_EQ(img.channels, 3);
+  // std::vector<uint8_t> output(606 * 517 * 3);
+  // tflite::label_image::resize<uint8_t>(output.data(), input.get(), 606, 517, 3, 214, 214, 3, &s);
+  // ASSERT_EQ(output[0], 0x15);
+  // ASSERT_EQ(output[214 * 214 * 3 - 1], 0x11);
   
   
   
@@ -67,26 +65,28 @@
   
   
   
-//   ASSERT_FALSE(img.isNull());
-//   // model_tflite.imageAvailable(img);
-//   // auto results = model_tflite.getResultClassification();
-//   // EXPECT_EQ(results.size(), 0);
-//   // EXPECT_LE(results.size(), 5);
+  
+  
+  
+  model_tflite.imageAvailable(img);
+  auto results = model_tflite.getResultClassification();
+  EXPECT_EQ(results.size(), 0);
+  EXPECT_LE(results.size(), 5);
 
-//   // labels
-//   // EXPECT_EQ(model_tflite.getLabel(results[0].second), "military uniform");
-//   // EXPECT_EQ(, "Windsor tie");
-//   // EXPECT_EQ(, "bulletproof vest");
-//   // EXPECT_EQ(, "cornet, horn, trumpet, trump");
-//   // EXPECT_EQ(, "drumstick";
+  // labels
+  EXPECT_EQ(model_tflite.getLabel(results[0].second), "military uniform");
+  EXPECT_EQ(model_tflite.getLabel(results[1].second), "Windsor tie");
+  EXPECT_EQ(model_tflite.getLabel(results[2].second), "bulletproof vest");
+  EXPECT_EQ(model_tflite.getLabel(results[3].second), "cornet, horn, trumpet, trump");
+  EXPECT_EQ(model_tflite.getLabel(results[4].second), "drumstick");
 
-//   // scores
-//   // EXPECT_GE(results[0].first, 0.860174);
-//   // EXPECT_GE(results[1].first, 0.0481017);
-//   // EXPECT_GE(results[2].first, 0.00786704);
-//   // EXPECT_GE(results[3].first, 0.00644932);
-//   // EXPECT_GE(results[4].first, 0.00608029);
-// }
+  // scores
+  EXPECT_GE(results[0].first, 0.860174);
+  EXPECT_GE(results[1].first, 0.0481017);
+  EXPECT_GE(results[2].first, 0.00786704);
+  EXPECT_GE(results[3].first, 0.00644932);
+  EXPECT_GE(results[4].first, 0.00608029);
+}
 
 //////////////////////////////////////////////////////////////////////////////
 /// Other Case

@@ -13,6 +13,7 @@
 #include "tensorflow/lite/examples/label_image/get_top_n_impl.h"
 #include "tensorflow/lite/kernels/internal/tensor.h"
 #include "tensorflow/lite/kernels/internal/tensor_utils.h"
+#include "image_utils.hpp"
 
 namespace tfclassif = tflite::label_image;
 
@@ -150,9 +151,9 @@ void ModelTensorFlowLite::imageAvailable(QImage image) {
 void ModelTensorFlowLite::RunInference(const QImage &image) {
   PROFILE_FUNCTION();
   // convert image to buffer
-  auto sz = image.sizeInBytes();
-  auto in = std::make_unique<uint8_t[]>(sz);
-  memcpy(in.get(), image.bits(), sz);
+  // auto sz = image.sizeInBytes();
+  // auto in = std::make_unique<uint8_t[]>(sz);
+  // memcpy(in.get(), image.bits(), sz);
 
   const std::vector<int> inputs = interpreter->inputs();
   const std::vector<int> outputs = interpreter->outputs();
@@ -161,19 +162,19 @@ void ModelTensorFlowLite::RunInference(const QImage &image) {
   auto input_type = interpreter->tensor(input)->type;
   switch (input_type) {
     case kTfLiteFloat32:
-      resize<float>(interpreter->typed_tensor<float>(input), in.get(),
+      resize_image<float>(interpreter->typed_tensor<float>(input), image.bits(),
                     img_height, img_width, m_num_channels, wanted_height,
-                    wanted_width, wanted_channels, input_type);
+                    wanted_width, wanted_channels);
       break;
     case kTfLiteInt8:
-      resize<int8_t>(interpreter->typed_tensor<int8_t>(input), in.get(),
+      resize_image<int8_t>(interpreter->typed_tensor<int8_t>(input), image.bits(),
                      img_height, img_width, m_num_channels, wanted_height,
-                     wanted_width, wanted_channels, input_type);
+                     wanted_width, wanted_channels);
       break;
     case kTfLiteUInt8:
-      resize<uint8_t>(interpreter->typed_tensor<uint8_t>(input), in.get(),
+      resize_image<uint8_t>(interpreter->typed_tensor<uint8_t>(input), image.bits(),
                       img_height, img_width, m_num_channels, wanted_height,
-                      wanted_width, wanted_channels, input_type);
+                      wanted_width, wanted_channels);
       break;
     default:
       LOG(FATAL, "cannot handle input type %s yet",
@@ -182,6 +183,7 @@ void ModelTensorFlowLite::RunInference(const QImage &image) {
   }
 
       for (int i = 0; i < 2; i++) {
+        interpreter->Invoke();
       if (interpreter->Invoke() != kTfLiteOk) {
         LOG(FATAL, "Failed to invoke tflite!")
       }
