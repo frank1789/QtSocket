@@ -158,20 +158,20 @@ void ModelTensorFlowLite::RunInference(const QImage &image) {
     case kTfLiteFloat32:
       LOG(DEBUG, "case kTfLiteFloat32")
       resize_image<float>(interpreter->typed_tensor<float>(input), image.bits(),
-                          img_height, img_width, m_num_channels, wanted_height_,
+                          image.height(), image.width(), m_num_channels, wanted_height_,
                           wanted_width_, wanted_channels_, input_type);
       break;
     case kTfLiteInt8:
       LOG(DEBUG, "case kTfLiteInt8")
       resize_image<int8_t>(interpreter->typed_tensor<int8_t>(input),
-                           image.bits(), img_height, img_width, m_num_channels,
+                           image.bits(), image.height(), image.width(), m_num_channels,
                            wanted_height_, wanted_width_, wanted_channels_,
                            input_type);
       break;
     case kTfLiteUInt8:
       LOG(DEBUG, "case kTfLiteUInt8")
       resize_image<uint8_t>(interpreter->typed_tensor<uint8_t>(input),
-                            image.bits(), img_height, img_width, m_num_channels,
+                            image.bits(), image.height(), image.width(), m_num_channels,
                             wanted_height_, wanted_width_, wanted_channels_,
                             input_type);
       break;
@@ -197,7 +197,7 @@ void ModelTensorFlowLite::RunInference(const QImage &image) {
       break;
 
     default:
-      break;
+      return;
   }
 }
 
@@ -484,7 +484,7 @@ void ModelTensorFlowLite::ClassifierOutput() {
   TfLiteIntArray *output_dims = interpreter->tensor(output)->dims;
   // assume output dims to be something like (1, 1, ... ,size)
   auto output_size = output_dims->data[output_dims->size - 1];
-  auto number_of_results = 5;
+  size_t number_of_results = 5;
   auto input_type = interpreter->tensor(output)->type;
   switch (interpreter->tensor(output)->type) {
     case kTfLiteFloat32:
