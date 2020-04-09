@@ -15,7 +15,7 @@ class QString;
 class QPixmap;
 QT_END_NAMESPACE
 
-enum type_detection { none = -1, image_classifier = 1, object_detection = 2 };
+enum class TypeDetection : int { ImageClassifier, ObjectDetection };
 
 struct result_t {
   // Results
@@ -34,16 +34,11 @@ struct Res {
 class ModelTensorFlowLite : public QObject {
  public:
   explicit ModelTensorFlowLite();
-  explicit ModelTensorFlowLite(const QString &path);
-
-  void LoadModelFromFile(const std::string &path) { init_model_TFLite(path); }
-
-  void LoadModelFromFile(const QString &path) {
-    init_model_TFLite(path.toStdString());
-  }
-
-  void run(QImage image);
-
+  void InitializeModelTFLite(const std::string &path);
+  void LoadModelFromFile(const std::string &path);
+  void LoadModelFromFile(const QString &path);
+  void RunInference(const QImage &image);
+  void ClassifierOutput();
   void setInput(QImage image);
 
   bool get_classifier_output(std::vector<std::pair<float, int>> *top_results);
@@ -66,32 +61,19 @@ class ModelTensorFlowLite : public QObject {
   bool getObjectOutputsTFLite(QStringList &captions, QList<double> &confidences,
                               QList<QRectF> &locations, QList<QImage> &masks);
 
-  // constants
-  static constexpr float MASK_THRESHOLD{0.3f};
-
-  // parametric threshold
-  float threshold;
-
-  // output string
-  const QString m_num_detections = "num_detections: ";
-  const QString m_detection_classes = "detection_classes: ";
-  const QString m_detection_scores = "detection_scores: ";
-  const QString m_detection_boxes = "detection_boxes: ";
-  const QString m_detection_masks = "detection_masks: ";
-
-  // image properties
+  // input image properties
   const int m_num_channels{3};
   int img_height, img_width;
-  int wanted_height, wanted_width, wanted_channels;
-
+  // size tensor image desired
+  int wanted_height_;
+  int wanted_width_;
+  int wanted_channels_;
   // detection mask
-  bool has_detection_mask;
-
-  //
-  int kind_network;
+  bool has_detection_mask_;
+  TypeDetection kind_network_{TypeDetection::ObjectDetection};
 
   // thread
-  int numThreads;
+  int num_threads_;
 
   result_t m_result;
 
@@ -102,10 +84,10 @@ class ModelTensorFlowLite : public QObject {
   std::unordered_map<int, std::string> m_labels;
 
   // model
-  std::unique_ptr<tflite::FlatBufferModel> model;
+  std::unique_ptr<tflite::FlatBufferModel> model{nullptr};
   tflite::ops::builtin::BuiltinOpResolver resolver;
   tflite::StderrReporter error_reporter;
-  std::unique_ptr<tflite::Interpreter> interpreter;
+  std::unique_ptr<tflite::Interpreter> interpreter{nullptr};
   std::vector<TfLiteTensor *> outputs;
 };
 

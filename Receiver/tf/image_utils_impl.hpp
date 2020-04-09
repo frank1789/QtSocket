@@ -1,37 +1,19 @@
-/* Copyright 2017 The TensorFlow Authors. All Rights Reserved.
+#ifndef IMAGE_UTILS_IMPL_HPP
+#define IMAGE_UTILS_IMPL_HPP
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-==============================================================================*/
-
-#ifndef TENSORFLOW_LITE_EXAMPLES_LABEL_IMAGE_BITMAP_HELPERS_IMPL_H_
-#define TENSORFLOW_LITE_EXAMPLES_LABEL_IMAGE_BITMAP_HELPERS_IMPL_H_
-
-#include "tensorflow/lite/examples/label_image/label_image.h"
+#include <cstdlib>
 
 #include "tensorflow/lite/builtin_op_data.h"
 #include "tensorflow/lite/interpreter.h"
 #include "tensorflow/lite/kernels/register.h"
 #include "tensorflow/lite/string_util.h"
 
-namespace tflite {
-namespace label_image {
-
-template <class T>
-void resize(T* out, uint8_t* in, int image_height, int image_width,
-            int image_channels, int wanted_height, int wanted_width,
-            int wanted_channels, Settings* s) {
+template <typename T, typename U>
+void resize_image(T* out, U* in, int image_height, int image_width,
+                  int image_channels, int wanted_height, int wanted_width,
+                  int wanted_channels, TfLiteType input_type) {
   int number_of_pixels = image_height * image_width * image_channels;
-  std::unique_ptr<Interpreter> interpreter(new Interpreter);
+  std::unique_ptr<tflite::Interpreter> interpreter(new tflite::Interpreter);
 
   int base_index = 0;
 
@@ -54,16 +36,14 @@ void resize(T* out, uint8_t* in, int image_height, int image_width,
       2, kTfLiteFloat32, "output",
       {1, wanted_height, wanted_width, wanted_channels}, quant);
 
-  ops::builtin::BuiltinOpResolver resolver;
+  tflite::ops::builtin::BuiltinOpResolver resolver;
   const TfLiteRegistration* resize_op =
-      resolver.FindOp(BuiltinOperator_RESIZE_BILINEAR, 1);
+      resolver.FindOp(tflite::BuiltinOperator_RESIZE_BILINEAR, 1);
   auto* params = reinterpret_cast<TfLiteResizeBilinearParams*>(
       malloc(sizeof(TfLiteResizeBilinearParams)));
   params->align_corners = false;
-  // params->half_pixel_centers = false;
   interpreter->AddNodeWithParameters({0, 1}, {2}, nullptr, 0, params, resize_op,
                                      nullptr);
-
   interpreter->AllocateTensors();
 
   // fill input image
@@ -80,12 +60,16 @@ void resize(T* out, uint8_t* in, int image_height, int image_width,
   interpreter->Invoke();
 
   auto output = interpreter->typed_tensor<float>(2);
-  auto output_number_of_pixels = wanted_height * wanted_width * wanted_channels;
+  auto output_number_of_pixels =
+      wanted_height * wanted_height * wanted_channels;
+
+  float input_mean = 127.5f;
+  float input_std = 127.5f;
 
   for (int i = 0; i < output_number_of_pixels; i++) {
-    switch (s->input_type) {
+    switch (input_type) {
       case kTfLiteFloat32:
-        out[i] = (output[i] - s->input_mean) / s->input_std;
+        out[i] = (output[i] - input_mean) / input_std;
         break;
       case kTfLiteInt8:
         out[i] = static_cast<int8_t>(output[i] - 128);
@@ -99,7 +83,4 @@ void resize(T* out, uint8_t* in, int image_height, int image_width,
   }
 }
 
-}  // namespace label_image
-}  // namespace tflite
-
-#endif  // TENSORFLOW_LITE_EXAMPLES_LABEL_IMAGE_BITMAP_HELPERS_IMPL_H_
+#endif  // IMAGE_UTILS_IMPL_HPP
