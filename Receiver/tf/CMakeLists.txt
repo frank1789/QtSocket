@@ -21,6 +21,10 @@ set(HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/model_tpu.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/label_utils.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/labels.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tensordata_impl.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tensordata.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/image_utils_impl.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/image_utils.hpp
 )
 
 #-------------------------------------------------------------------------------
