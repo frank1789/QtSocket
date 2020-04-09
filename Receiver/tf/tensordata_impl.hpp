@@ -2,6 +2,10 @@
 #define TENSOR_DATA_IMPL_HPP
 
 #include "logger.h"
+#include "tensorflow/lite/builtin_op_data.h"
+#include "tensorflow/lite/interpreter.h"
+#include "tensorflow/lite/kernels/register.h"
+#include "tensorflow/lite/string_util.h"
 
 // --------------------------------------------------------------------------------------
 // Code from:
