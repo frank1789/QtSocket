@@ -132,7 +132,7 @@ void ModelTensorFlowLite::setLabel(
 
 void ModelTensorFlowLite::imageAvailable(QPixmap image) {
   if (!image.isNull()) {
-    LOG(LevelAlert::D, "image not null: %s", !image.isNull() ? "true" : "false")
+    LOG(LevelAlert::D, "image not null: ", !image.isNull() ? "true" : "false")
     QImage input = image.toImage().convertToFormat(QImage::Format_RGB888);
     RunInference(input);
   }
