@@ -6,6 +6,7 @@
 #include <QThread>
 
 #include "colormanager.hpp"
+#include "image_utils.hpp"
 #include "instrumentor.h"
 #include "logger.h"
 #include "model_support_function.hpp"
@@ -13,7 +14,6 @@
 #include "tensorflow/lite/examples/label_image/get_top_n_impl.h"
 #include "tensorflow/lite/kernels/internal/tensor.h"
 #include "tensorflow/lite/kernels/internal/tensor_utils.h"
-#include "image_utils.hpp"
 
 namespace tfclassif = tflite::label_image;
 
@@ -36,7 +36,9 @@ ModelTensorFlowLite::ModelTensorFlowLite()
   LOG(DEBUG, "ideal thread count: %d", numThreads)
 }
 
-void ModelTensorFlowLite::LoadModelFromFile(const std::string &path) { InitializeModelTFLite(path); }
+void ModelTensorFlowLite::LoadModelFromFile(const std::string &path) {
+  InitializeModelTFLite(path);
+}
 
 void ModelTensorFlowLite::LoadModelFromFile(const QString &path) {
   InitializeModelTFLite(path.toStdString());
@@ -61,9 +63,9 @@ void ModelTensorFlowLite::InitializeModelTFLite(const std::string &path) {
     }
 
     if (interpreter->outputs().size() > 1) {
-      // kind_network = TypeDetection::ObjectDetection;
+      kind_network = type_detection::object_detection;
     } else {
-      // kind_network = TypeDetection::ImageClassifier;
+      kind_network = type_detection::image_classifier;
     }
 
     // Get input dimension from the input tensor metadata
@@ -143,56 +145,59 @@ void ModelTensorFlowLite::imageAvailable(QPixmap image) {
 void ModelTensorFlowLite::imageAvailable(QImage image) {
   if (!image.isNull()) {
     LOG(DEBUG, "image not null: %s", !image.isNull() ? "true" : "false")
-    QImage input = image.convertToFormat(QImage::Format_RGB888);
-    RunInference(input);
+    // QImage input = image.convertToFormat(QImage::Format_RGB888);
+    RunInference(image);
   }
 }
 
 void ModelTensorFlowLite::RunInference(const QImage &image) {
+  LOG(DEBUG, "RunInference")
   PROFILE_FUNCTION();
-  // convert image to buffer
-  // auto sz = image.sizeInBytes();
-  // auto in = std::make_unique<uint8_t[]>(sz);
-  // memcpy(in.get(), image.bits(), sz);
-
-  const std::vector<int> inputs = interpreter->inputs();
-  const std::vector<int> outputs = interpreter->outputs();
+  // const std::vector<int> inputs = interpreter->inputs();
+  // const std::vector<int> outputs = interpreter->outputs();
   // detect kind input
   int input = interpreter->inputs()[0];
-  auto input_type = interpreter->tensor(input)->type;
+  TfLiteType input_type = interpreter->tensor(input)->type;
+  LOG(DEBUG, "detect input type")
+  std::cout << interpreter->tensor(input)->type << "\n";
   switch (input_type) {
     case kTfLiteFloat32:
+      LOG(DEBUG, "case kTfLiteFloat32")
       resize_image<float>(interpreter->typed_tensor<float>(input), image.bits(),
-                    img_height, img_width, m_num_channels, wanted_height,
-                    wanted_width, wanted_channels, input_type);
+                          img_height, img_width, m_num_channels, wanted_height,
+                          wanted_width, wanted_channels, input_type);
       break;
     case kTfLiteInt8:
-      resize_image<int8_t>(interpreter->typed_tensor<int8_t>(input), image.bits(),
-                     img_height, img_width, m_num_channels, wanted_height,
-                     wanted_width, wanted_channels, input_type);
+      LOG(DEBUG, "case kTfLiteInt8")
+      resize_image<int8_t>(interpreter->typed_tensor<int8_t>(input),
+                           image.bits(), img_height, img_width, m_num_channels,
+                           wanted_height, wanted_width, wanted_channels,
+                           input_type);
       break;
     case kTfLiteUInt8:
-      resize_image<uint8_t>(interpreter->typed_tensor<uint8_t>(input), image.bits(),
-                      img_height, img_width, m_num_channels, wanted_height,
-                      wanted_width, wanted_channels, input_type);
+      LOG(DEBUG, "case kTfLiteUInt8")
+      resize_image<uint8_t>(interpreter->typed_tensor<uint8_t>(input),
+                            image.bits(), img_height, img_width, m_num_channels,
+                            wanted_height, wanted_width, wanted_channels,
+                            input_type);
       break;
     default:
       LOG(FATAL, "cannot handle input type %s yet",
           interpreter->tensor(input)->type)
       std::exit(-1);
   }
+  LOG(DEBUG, "exit switch")
 
-      for (int i = 0; i < 2; i++) {
-        interpreter->Invoke();
-      if (interpreter->Invoke() != kTfLiteOk) {
-        LOG(FATAL, "Failed to invoke tflite!")
-      }
+  for (int i = 0; i < 2; i++) {
+    interpreter->Invoke();
+    if (interpreter->Invoke() != kTfLiteOk) {
+      LOG(FATAL, "Failed to invoke tflite!")
     }
+  }
 
-
-  if (kind_network == type_detection::image_classifier)
-  {ClassifierOutput();}
-  else{
+  if (kind_network == type_detection::image_classifier) {
+    ClassifierOutput();
+  } else {
     get_object_outputs();
   }
 }
