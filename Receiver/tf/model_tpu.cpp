@@ -9,7 +9,7 @@
 #include "image_utils.hpp"
 #include "instrumentor.h"
 #include "logger.h"
-#include "tensordata.hpp"
+// #include "tensordata.hpp"
 #include "tensorflow/lite/examples/label_image/bitmap_helpers_impl.h"
 #include "tensorflow/lite/examples/label_image/get_top_n_impl.h"
 #include "tensorflow/lite/kernels/internal/tensor.h"

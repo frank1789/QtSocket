@@ -24,7 +24,7 @@ void ObjectDetection::SearchObject(const std::vector<TfLiteTensor *> &outputs,
       if (cls == 0) continue;  // in general class 0 is background
       auto score = static_cast<float>(detection_scores_.get()[i]);
       if (score < threshold) {
-        LOG(WARN, "low score: %f, class %s", score, getLabel(cls).c_str())
+        LOG(WARN, "low score: %f, class %d", score, cls)
         break;
       }
 
@@ -34,7 +34,7 @@ void ObjectDetection::SearchObject(const std::vector<TfLiteTensor *> &outputs,
       const auto bottom =   static_cast<qreal>(detection_boxes_.get()[4 * i + 2] * img.height());
       const auto right =    static_cast<qreal>(detection_boxes_.get()[4 * i + 3] * img.width());
       QRectF box(left, top, right - left, bottom - top);
-
+      LOG(DEBUG, "find score: %f, class %d", score, cls)
       class_box_.push_back(std::make_tuple(cls, score, box));
     }
   }
