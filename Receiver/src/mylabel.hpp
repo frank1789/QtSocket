@@ -25,7 +25,7 @@ class MyLabel : public QLabel {
    * @brief Destroy the My Label object
    *
    */
-  ~MyLabel();
+  ~MyLabel() = default;
 
  public slots:
   /**

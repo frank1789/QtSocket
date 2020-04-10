@@ -5,11 +5,12 @@
 #include <QString>
 #include <QTextStream>
 #include <iostream>
+#include <utility>
 
 #include "label_utils.hpp"
 #include "logger.h"
 
-LabelDetection::LabelDetection(const QString &path) : m_filename(path) {}
+LabelDetection::LabelDetection(QString path) : m_filename(std::move(path)) {}
 
 LabelDetection::LabelDetection(const std::string &path)
     : m_filename(QString::fromStdString(path)) {}
@@ -29,7 +30,7 @@ void LabelDetection::IdentifyTypeFile() {
   }
 
   else {
-    LOG(FATAL, "file unsupported")
+    LOG(LevelAlert::F, "file unsupported")
     std::cerr << "file unsupported: " << m_filename.toStdString() << "\n";
     std::abort();
   }
@@ -43,7 +44,7 @@ void LabelDetection::read() {
   IdentifyTypeFile();
   QFile file(m_filename);
   if (!file.open(QIODevice::ReadOnly)) {
-    LOG(ERROR, "file not exist %s", m_filename.toStdString().c_str())
+    LOG(LevelAlert::E, "file not exist ", m_filename.toStdString())
     return;
   }
   QTextStream in(&file);

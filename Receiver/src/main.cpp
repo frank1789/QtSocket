@@ -1,11 +1,11 @@
 #include <QApplication>
 #include <QObject>
 
-#include "../log/instrumentor.h"
-#include "../tf/findmodel.hpp"
-#include "../tf/model_tpu.hpp"
+#include "findmodel.hpp"
+#include "instrumentor.h"
 #include "labels.hpp"
 #include "mainwindow.hpp"
+#include "model_tpu.hpp"
 
 const QString local_model_path{"/resources/detect.tflite"};
 const QString local_label_path{"/resources/coco_labels.txt"};
@@ -23,7 +23,7 @@ int main(int argc, char* argv[]) {
   auto label_path = QApplication::applicationDirPath() + local_label_path;
   if (!QFile::exists(model_path) && !QFile::exists(label_path)) {
 #if LOGGER
-    LOG(ERROR, "model file and label file not found, throw ui")
+    LOG(LevelAlert::E, "model file and label file not found, throw ui")
 #endif
     FindModel m;
     m.exec();
@@ -36,7 +36,7 @@ int main(int argc, char* argv[]) {
   }
   LabelDetection label(label_path);
   label.read();
-  ModelTensorFlowLite model_tflite; 
+  ModelTensorFlowLite model_tflite;
   model_tflite.LoadModelFromFile(model_path);
   model_tflite.setLabel(label.getLabels());
   QObject::connect(

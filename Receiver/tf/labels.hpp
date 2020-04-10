@@ -13,7 +13,7 @@ QT_END_NAMESPACE
 
 class LabelDetection {
  public:
-  LabelDetection(const QString &path);
+  LabelDetection(QString path);
   LabelDetection(const std::string &path);
   void read();
 
@@ -21,7 +21,7 @@ class LabelDetection {
   std::unordered_map<int, std::string> getLabels();
 
  private:
-  //methods
+  // methods
   void IdentifyTypeFile();
 
   // attributes

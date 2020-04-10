@@ -31,7 +31,7 @@ TEST(LoadFiles, LoadLabels) {
   EXPECT_TRUE(exists_file(label));
 }
 
-std::string write_dummy_file(const std::string &param) {
+std::string write_dummy_file(const std::string& param) {
   const std::string filename{"../build_debug/test/resources/"};
   const std::string input{"Hello world!"};
   std::ofstream out(filename + param);

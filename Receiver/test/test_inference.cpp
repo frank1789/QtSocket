@@ -1,9 +1,9 @@
+#include <QFile>
 #include <QImage>
 #include <QObject>
 #include <QPixmap>
 #include <QString>
 #include <vector>
-#include <QFile>
 
 #include "gtest/gtest.h"
 #include "labels.hpp"
@@ -17,7 +17,8 @@
 
 class Inference : public ::testing::Test {
  protected:
-  const std::string mobilenet{"../build_debug/test/resources/mobilenet_v1_1.0_224.tflite"};
+  const std::string mobilenet{
+      "../build_debug/test/resources/mobilenet_v1_1.0_224.tflite"};
   const std::string mobnet_label{"../build_debug/test/resources/labels.txt"};
 
   void SetUp() {
@@ -50,7 +51,8 @@ TEST_F(Inference, GraceHooper) {
   EXPECT_EQ(model_tflite.getLabel(results[0].second), "military uniform");
   EXPECT_EQ(model_tflite.getLabel(results[1].second), "Windsor tie");
   EXPECT_EQ(model_tflite.getLabel(results[2].second), "bulletproof vest");
-  EXPECT_EQ(model_tflite.getLabel(results[3].second), "cornet, horn, trumpet, trump");
+  EXPECT_EQ(model_tflite.getLabel(results[3].second),
+            "cornet, horn, trumpet, trump");
   EXPECT_EQ(model_tflite.getLabel(results[4].second), "drumstick");
 
   // scores
@@ -89,13 +91,18 @@ TEST_F(InferenceTestCase, Dog1) {
   ASSERT_FALSE(img.isNull());
   ASSERT_EQ(img.height(), 248);
   ASSERT_EQ(img.width(), 203);
-//   model_tflite.imageAvailable(img);
-//   // auto results = model_tflite.getResults();
-//   // EXPECT_GT(results.size(), 0);
-//   // labels
-//   // EXPECT_EQ(model_tflite.getLabel(results[0].second), "dog");
-//   // scores
-//   // EXPECT_GE(results[0].first, 0.01);
+  model_tflite.imageAvailable(img);
+  int cls;
+  float score;
+  QRectF box;
+  auto result = model_tflite.getResults();
+  for (auto it = result.begin(); it != result.end(); ++it) {
+    std::tie(cls, score, box) = *it;
+    // labels
+    EXPECT_EQ(model_tflite.getLabel(cls), "dog");
+    // scores
+    EXPECT_GE(score, 0.01);
+  }
 }
 
 TEST_F(InferenceTestCase, Dog2) {
@@ -103,41 +110,56 @@ TEST_F(InferenceTestCase, Dog2) {
   ASSERT_FALSE(img.isNull());
   ASSERT_EQ(img.height(), 485);
   ASSERT_EQ(img.width(), 729);
-//   model_tflite.imageAvailable(img);
-//   // auto results = model_tflite.getResults();
-//   // EXPECT_GT(results.size(), 0);
-//   // labels
-//   // EXPECT_EQ(model_tflite.getLabel(results[0].second), "dog");
-//   // scores
-//   // EXPECT_GE(results[0].first, 0.01);
+  model_tflite.imageAvailable(img);
+  int cls;
+  float score;
+  QRectF box;
+  auto result = model_tflite.getResults();
+  for (auto it = result.begin(); it != result.end(); ++it) {
+    std::tie(cls, score, box) = *it;
+    // labels
+    EXPECT_EQ(model_tflite.getLabel(cls), "dog");
+    // scores
+    EXPECT_GE(score, 0.01);
+  }
 }
 
 TEST_F(InferenceTestCase, Dog3) {
-const QImage img("../build_debug/test/testdata/dog_3.jpg");
+  const QImage img("../build_debug/test/testdata/dog_3.jpg");
   ASSERT_FALSE(img.isNull());
   ASSERT_EQ(img.height(), 1385);
   ASSERT_EQ(img.width(), 1385);
-//   model_tflite.imageAvailable(img);
-//   // auto results = model_tflite.getResults();
-//   // EXPECT_GT(results.size(), 0);
-//   // labels
-//   // EXPECT_EQ(model_tflite.getLabel(results[0].second), "dog");
-//   // scores
-//   // EXPECT_GE(results[0].first, 0.01);
+  model_tflite.imageAvailable(img);
+  int cls;
+  float score;
+  QRectF box;
+  auto result = model_tflite.getResults();
+  for (auto it = result.begin(); it != result.end(); ++it) {
+    std::tie(cls, score, box) = *it;
+    // labels
+    EXPECT_EQ(model_tflite.getLabel(cls), "dog");
+    // scores
+    EXPECT_GE(score, 0.01);
+  }
 }
 
 TEST_F(InferenceTestCase, Dog4) {
-const QImage img("../build_debug/test/testdata/dog_4.jpg");
+  const QImage img("../build_debug/test/testdata/dog_4.jpg");
   ASSERT_FALSE(img.isNull());
   ASSERT_EQ(img.height(), 478);
   ASSERT_EQ(img.width(), 640);
-  // model_tflite.imageAvailable(img);
-  // auto results = model_tflite.getResults();
-  // EXPECT_GT(results.size(), 0);
-  // labels
-  // EXPECT_EQ(model_tflite.getLabel(results[0].second), "dog");
-  // scores
-  // EXPECT_GE(results[0].first, 0.01);
+  model_tflite.imageAvailable(img);
+  int cls;
+  float score;
+  QRectF box;
+  auto result = model_tflite.getResults();
+  for (auto it = result.begin(); it != result.end(); ++it) {
+    std::tie(cls, score, box) = *it;
+    // labels
+    EXPECT_EQ(model_tflite.getLabel(cls), "dog");
+    // scores
+    EXPECT_GE(score, 0.01);
+  }
 }
 
 TEST_F(InferenceTestCase, Dog5) {
@@ -145,28 +167,37 @@ TEST_F(InferenceTestCase, Dog5) {
   ASSERT_FALSE(img.isNull());
   ASSERT_EQ(img.height(), 500);
   ASSERT_EQ(img.width(), 750);
-  // model_tflite.imageAvailable(img);
-  // auto results = model_tflite.getResults();
-  // EXPECT_GT(results.size(), 0);
-  // labels
-  // EXPECT_EQ(model_tflite.getLabel(results[0].second), "dog");
-  // scores
-  // EXPECT_GE(results[0].first, 0.01);
+  model_tflite.imageAvailable(img);
+  int cls;
+  float score;
+  QRectF box;
+  auto result = model_tflite.getResults();
+  for (auto it = result.begin(); it != result.end(); ++it) {
+    std::tie(cls, score, box) = *it;
+    // labels
+    EXPECT_EQ(model_tflite.getLabel(cls), "dog");
+    // scores
+    EXPECT_GE(score, 0.01);
+  }
 }
-
 
 TEST_F(InferenceTestCase, Cat1) {
   const QImage img("../build_debug/test/testdata/cat_1.jpg");
   ASSERT_FALSE(img.isNull());
   ASSERT_EQ(img.height(), 1800);
   ASSERT_EQ(img.width(), 1200);
-  // model_tflite.imageAvailable(img);
-  // auto results = model_tflite.getResults();
-  // EXPECT_GT(results.size(), 0);
-  // labels
-  // EXPECT_EQ(model_tflite.getLabel(results[0].second), "cat");
-  // scores
-  // EXPECT_GE(results[0].first, 0.01);
+  model_tflite.imageAvailable(img);
+  int cls;
+  float score;
+  QRectF box;
+  auto result = model_tflite.getResults();
+  for (auto it = result.begin(); it != result.end(); ++it) {
+    std::tie(cls, score, box) = *it;
+    // labels
+    EXPECT_EQ(model_tflite.getLabel(cls), "cat");
+    // scores
+    EXPECT_GE(score, 0.01);
+  }
 }
 
 TEST_F(InferenceTestCase, Cat2) {
@@ -174,13 +205,18 @@ TEST_F(InferenceTestCase, Cat2) {
   ASSERT_FALSE(img.isNull());
   ASSERT_EQ(img.height(), 400);
   ASSERT_EQ(img.width(), 600);
-  // model_tflite.imageAvailable(img);
-  // auto results = model_tflite.getResults();
-  // EXPECT_GT(results.size(), 0);
-  // labels
-  // EXPECT_EQ(model_tflite.getLabel(results[0].second), "cat");
-  // scores
-  // EXPECT_GE(results[0].first, 0.01);
+  model_tflite.imageAvailable(img);
+  int cls;
+  float score;
+  QRectF box;
+  auto result = model_tflite.getResults();
+  for (auto it = result.begin(); it != result.end(); ++it) {
+    std::tie(cls, score, box) = *it;
+    // labels
+    EXPECT_EQ(model_tflite.getLabel(cls), "cat");
+    // scores
+    EXPECT_GE(score, 0.01);
+  }
 }
 
 TEST_F(InferenceTestCase, Cat3) {
@@ -188,13 +224,18 @@ TEST_F(InferenceTestCase, Cat3) {
   ASSERT_FALSE(img.isNull());
   ASSERT_EQ(img.height(), 710);
   ASSERT_EQ(img.width(), 836);
-  // model_tflite.imageAvailable(img);
-  // auto results = model_tflite.getResults();
-  // EXPECT_GT(results.size(), 0);
-  // labels
-  // EXPECT_EQ(model_tflite.getLabel(results[0].second), "cat");
-  // scores
-  // EXPECT_GE(results[0].first, 0.01);
+  model_tflite.imageAvailable(img);
+  int cls;
+  float score;
+  QRectF box;
+  auto result = model_tflite.getResults();
+  for (auto it = result.begin(); it != result.end(); ++it) {
+    std::tie(cls, score, box) = *it;
+    // labels
+    EXPECT_EQ(model_tflite.getLabel(cls), "cat");
+    // scores
+    EXPECT_GE(score, 0.01);
+  }
 }
 
 TEST_F(InferenceTestCase, Cat4) {
@@ -202,13 +243,18 @@ TEST_F(InferenceTestCase, Cat4) {
   ASSERT_FALSE(img.isNull());
   ASSERT_EQ(img.height(), 700);
   ASSERT_EQ(img.width(), 1600);
-  // model_tflite.imageAvailable(img);
-  // auto results = model_tflite.getResults();
-  // EXPECT_GT(results.size(), 0);
-  // labels
-  // EXPECT_EQ(model_tflite.getLabel(results[0].second), "cat");
-  // scores
-  // EXPECT_GE(results[0].first, 0.01);
+  model_tflite.imageAvailable(img);
+  int cls;
+  float score;
+  QRectF box;
+  auto result = model_tflite.getResults();
+  for (auto it = result.begin(); it != result.end(); ++it) {
+    std::tie(cls, score, box) = *it;
+    // labels
+    EXPECT_EQ(model_tflite.getLabel(cls), "cat");
+    // scores
+    EXPECT_GE(score, 0.01);
+  }
 }
 
 TEST_F(InferenceTestCase, Cat5) {
@@ -216,11 +262,16 @@ TEST_F(InferenceTestCase, Cat5) {
   ASSERT_FALSE(img.isNull());
   ASSERT_EQ(img.height(), 678);
   ASSERT_EQ(img.width(), 800);
-  // model_tflite.imageAvailable(img);
-  // auto results = model_tflite.getResults();
-  // EXPECT_GT(results.size(), 0);
-  // labels
-  // EXPECT_EQ(model_tflite.getLabel(results[0].second), "cat");
-  // scores
-  // EXPECT_GE(results[0].first, 0.01);
+  model_tflite.imageAvailable(img);
+  int cls;
+  float score;
+  QRectF box;
+  auto result = model_tflite.getResults();
+  for (auto it = result.begin(); it != result.end(); ++it) {
+    std::tie(cls, score, box) = *it;
+    // labels
+    EXPECT_EQ(model_tflite.getLabel(cls), "cat");
+    // scores
+    EXPECT_GE(score, 0.01);
+  }
 }

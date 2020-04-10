@@ -9,8 +9,7 @@ std::tuple<int, std::string> LabelSplitter::CocoLabel(const QString &str) {
   QString id{""};
   QString label{""};
   QString accessor{""};
-  QRegularExpression re;
-  re.setPattern(
+  QRegularExpression re(
       "(?<id>[0-9]\\d*)\\s*(?<label>[A-z]\\w*)?\\s+(?<accessor>[A-z]\\w+)");
   QRegularExpressionMatch match = re.match(str);
   if (match.hasMatch()) {
@@ -28,10 +27,7 @@ std::tuple<int, std::string> LabelSplitter::CocoLabel(const QString &str) {
 std::tuple<int, std::string> LabelSplitter::ImagenetLabel(const QString &str) {
   QString id;
   QString label;
-  QString accessor;
-  QString accessor2;
-  QRegularExpression re;
-  re.setPattern("(?P<id>\\d+)\\W+(?P<label>(.*))");
+  QRegularExpression re("(?P<id>\\d+)\\W+(?P<label>(.*))");
   QRegularExpressionMatch match = re.match(str);
   if (match.hasMatch()) {
     id = match.captured("id");

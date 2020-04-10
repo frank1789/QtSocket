@@ -1,16 +1,16 @@
 #ifndef LOGGER_H
 #define LOGGER_H
 
-#include <chrono>
+#include <array>
 #include <iostream>
-#include <ratio>
+#include <ostream>
+#include <string>
+#include <type_traits>
 
-#if __cplusplus
-extern "C" {
-#endif
-
-#include <stdarg.h>
-#include <stdio.h>
+template <typename E>
+constexpr auto to_underlying(E e) noexcept {
+  return static_cast<std::underlying_type_t<E>>(e);
+}
 
 #define LOGGER 0
 #if LOGGER
@@ -20,7 +20,7 @@ extern "C" {
 #define LOG(LEVEL, ...) logger(LEVEL, __FILE__, __LINE__, __VA_ARGS__);
 #else
 #define LOG(LEVEL, ...)
-#endif 
+#endif
 
 // define constant color hex
 extern const char RED[];
@@ -40,47 +40,49 @@ extern const char LIGHT_CYAN[];
 extern const char WHITE[];
 extern const char RESET[];
 
-// define level's name
-extern const char *levels_name[];
-
 // define level's color
-extern const char *levels_color[];
+extern const std::array<std::string, 6> levels_color;
 
-typedef enum level { TRACE, DEBUG, INFO, WARN, ERROR, FATAL } level_t;
+enum class LevelAlert : int { I, T, D, W, E, F };
 
-/*
- */
-extern void logger(level_t level, const char *file, int line, const char *fmt,
-                   ...);
-
-#if __cplusplus
+inline std::string get_level(LevelAlert lvl) {
+  std::string alert;
+  switch (lvl) {
+    case LevelAlert::I:
+      alert = "I ";
+      break;
+    case LevelAlert::T:
+      alert = "T ";
+      break;
+    case LevelAlert::D:
+      alert = "D ";
+      break;
+    case LevelAlert::W:
+      alert = "W ";
+      break;
+    case LevelAlert::E:
+      alert = "E ";
+      break;
+    case LevelAlert::F:
+      alert = "F ";
+      break;
+  }
+  return alert;
 }
-#endif
 
-class TimeMeter {
-public:
-  explicit TimeMeter() {}
-  inline void start();
-  inline void stop();
-  void getPartialElapsed();
-  void getTotalElapsed();
-  ~TimeMeter();
+inline std::ostream &operator<<(std::ostream &os, LevelAlert lvl) {
+  auto alert = get_level(lvl);
+  os << alert;
+  return os;
+}
 
-private:
-  std::chrono::time_point<std::chrono::high_resolution_clock> m_start;
-  std::chrono::time_point<std::chrono::high_resolution_clock> m_stop;
-  std::chrono::duration<double, std::micro> m_partial_elapsed;
-  std::chrono::duration<double, std::micro> m_total_elapsed;
-};
+template <typename... T>
+inline void logger(LevelAlert lvl, const char *file, int line, T &&... args) {
+  std::cerr << levels_color[to_underlying(lvl)] << lvl << RESET << " " << file
+            << " l: " << line << "] ";
+  int expander[]{0, (void(std::cerr << std::forward<T>(args) << " "), 0)...};
+  static_cast<void>(expander);
+  std::cerr << std::endl;
+}
 
-class StopWatch {
- public:
-  explicit StopWatch();
-  ~StopWatch();
-
- private:
-  std::chrono::time_point<std::chrono::high_resolution_clock> m_start;
-  std::chrono::time_point<std::chrono::high_resolution_clock> m_stop;
-};
-
-#endif // LOGGER_H
+#endif  // LOGGER_H

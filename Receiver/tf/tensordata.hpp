@@ -3,6 +3,7 @@
 
 #include "tensordata_impl.hpp"
 
-template <typename T> T *TensorData(TfLiteTensor *tensor, int batch_index);
+template <typename T>
+T *TensorData(TfLiteTensor *tensor, int batch_index);
 
-#endif // TENSOR_DATA_HPP
+#endif  // TENSOR_DATA_HPP

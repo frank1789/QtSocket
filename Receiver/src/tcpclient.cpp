@@ -15,22 +15,22 @@
 #include <QString>
 #include <QTextEdit>
 
-#include "../log/instrumentor.h"
-#include "../log/logger.h"
+#include "instrumentor.h"
+#include "logger.h"
 #include "commonconnection.hpp"
 
 TcpClient::TcpClient(QWidget *parent) : QWidget(parent) {
 #if LOGGER_UI
-  LOG(INFO, "ctor Client initialize parameters.")
-  LOG(INFO, "dis/connect buttons are set disable.")
-  LOG(INFO, "Opening network session.")
+  LOG(LevelAlert::I, "ctor Client initialize parameters.")
+  LOG(LevelAlert::I, "dis/connect buttons are set disable.")
+  LOG(LevelAlert::I, "Opening network session.")
 #endif
   // initialize button and assemble ui
   connectButton = new QPushButton("Connect");
   disconnectButton = new QPushButton("Disconnect");
   connectButton->setEnabled(false);
   disconnectButton->setEnabled(false);
-  QGridLayout *grid = new QGridLayout;
+  auto *grid = new QGridLayout;
   grid->addWidget(createInformationGroup(), 0, 0, 1, 3);
   grid->addWidget(connectButton, 1, 1);
   grid->addWidget(disconnectButton, 1, 2);
@@ -103,8 +103,8 @@ void TcpClient::imageAvailabe(QByteArray baImage) {
 void TcpClient::connectedToServer() {
   PROFILE_FUNCTION();
 #if LOGGER_UI
-  LOG(INFO, "update connection status: try connect to server.")
-  LOG(INFO, "update ui.")
+  LOG(LevelAlert::I, "update connection status: try connect to server.")
+  LOG(LevelAlert::I, "update ui.")
 #endif
   m_log_text->append(tr("* Connected to server."));
   updateGui(QAbstractSocket::ConnectedState);
@@ -112,8 +112,8 @@ void TcpClient::connectedToServer() {
 
 void TcpClient::onDisconnectClicked() {
 #if LOGGER_UI
-  LOG(INFO, "disconnect button pressed, emit signal.")
-  LOG(DEBUG, "set connect button true, set disconnect button false.")
+  LOG(LevelAlert::I, "disconnect button pressed, emit signal.")
+  LOG(LevelAlert::D, "set connect button true, set disconnect button false.")
 #endif
   m_stream->slotQuit();
   m_log_text->append(tr("* Disconnect."));
@@ -173,13 +173,13 @@ void TcpClient::enableConnectButton() {
 void TcpClient::onConnectClicked() {
   // check user name is not empty
   if (m_user_linedit->text().isEmpty()) {
-    LOG(ERROR, "must define user name.")
+    LOG(LevelAlert::E, "must define user name.")
     QMessageBox::information(this, tr("Client"), tr("Define an user name"));
     return;
   }
 
   if (m_user_linedit->text().isEmpty()) {
-    LOG(ERROR, "must define port.")
+    LOG(LevelAlert::E, "must define port.")
     QMessageBox::information(this, tr("Client"), tr("Define port 52693."));
     return;
   }
@@ -194,8 +194,7 @@ void TcpClient::onConnectClicked() {
   m_stream->start();
   connectButton->setEnabled(false);
   disconnectButton->setEnabled(true);
-  LOG(DEBUG, "try connect, connection status: %s, start thread",
-      result.toUtf8().data())
+  LOG(LevelAlert::D, "try connect, connection status: ", result.toUtf8().data())
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -203,7 +202,7 @@ void TcpClient::onConnectClicked() {
 //////////////////////////////////////////////////////////////////////////////
 
 QGroupBox *TcpClient::createInformationGroup() {
-  LOG(INFO, "build information group ui")
+  LOG(LevelAlert::I, "build information group ui")
   // defining layout group
   QGroupBox *groupBox = new QGroupBox(tr("Server Configuration"));
   // init element ui
@@ -229,16 +228,16 @@ QGroupBox *TcpClient::createInformationGroup() {
   // find out IP addresses of this machine
   QList<QHostAddress> ipAddressesList = QNetworkInterface::allAddresses();
   // add non-localhost addresses
-  for (int i = 0; i < ipAddressesList.size(); ++i) {
-    if (!ipAddressesList.at(i).isLoopback()) {
-      hostCombo->addItem(ipAddressesList.at(i).toString());
+  for (const auto &address : ipAddressesList) {
+    if (!address.isLoopback()) {
+      hostCombo->addItem(address.toString());
     }
   }
   // validate input port must be 1 <= x <= 65535
   m_port_linedit->setValidator(new QIntValidator(1, 65535, this));
 
   // setup grid layout
-  QGridLayout *gridLayout = new QGridLayout;
+  auto *gridLayout = new QGridLayout;
   gridLayout->addWidget(address_label, 0, 0);
   gridLayout->addWidget(hostCombo, 0, 1);
   gridLayout->addWidget(port_label, 1, 0);
@@ -251,7 +250,7 @@ QGroupBox *TcpClient::createInformationGroup() {
 
 QGroupBox *TcpClient::createLogGroup() {
 #if LOGGER_UI
-  LOG(INFO, "build logging group ui")
+  LOG(LevelAlert::I, "build logging group ui")
 #endif
 
   // defining layout group
@@ -261,7 +260,7 @@ QGroupBox *TcpClient::createLogGroup() {
   m_log_text = new QTextEdit;
 
   // setup grid layout
-  QGridLayout *gridLayout = new QGridLayout;
+  auto *gridLayout = new QGridLayout;
   gridLayout->addWidget(m_log_text, 0, 0);
   groupBox->setLayout(gridLayout);
   return groupBox;
@@ -271,8 +270,8 @@ void TcpClient::updateGui(QAbstractSocket::SocketState state) {
   const bool connected = (state == QAbstractSocket::ConnectedState);
   const bool unconnected = (state == QAbstractSocket::UnconnectedState);
 #if LOGGER_UI
-  LOG(DEBUG, "connection state %s", connected ? "true" : "false")
-  LOG(DEBUG, "un-connection state %s", unconnected ? "true" : "false")
+  LOG(LevelAlert::D, "connection state: ", connected ? "true" : "false")
+  LOG(LevelAlert::D, "un-connection state: ", unconnected ? "true" : "false")
 #endif
   // update ui
   connectButton->setEnabled(unconnected);
