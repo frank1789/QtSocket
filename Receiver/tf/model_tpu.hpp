@@ -5,10 +5,10 @@
 #include <memory>
 #include <string>
 
+#include "object_detection.hpp"
 #include "tensorflow/lite/interpreter.h"
 #include "tensorflow/lite/kernels/register.h"
 #include "tensorflow/lite/model.h"
-#include "object_detection.hpp"
 
 QT_BEGIN_NAMESPACE
 class QImage;
@@ -18,54 +18,33 @@ QT_END_NAMESPACE
 
 enum class TypeDetection : int { ImageClassifier, ObjectDetection };
 
-struct result_t {
-  // Results
-  QList<QString> caption;
-  QList<double> confidences;
-  QList<QRectF> box;
-  QList<QImage> masks;
-};
-
-struct Res {
-  QString label;
-  int index;
-  double score;
-};
-
 class ModelTensorFlowLite : public QObject {
- public:
+public:
   explicit ModelTensorFlowLite();
   void InitializeModelTFLite(const std::string &path);
+
+  // setter
   void LoadModelFromFile(const std::string &path);
   void LoadModelFromFile(const QString &path);
+  void setLabel(const std::unordered_map<int, std::string> &l);
+
+  // core
   void RunInference(const QImage &image);
   void ClassifierOutput();
-  void setInput(QImage image);
+  void ObjectOutput(const QImage img);
 
-  bool get_classifier_output(std::vector<std::pair<float, int>> *top_results);
-  bool get_object_outputs();
-
-  void setLabel(const std::unordered_map<int, std::string> &l);
+  // getter
   std::string getLabel(int i);
-
-  std::vector<std::tuple<int, float, QRectF> > getResults() const;
-
+  std::vector<std::tuple<int, float, QRectF>> getResults() const;
   std::vector<std::pair<float, int>> getResultClassification() const;
 
-  void ObjectOutput(const QImage img);
 public slots:
   void imageAvailable(QPixmap image);
   void imageAvailable(QImage image);
 
- private:
-  //  methods
-  void init_model_TFLite(const std::string &path);
-  bool getObjectOutputsTFLite(QStringList &captions, QList<double> &confidences,
-                              QList<QRectF> &locations, QList<QImage> &masks);
-
+private:
   // input image properties
   const int m_num_channels{3};
-  int img_height, img_width;
   // size tensor image desired
   int wanted_height_;
   int wanted_width_;
@@ -73,12 +52,9 @@ public slots:
   // detection mask
   bool has_detection_mask_;
   TypeDetection kind_network_{TypeDetection::ObjectDetection};
-
-  // thread
   int num_threads_;
   std::vector<std::pair<float, int>> top_results;
   std::unordered_map<int, std::string> m_labels;
-
   std::unique_ptr<ObjectDetection> object_detect_{nullptr};
 
   // model
@@ -89,4 +65,4 @@ public slots:
   std::vector<TfLiteTensor *> outputs;
 };
 
-#endif  // MODEL_TPU_HPP
+#endif // MODEL_TPU_HPP
