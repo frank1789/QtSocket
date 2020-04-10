@@ -35,7 +35,7 @@ void ModelTensorFlowLite::InitializeModelTFLite(const std::string &path) {
     model =
         tflite::FlatBufferModel::BuildFromFile(path.c_str(), &error_reporter);
     if (model == nullptr) {
-      LOG(LevelAlert::F, "can't load TensorFLow lite model from: %",
+      LOG(LevelAlert::F, "can't load TensorFLow lite model from: ",
           path.c_str())
     }
     // link model and resolver
@@ -208,7 +208,7 @@ void ModelTensorFlowLite::ClassifierOutput() {
           number_of_results, kThreshold, &top_results, input_type);
       break;
     default:
-      LOG(LevelAlert::F, "cannot handle output type %s yet",
+      LOG(LevelAlert::F, "cannot handle output type yet",
           interpreter->tensor(output)->type)
       std::exit(-1);
   }
