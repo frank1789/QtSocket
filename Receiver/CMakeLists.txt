@@ -127,7 +127,7 @@ if(COVERAGE)
 	set(COVERAGE_CHECK "ON")
 	add_library(coverage INTERFACE)
 	if(${CMAKE_BUILD_TYPE} STREQUAL "Debug" AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-	  	target_compile_options(coverage INTERFACE	# Add required flags (GCC & LLVM/Clang)
+	  	target_compile_options(coverage INTERFACE
 			-O0        								# no optimization
 			-g         								# generate debug info
 			-ftest-coverage -fprofile-arcs 			# sets all required flags

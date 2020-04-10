@@ -18,7 +18,7 @@ QColor ColorManager::getColor(QString element) {
 }
 
 QColor ColorManager::getNewColor() {
-  QColor color = def_color(defColors, elements.count());
+  QColor color = def_color(Colors, elements.count());
 
   if (!rgb) {
     int r = color.red();

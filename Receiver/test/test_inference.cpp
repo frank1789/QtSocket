@@ -17,8 +17,8 @@
 
 class Inference : public ::testing::Test {
  protected:
-  const std::string mobilenet{"../test/resources/mobilenet_v1_1.0_224.tflite"};
-  const std::string mobnet_label{"../test/resources/labels.txt"};
+  const std::string mobilenet{"../build_debug/test/resources/mobilenet_v1_1.0_224.tflite"};
+  const std::string mobnet_label{"../build_debug/test/resources/labels.txt"};
 
   void SetUp() {
     LabelDetection label(mobnet_label);
@@ -37,7 +37,7 @@ class Inference : public ::testing::Test {
 };
 
 TEST_F(Inference, GraceHooper) {
-  const QImage img("../test/testdata/grace_hopper.bmp");
+  const QImage img("../build_debug/test/testdata/grace_hopper.bmp");
   // check dimension
   ASSERT_FALSE(img.isNull());
   ASSERT_EQ(img.height(), 606);
@@ -68,8 +68,8 @@ TEST_F(Inference, GraceHooper) {
 
 class InferenceTestCase : public ::testing::Test {
  protected:
-  const QString label_path{"../test/resources/coco_labels.txt"};
-  const QString model_path{"../test/resources/detect.tflite"};
+  const QString label_path{"../build_debug/test/resources/coco_labels.txt"};
+  const QString model_path{"../build_debug/test/resources/detect.tflite"};
   ModelTensorFlowLite model_tflite;
 
   void SetUp() override {
@@ -86,7 +86,7 @@ class InferenceTestCase : public ::testing::Test {
 };
 
 TEST_F(InferenceTestCase, Dog1) {
-  const QImage img("../test/testdata/dog_1.jpg");
+  const QImage img("../build_debug/test/testdata/dog_1.jpg");
   ASSERT_FALSE(img.isNull());
   ASSERT_EQ(img.height(), 248);
   ASSERT_EQ(img.width(), 203);
@@ -105,7 +105,7 @@ TEST_F(InferenceTestCase, Dog1) {
 }
 
 TEST_F(InferenceTestCase, Dog2) {
-  const QImage img("../test/testdata/dog_2.jpg");
+  const QImage img("../build_debug/test/testdata/dog_2.jpg");
   ASSERT_FALSE(img.isNull());
   ASSERT_EQ(img.height(), 485);
   ASSERT_EQ(img.width(), 729);
@@ -124,7 +124,7 @@ TEST_F(InferenceTestCase, Dog2) {
 }
 
 TEST_F(InferenceTestCase, Dog3) {
-  const QImage img("../test/testdata/dog_3.jpg");
+  const QImage img("../build_debug/test/testdata/dog_3.jpg");
   ASSERT_FALSE(img.isNull());
   ASSERT_EQ(img.height(), 1385);
   ASSERT_EQ(img.width(), 1385);
@@ -143,7 +143,7 @@ TEST_F(InferenceTestCase, Dog3) {
 }
 
 TEST_F(InferenceTestCase, Dog4) {
-  const QImage img("../test/testdata/dog_4.jpg");
+  const QImage img("../build_debug/test/testdata/dog_4.jpg");
   ASSERT_FALSE(img.isNull());
   ASSERT_EQ(img.height(), 478);
   ASSERT_EQ(img.width(), 640);
@@ -162,7 +162,7 @@ TEST_F(InferenceTestCase, Dog4) {
 }
 
 TEST_F(InferenceTestCase, Dog5) {
-  const QImage img("../test/testdata/dog_5.jpg");
+  const QImage img("../build_debug/test/testdata/dog_5.jpg");
   ASSERT_FALSE(img.isNull());
   ASSERT_EQ(img.height(), 500);
   ASSERT_EQ(img.width(), 750);
@@ -181,7 +181,7 @@ TEST_F(InferenceTestCase, Dog5) {
 }
 
 TEST_F(InferenceTestCase, Cat1) {
-  const QImage img("../test/testdata/cat_1.jpg");
+  const QImage img("../build_debug/test/testdata/cat_1.jpg");
   ASSERT_FALSE(img.isNull());
   ASSERT_EQ(img.height(), 1800);
   ASSERT_EQ(img.width(), 1200);
@@ -200,7 +200,7 @@ TEST_F(InferenceTestCase, Cat1) {
 }
 
 TEST_F(InferenceTestCase, Cat2) {
-  const QImage img("../test/testdata/cat_2.jpg");
+  const QImage img("../build_debug/test/testdata/cat_2.jpg");
   ASSERT_FALSE(img.isNull());
   ASSERT_EQ(img.height(), 400);
   ASSERT_EQ(img.width(), 600);
@@ -219,7 +219,7 @@ TEST_F(InferenceTestCase, Cat2) {
 }
 
 TEST_F(InferenceTestCase, Cat3) {
-  const QImage img("../test/testdata/cat_3.jpg");
+  const QImage img("../build_debug/test/testdata/cat_3.jpg");
   ASSERT_FALSE(img.isNull());
   ASSERT_EQ(img.height(), 710);
   ASSERT_EQ(img.width(), 836);
@@ -238,7 +238,7 @@ TEST_F(InferenceTestCase, Cat3) {
 }
 
 TEST_F(InferenceTestCase, Cat4) {
-  const QImage img("../test/testdata/cat_4.jpg");
+  const QImage img("../build_debug/test/testdata/cat_4.jpg");
   ASSERT_FALSE(img.isNull());
   ASSERT_EQ(img.height(), 700);
   ASSERT_EQ(img.width(), 1600);
@@ -257,7 +257,7 @@ TEST_F(InferenceTestCase, Cat4) {
 }
 
 TEST_F(InferenceTestCase, Cat5) {
-  const QImage img("../test/testdata/cat_5.jpg");
+  const QImage img("../build_debug/test/testdata/cat_5.jpg");
   ASSERT_FALSE(img.isNull());
   ASSERT_EQ(img.height(), 678);
   ASSERT_EQ(img.width(), 800);

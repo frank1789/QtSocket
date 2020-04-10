@@ -11,27 +11,27 @@ inline bool exists_file(const std::string& name) {
 }
 
 TEST(LoadFiles, LoadModel) {
-  std::string model{"../test/resources/detect.tflite"};
+  std::string model{"../build_debug/test/resources/detect.tflite"};
   EXPECT_TRUE(exists_file(model));
 }
 
 TEST(LoadFiles, LoadModelMobileNet) {
-  std::string model{"../test/resources/mobilenet_v1_1.0_224.tflite"};
+  std::string model{"../build_debug/test/resources/mobilenet_v1_1.0_224.tflite"};
   EXPECT_TRUE(exists_file(model));
 }
 
 TEST(LoadFiles, LoadCocoLabels) {
-  std::string label{"../test/resources/coco_labels.txt"};
+  std::string label{"../build_debug/test/resources/coco_labels.txt"};
   EXPECT_TRUE(exists_file(label));
 }
 
 TEST(LoadFiles, LoadLabels) {
-  std::string label{"../test/resources/labels.txt"};
+  std::string label{"../build_debug/test/resources/labels.txt"};
   EXPECT_TRUE(exists_file(label));
 }
 
 std::string write_dummy_file(const std::string& param) {
-  const std::string filename{"../test/resources/"};
+  const std::string filename{"../build_debug/test/resources/"};
   const std::string input{"Hello world!"};
   std::ofstream out(filename + param);
   for (auto i = 0; i < 10; ++i) {

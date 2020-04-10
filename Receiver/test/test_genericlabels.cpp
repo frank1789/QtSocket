@@ -6,7 +6,7 @@
 
 class GenericLabels : public ::testing::Test {
  protected:
-  const std::string label_path = {"../test/resources/labels.txt"};
+  const std::string label_path = {"../build_debug/test/resources/labels.txt"};
   std::unique_ptr<LabelDetection> label_{nullptr};
 
   void SetUp() {

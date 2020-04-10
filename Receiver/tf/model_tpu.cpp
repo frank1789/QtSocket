@@ -23,7 +23,7 @@ ModelTensorFlowLite::ModelTensorFlowLite()
     : wanted_height_(0),
       wanted_width_(0),
       wanted_channels_(3),
-//      has_detection_mask_(false),
+      //      has_detection_mask_(false),
       num_threads_(QThread::idealThreadCount()) {
   LOG(LevelAlert::I, "ctor model tensorflow lite")
   LOG(LevelAlert::D, "ideal thread count: %d", num_threads_)
@@ -35,8 +35,8 @@ void ModelTensorFlowLite::InitializeModelTFLite(const std::string &path) {
     model =
         tflite::FlatBufferModel::BuildFromFile(path.c_str(), &error_reporter);
     if (model == nullptr) {
-      LOG(LevelAlert::F, "can't load TensorFLow lite model from: ",
-          path.c_str())
+      LOG(LevelAlert::F,
+          "can't load TensorFLow lite model from: ", path.c_str())
     }
     // link model and resolver
     tflite::InterpreterBuilder(*model, resolver)(&interpreter);
@@ -176,7 +176,6 @@ void ModelTensorFlowLite::RunInference(const QImage &image) {
 
     case TypeDetection::ObjectDetection:
       ObjectOutput(image);
-
       break;
 
     default:
