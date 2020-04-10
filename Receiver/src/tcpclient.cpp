@@ -15,8 +15,8 @@
 #include <QString>
 #include <QTextEdit>
 
-#include "../log/instrumentor.h"
-#include "../log/logger.h"
+#include "instrumentor.h"
+#include "logger.h"
 #include "commonconnection.hpp"
 
 TcpClient::TcpClient(QWidget *parent) : QWidget(parent) {
@@ -194,8 +194,7 @@ void TcpClient::onConnectClicked() {
   m_stream->start();
   connectButton->setEnabled(false);
   disconnectButton->setEnabled(true);
-  LOG(LevelAlert::D, "try connect, connection status: %s, start thread",
-      result.toUtf8().data())
+  LOG(LevelAlert::D, "try connect, connection status: ", result.toUtf8().data())
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -271,8 +270,8 @@ void TcpClient::updateGui(QAbstractSocket::SocketState state) {
   const bool connected = (state == QAbstractSocket::ConnectedState);
   const bool unconnected = (state == QAbstractSocket::UnconnectedState);
 #if LOGGER_UI
-  LOG(LevelAlert::D, "connection state %s", connected ? "true" : "false")
-  LOG(LevelAlert::D, "un-connection state %s", unconnected ? "true" : "false")
+  LOG(LevelAlert::D, "connection state: ", connected ? "true" : "false")
+  LOG(LevelAlert::D, "un-connection state: ", unconnected ? "true" : "false")
 #endif
   // update ui
   connectButton->setEnabled(unconnected);

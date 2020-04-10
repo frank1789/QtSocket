@@ -1,9 +1,11 @@
 #include "streamerthread.hpp"
 
 #include <unistd.h>
+
 #include <QMutexLocker>
+
+#include "instrumentor.h"
 #include "commonconnection.hpp"
-#include "../log/instrumentor.h"
 
 StreamerThread::StreamerThread(QObject *parent)
     : m_address(QHostAddress::LocalHost), m_port(TCP_PORT) {
