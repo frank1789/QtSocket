@@ -44,13 +44,13 @@ public slots:
 
 private:
   // input image properties
-  const int m_num_channels{3};
+  const int channels_{3};
   // size tensor image desired
   int wanted_height_;
   int wanted_width_;
   int wanted_channels_;
   // detection mask
-  bool has_detection_mask_;
+//  bool has_detection_mask_;
   TypeDetection kind_network_{TypeDetection::ObjectDetection};
   int num_threads_;
   std::vector<std::pair<float, int>> top_results;

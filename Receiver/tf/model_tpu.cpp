@@ -23,7 +23,7 @@ ModelTensorFlowLite::ModelTensorFlowLite()
     : wanted_height_(0),
       wanted_width_(0),
       wanted_channels_(3),
-      has_detection_mask_(false),
+//      has_detection_mask_(false),
       num_threads_(QThread::idealThreadCount()) {
   LOG(LevelAlert::I, "ctor model tensorflow lite")
   LOG(LevelAlert::D, "ideal thread count: %d", num_threads_)
@@ -139,7 +139,7 @@ void ModelTensorFlowLite::RunInference(const QImage &image) {
     case kTfLiteFloat32:
       LOG(LevelAlert::D, "case kTfLiteFloat32")
       resize_image<float>(interpreter->typed_tensor<float>(input), image.bits(),
-                          image.height(), image.width(), m_num_channels,
+                          image.height(), image.width(), channels_,
                           wanted_height_, wanted_width_, wanted_channels_,
                           input_type);
       break;
@@ -147,14 +147,14 @@ void ModelTensorFlowLite::RunInference(const QImage &image) {
       LOG(LevelAlert::D, "case kTfLiteInt8")
       resize_image<int8_t>(interpreter->typed_tensor<int8_t>(input),
                            image.bits(), image.height(), image.width(),
-                           m_num_channels, wanted_height_, wanted_width_,
+                           channels_, wanted_height_, wanted_width_,
                            wanted_channels_, input_type);
       break;
     case kTfLiteUInt8:
       LOG(LevelAlert::D, "case kTfLiteUInt8")
       resize_image<uint8_t>(interpreter->typed_tensor<uint8_t>(input),
                             image.bits(), image.height(), image.width(),
-                            m_num_channels, wanted_height_, wanted_width_,
+                            channels_, wanted_height_, wanted_width_,
                             wanted_channels_, input_type);
       break;
     default:
