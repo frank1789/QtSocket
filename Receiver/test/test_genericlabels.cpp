@@ -1,22 +1,11 @@
 #include <memory>
-#include <string>
 
 #include "gtest/gtest.h"
 #include "labels.hpp"
+#include "test_label_function.hpp"
 
-const std::string getLabel(std::unordered_map<int, std::string> label, int i) {
-  std::unordered_map<int, std::string>::iterator it = label.find(i);
-  return it->second;
-}
-
-const int getIndexLabel(std::unordered_map<int, std::string> label, int i) {
-  std::unordered_map<int, std::string>::iterator it = label.find(i);
-  return it->first;
-}
-
-TEST(GenericLabels, AllClass) {
-  const std::string label_path = {
-      "../build_debug/test/resources/labels.txt"};
+TEST(Labels, Generic) {
+  const std::string label_path = {"../build_debug/test/resources/labels.txt"};
   auto label_ = std::make_unique<LabelDetection>(label_path);
   label_->read();
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 0), 0);
