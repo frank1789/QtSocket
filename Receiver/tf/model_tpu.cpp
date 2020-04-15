@@ -3,6 +3,8 @@
 #include <QDebug>
 #include <QImage>
 #include <QPixmap>
+#include <QRectF>
+#include <QString>
 #include <QThread>
 
 #include "colormanager.hpp"
@@ -17,7 +19,6 @@
 namespace tfclassif = tflite::label_image;
 
 constexpr float kThreshold{0.001F};
-constexpr float kMaskThreshold{0.3F};
 
 ModelTensorFlowLite::ModelTensorFlowLite()
     : wanted_height_(0),
@@ -35,17 +36,22 @@ void ModelTensorFlowLite::InitializeModelTFLite(const std::string &path) {
     model =
         tflite::FlatBufferModel::BuildFromFile(path.c_str(), &error_reporter);
     if (model == nullptr) {
-      LOG(LevelAlert::F,
-          "can't load TensorFLow lite model from: ", path.c_str())
+      LOG(LevelAlert::F, "can't load TensorFLow lite model from: ", path)
     }
+
     // link model and resolver
     tflite::InterpreterBuilder(*model, resolver)(&interpreter);
+    if (!interpreter) {
+      LOG(LevelAlert::F, "failed builder interpreter")
+      std::abort();
+    }
 
     // Apply accelaration (Neural Network Android)
     //    interpreter->UseNNAPI(accelaration);
 
     if (interpreter->AllocateTensors() != kTfLiteOk) {
-      LOG(LevelAlert::D, "failed to allocate tensor")
+      LOG(LevelAlert::F, "failed to allocate tensor")
+      std::abort();
     }
 
     if (interpreter->outputs().size() > 1) {
@@ -176,6 +182,15 @@ void ModelTensorFlowLite::RunInference(const QImage &image) {
 
     case TypeDetection::ObjectDetection:
       ObjectOutput(image);
+      for (auto &r : getResults()) {
+        int cls = r.index_class;
+        auto score = r.score;
+        auto label = QString("%1: %2 %")
+                         .arg(QString::fromStdString(getLabel(cls)))
+                         .arg(QString::number(score * 100, 'g', 4));
+        r.name = label;
+        emit objAvailable(r);
+      }
       break;
 
     default:
@@ -224,7 +239,7 @@ std::string ModelTensorFlowLite::getLabel(int i) {
   return it->second;
 }
 
-std::vector<std::tuple<int, float, QRectF> > ModelTensorFlowLite::getResults()
+std::vector<BoxDetection> ModelTensorFlowLite::getResults()
     const {
   return object_detect_->getResult();
 }

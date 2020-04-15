@@ -8,6 +8,7 @@
 #include <QImage>
 #include <QPushButton>
 #include <QRadioButton>
+#include <QRectF>
 #include <QString>
 #include <QVBoxLayout>
 
@@ -52,15 +53,17 @@ MainWindow::MainWindow(QWidget *parent)
   });
 }
 
+void MainWindow::boxDetection(BoxDetection result) {
+  emit updateBoxDetection(result);
+}
+
 MainWindow::~MainWindow() {
   delete ui;
   delete client;
 }
 
 QGridLayout *MainWindow::create_label_preview() {
-#if LOGGER_UI
   LOG(LevelAlert::I, "make preview label ui.")
-#endif
   // create horizontal layout
   auto m_group_label = new QGridLayout;
   return m_group_label;

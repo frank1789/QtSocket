@@ -24,7 +24,7 @@ target_compile_options(${NAME_PROJECT} PRIVATE -fstack-protector-strong
 )
 if (CMAKE_BUILD_TYPE MATCHES "Debug")
 	if(COVERAGE)
-		target_link_libraries(coverage)
+		target_link_libraries(${NAME_PROJECT} coverage)
 	endif()
 	else()
 	target_compile_options(${NAME_PROJECT} PUBLIC -fpic -O2)
