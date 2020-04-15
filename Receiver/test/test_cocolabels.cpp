@@ -1,38 +1,14 @@
 #include <memory>
-#include <string>
 
 #include "gtest/gtest.h"
 #include "labels.hpp"
+#include "test_label_function.hpp"
 
-class CocoLabels : public ::testing::Test {
- protected:
+TEST(Labels, Coco) {
   const std::string label_path = {
       "../build_debug/test/resources/coco_labels.txt"};
-  std::unique_ptr<LabelDetection> label_{nullptr};
-
-  void SetUp() {
-    label_ = std::make_unique<LabelDetection>(label_path);
-    label_->read();
-  }
-
-  void TearDown() {
-    // code here will be called just after the TEST_F completes
-    // ok to through exceptions from here if need be
-  }
-
-  const std::string getLabel(std::unordered_map<int, std::string> label,
-                             int i) {
-    std::unordered_map<int, std::string>::iterator it = label.find(i);
-    return it->second;
-  }
-
-  const int getIndexLabel(std::unordered_map<int, std::string> label, int i) {
-    std::unordered_map<int, std::string>::iterator it = label.find(i);
-    return it->first;
-  }
-};
-
-TEST_F(CocoLabels, AllClass) {
+  auto label_ = std::make_unique<LabelDetection>(label_path);
+  label_->read();
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 0), 0);
   EXPECT_EQ(getLabel(label_->getLabels(), 0), "person");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 1), 1);

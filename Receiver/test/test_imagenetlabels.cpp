@@ -1,38 +1,15 @@
 #include <memory>
-#include <string>
 
 #include "gtest/gtest.h"
 #include "labels.hpp"
+#include "test_label_function.hpp"
 
-class ImagenetLabels : public ::testing::Test {
- protected:
+TEST(Labels, Imagenet) {
   const std::string label_path = {
       "../build_debug/test/resources/imagenet_labels.txt"};
-  std::unique_ptr<LabelDetection> label_{nullptr};
-
-  void SetUp() {
-    label_ = std::make_unique<LabelDetection>(label_path);
-    label_->read();
-  }
-
-  void TearDown() {
-    // code here will be called just after the  completes
-    // ok to through exceptions from here if need be
-  }
-
-  const std::string getLabel(std::unordered_map<int, std::string> label,
-                             int i) {
-    std::unordered_map<int, std::string>::iterator it = label.find(i);
-    return it->second;
-  }
-
-  const int getIndexLabel(std::unordered_map<int, std::string> label, int i) {
-    std::unordered_map<int, std::string>::iterator it = label.find(i);
-    return it->first;
-  }
-};
-
-TEST_F(ImagenetLabels, AllClass) {
+  auto label_ = std::make_unique<LabelDetection>(label_path);
+  label_->read();
+  // test case
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 0), 0);
   EXPECT_EQ(getLabel(label_->getLabels(), 0), "background");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 1), 1);
@@ -121,9 +98,9 @@ TEST_F(ImagenetLabels, AllClass) {
   EXPECT_EQ(getLabel(label_->getLabels(), 34),
             "loggerhead, loggerhead turtle, Caretta caretta");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 35), 35);
-  EXPECT_EQ(
-      getLabel(label_->getLabels(), 35),
-      "leatherback turtle, leatherback, leathery turtle, Dermochelys coriacea");
+  EXPECT_EQ(getLabel(label_->getLabels(), 35),
+            "leatherback turtle, leatherback, leathery turtle, Dermochelys "
+            "coriacea");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 36), 36);
   EXPECT_EQ(getLabel(label_->getLabels(), 36), "mud turtle");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 37), 37);
@@ -297,9 +274,9 @@ TEST_F(ImagenetLabels, AllClass) {
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 105), 105);
   EXPECT_EQ(getLabel(label_->getLabels(), 105), "wallaby, brush kangaroo");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 106), 106);
-  EXPECT_EQ(
-      getLabel(label_->getLabels(), 106),
-      "koala, koala bear, kangaroo bear, native bear, Phascolarctos cinereus");
+  EXPECT_EQ(getLabel(label_->getLabels(), 106),
+            "koala, koala bear, kangaroo bear, native bear, Phascolarctos "
+            "cinereus");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 107), 107);
   EXPECT_EQ(getLabel(label_->getLabels(), 107), "wombat");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 108), 108);
@@ -339,9 +316,9 @@ TEST_F(ImagenetLabels, AllClass) {
             "king crab, Alaska crab, Alaskan king crab, Alaska king crab, "
             "Paralithodes camtschatica");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 123), 123);
-  EXPECT_EQ(
-      getLabel(label_->getLabels(), 123),
-      "American lobster, Northern lobster, Maine lobster, Homarus americanus");
+  EXPECT_EQ(getLabel(label_->getLabels(), 123),
+            "American lobster, Northern lobster, Maine lobster, Homarus "
+            "americanus");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 124), 124);
   EXPECT_EQ(getLabel(label_->getLabels(), 124),
             "spiny lobster, langouste, rock lobster, crawfish, crayfish, sea "
@@ -738,9 +715,9 @@ TEST_F(ImagenetLabels, AllClass) {
   EXPECT_EQ(getLabel(label_->getLabels(), 295),
             "brown bear, bruin, Ursus arctos");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 296), 296);
-  EXPECT_EQ(
-      getLabel(label_->getLabels(), 296),
-      "American black bear, black bear, Ursus americanus, Euarctos americanus");
+  EXPECT_EQ(getLabel(label_->getLabels(), 296),
+            "American black bear, black bear, Ursus americanus, Euarctos "
+            "americanus");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 297), 297);
   EXPECT_EQ(getLabel(label_->getLabels(), 297),
             "ice bear, polar bear, Ursus Maritimus, Thalarctos maritimus");
@@ -957,9 +934,9 @@ TEST_F(ImagenetLabels, AllClass) {
   EXPECT_EQ(getLabel(label_->getLabels(), 387),
             "African elephant, Loxodonta africana");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 388), 388);
-  EXPECT_EQ(
-      getLabel(label_->getLabels(), 388),
-      "lesser panda, red panda, panda, bear cat, cat bear, Ailurus fulgens");
+  EXPECT_EQ(getLabel(label_->getLabels(), 388),
+            "lesser panda, red panda, panda, bear cat, cat bear, Ailurus "
+            "fulgens");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 389), 389);
   EXPECT_EQ(
       getLabel(label_->getLabels(), 389),
@@ -1506,9 +1483,9 @@ TEST_F(ImagenetLabels, AllClass) {
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 632), 632);
   EXPECT_EQ(getLabel(label_->getLabels(), 632), "lotion");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 633), 633);
-  EXPECT_EQ(
-      getLabel(label_->getLabels(), 633),
-      "loudspeaker, speaker, speaker unit, loudspeaker system, speaker system");
+  EXPECT_EQ(getLabel(label_->getLabels(), 633),
+            "loudspeaker, speaker, speaker unit, loudspeaker system, "
+            "speaker system");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 634), 634);
   EXPECT_EQ(getLabel(label_->getLabels(), 634), "loupe, jeweler's loupe");
   EXPECT_EQ(getIndexLabel(label_->getLabels(), 635), 635);

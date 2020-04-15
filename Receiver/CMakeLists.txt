@@ -127,7 +127,7 @@ if(COVERAGE)
 	set(COVERAGE_CHECK "ON")
 	add_library(coverage INTERFACE)
 	if(${CMAKE_BUILD_TYPE} STREQUAL "Debug" AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-	  	target_compile_options(coverage INTERFACE	# Add required flags (GCC & LLVM/Clang)
+	  	target_compile_options(coverage INTERFACE
 			-O0        								# no optimization
 			-g         								# generate debug info
 			-ftest-coverage -fprofile-arcs 			# sets all required flags
@@ -184,8 +184,8 @@ message( STATUS "---------------------------------------------------------------
 message( STATUS )
 message( STATUS "Architecture:\t${ARCHITECTURE}" )
 message( STATUS "Compiler:\t${CMAKE_COMPILER}\t${CMAKE_CXX_COMPILER}")
-message( STATUS "C flags (Release): \t${CMAKE_C_FLAGS} ${CMAKE_C_FLAGS_RELEASE}")
-message( STATUS "C flags (Debug): \t${CMAKE_C_FLAGS} ${CMAKE_C_FLAGS_DEBUG}")
+message( STATUS "C flags (Release):\t${CMAKE_C_FLAGS} ${CMAKE_C_FLAGS_RELEASE}")
+message( STATUS "C flags (Debug):\t${CMAKE_C_FLAGS} ${CMAKE_C_FLAGS_DEBUG}")
 message( STATUS "C++ flags (Release):\t${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_RELEASE}")
 message( STATUS "C++ flags (Debug):\t${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_DEBUG}")
 message( STATUS "Coverage:\t${COVERAGE_CHECK}")

@@ -5,6 +5,7 @@ add_executable(
   test_imagenetlabels.cpp
   test_genericlabels.cpp
   test_inference.cpp
+  test_color.cpp
 )
 
 target_link_libraries(
@@ -12,8 +13,11 @@ target_link_libraries(
   gtest_main
   Qt5::Widgets
   neuralnetwork
-  coverage
 )
+
+if(COVERAGE)
+  target_link_libraries(unit_tests coverage)
+endif(COVERAGE)
 
 add_test(
   NAME

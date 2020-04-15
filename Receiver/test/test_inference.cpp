@@ -15,29 +15,15 @@
 /// GitHub example case
 //////////////////////////////////////////////////////////////////////////////
 
-class Inference : public ::testing::Test {
- protected:
+TEST(InferenceExample, GraceHooper) {
   const std::string mobilenet{
       "../build_debug/test/resources/mobilenet_v1_1.0_224.tflite"};
   const std::string mobnet_label{"../build_debug/test/resources/labels.txt"};
-
-  void SetUp() {
-    LabelDetection label(mobnet_label);
-    label.read();
-    model_tflite.LoadModelFromFile(mobilenet);
-    model_tflite.setLabel(label.getLabels());
-  }
-
-  void TearDown() {
-    // code here will be called just after the test completes
-    // ok to through exceptions from here if need be
-  }
-
- public:
   ModelTensorFlowLite model_tflite;
-};
-
-TEST_F(Inference, GraceHooper) {
+  LabelDetection label(mobnet_label);
+  label.read();
+  model_tflite.LoadModelFromFile(mobilenet);
+  model_tflite.setLabel(label.getLabels());
   const QImage img("../build_debug/test/testdata/grace_hopper.bmp");
   // check dimension
   ASSERT_FALSE(img.isNull());
@@ -67,26 +53,14 @@ TEST_F(Inference, GraceHooper) {
 /// Other Case
 //////////////////////////////////////////////////////////////////////////////
 
-class InferenceTestCase : public ::testing::Test {
- protected:
+TEST(InferenceAnimal, Dog1) {
   const QString label_path{"../build_debug/test/resources/coco_labels.txt"};
   const QString model_path{"../build_debug/test/resources/detect.tflite"};
   ModelTensorFlowLite model_tflite;
-
-  void SetUp() override {
-    LabelDetection label(label_path);
-    label.read();
-    model_tflite.LoadModelFromFile(model_path);
-    model_tflite.setLabel(label.getLabels());
-  }
-
-  void TearDown() override {
-    // code here will be called just after the test completes
-    // ok to through exceptions from here if need be
-  }
-};
-
-TEST_F(InferenceTestCase, Dog1) {
+  LabelDetection label(label_path);
+  label.read();
+  model_tflite.LoadModelFromFile(model_path);
+  model_tflite.setLabel(label.getLabels());
   const QImage img("../build_debug/test/testdata/dog_1.jpg");
   ASSERT_FALSE(img.isNull());
   ASSERT_EQ(img.height(), 248);
@@ -97,7 +71,8 @@ TEST_F(InferenceTestCase, Dog1) {
   QRectF box;
   auto result = model_tflite.getResults();
   for (auto it = result.begin(); it != result.end(); ++it) {
-    std::tie(cls, score, box) = *it;
+    auto cls = it->index_class;
+    auto score = it->score;
     // labels
     EXPECT_EQ(model_tflite.getLabel(cls), "dog");
     // scores
@@ -105,7 +80,14 @@ TEST_F(InferenceTestCase, Dog1) {
   }
 }
 
-TEST_F(InferenceTestCase, Dog2) {
+TEST(InferenceAnimal, Dog2) {
+  const QString label_path{"../build_debug/test/resources/coco_labels.txt"};
+  const QString model_path{"../build_debug/test/resources/detect.tflite"};
+  ModelTensorFlowLite model_tflite;
+  LabelDetection label(label_path);
+  label.read();
+  model_tflite.LoadModelFromFile(model_path);
+  model_tflite.setLabel(label.getLabels());
   const QImage img("../build_debug/test/testdata/dog_2.jpg");
   ASSERT_FALSE(img.isNull());
   ASSERT_EQ(img.height(), 485);
@@ -116,7 +98,8 @@ TEST_F(InferenceTestCase, Dog2) {
   QRectF box;
   auto result = model_tflite.getResults();
   for (auto it = result.begin(); it != result.end(); ++it) {
-    std::tie(cls, score, box) = *it;
+    auto cls = it->index_class;
+    auto score = it->score;
     // labels
     EXPECT_EQ(model_tflite.getLabel(cls), "dog");
     // scores
@@ -124,7 +107,14 @@ TEST_F(InferenceTestCase, Dog2) {
   }
 }
 
-TEST_F(InferenceTestCase, Dog3) {
+TEST(InferenceAnimal, Dog3) {
+  const QString label_path{"../build_debug/test/resources/coco_labels.txt"};
+  const QString model_path{"../build_debug/test/resources/detect.tflite"};
+  ModelTensorFlowLite model_tflite;
+  LabelDetection label(label_path);
+  label.read();
+  model_tflite.LoadModelFromFile(model_path);
+  model_tflite.setLabel(label.getLabels());
   const QImage img("../build_debug/test/testdata/dog_3.jpg");
   ASSERT_FALSE(img.isNull());
   ASSERT_EQ(img.height(), 1385);
@@ -135,7 +125,8 @@ TEST_F(InferenceTestCase, Dog3) {
   QRectF box;
   auto result = model_tflite.getResults();
   for (auto it = result.begin(); it != result.end(); ++it) {
-    std::tie(cls, score, box) = *it;
+    auto cls = it->index_class;
+    auto score = it->score;
     // labels
     EXPECT_EQ(model_tflite.getLabel(cls), "dog");
     // scores
@@ -143,7 +134,14 @@ TEST_F(InferenceTestCase, Dog3) {
   }
 }
 
-TEST_F(InferenceTestCase, Dog4) {
+TEST(InferenceAnimal, Dog4) {
+  const QString label_path{"../build_debug/test/resources/coco_labels.txt"};
+  const QString model_path{"../build_debug/test/resources/detect.tflite"};
+  ModelTensorFlowLite model_tflite;
+  LabelDetection label(label_path);
+  label.read();
+  model_tflite.LoadModelFromFile(model_path);
+  model_tflite.setLabel(label.getLabels());
   const QImage img("../build_debug/test/testdata/dog_4.jpg");
   ASSERT_FALSE(img.isNull());
   ASSERT_EQ(img.height(), 478);
@@ -154,7 +152,8 @@ TEST_F(InferenceTestCase, Dog4) {
   QRectF box;
   auto result = model_tflite.getResults();
   for (auto it = result.begin(); it != result.end(); ++it) {
-    std::tie(cls, score, box) = *it;
+    auto cls = it->index_class;
+    auto score = it->score;
     // labels
     EXPECT_EQ(model_tflite.getLabel(cls), "dog");
     // scores
@@ -162,7 +161,14 @@ TEST_F(InferenceTestCase, Dog4) {
   }
 }
 
-TEST_F(InferenceTestCase, Dog5) {
+TEST(InferenceAnimal, Dog5) {
+  const QString label_path{"../build_debug/test/resources/coco_labels.txt"};
+  const QString model_path{"../build_debug/test/resources/detect.tflite"};
+  ModelTensorFlowLite model_tflite;
+  LabelDetection label(label_path);
+  label.read();
+  model_tflite.LoadModelFromFile(model_path);
+  model_tflite.setLabel(label.getLabels());
   const QImage img("../build_debug/test/testdata/dog_5.jpg");
   ASSERT_FALSE(img.isNull());
   ASSERT_EQ(img.height(), 500);
@@ -173,7 +179,8 @@ TEST_F(InferenceTestCase, Dog5) {
   QRectF box;
   auto result = model_tflite.getResults();
   for (auto it = result.begin(); it != result.end(); ++it) {
-    std::tie(cls, score, box) = *it;
+    auto cls = it->index_class;
+    auto score = it->score;
     // labels
     EXPECT_EQ(model_tflite.getLabel(cls), "dog");
     // scores
@@ -181,7 +188,14 @@ TEST_F(InferenceTestCase, Dog5) {
   }
 }
 
-TEST_F(InferenceTestCase, Cat1) {
+TEST(InferenceAnimal, Cat1) {
+  const QString label_path{"../build_debug/test/resources/coco_labels.txt"};
+  const QString model_path{"../build_debug/test/resources/detect.tflite"};
+  ModelTensorFlowLite model_tflite;
+  LabelDetection label(label_path);
+  label.read();
+  model_tflite.LoadModelFromFile(model_path);
+  model_tflite.setLabel(label.getLabels());
   const QImage img("../build_debug/test/testdata/cat_1.jpg");
   ASSERT_FALSE(img.isNull());
   ASSERT_EQ(img.height(), 1800);
@@ -192,7 +206,8 @@ TEST_F(InferenceTestCase, Cat1) {
   QRectF box;
   auto result = model_tflite.getResults();
   for (auto it = result.begin(); it != result.end(); ++it) {
-    std::tie(cls, score, box) = *it;
+    auto cls = it->index_class;
+    auto score = it->score;
     // labels
     EXPECT_EQ(model_tflite.getLabel(cls), "cat");
     // scores
@@ -200,7 +215,14 @@ TEST_F(InferenceTestCase, Cat1) {
   }
 }
 
-TEST_F(InferenceTestCase, Cat2) {
+TEST(InferenceAnimal, Cat2) {
+  const QString label_path{"../build_debug/test/resources/coco_labels.txt"};
+  const QString model_path{"../build_debug/test/resources/detect.tflite"};
+  ModelTensorFlowLite model_tflite;
+  LabelDetection label(label_path);
+  label.read();
+  model_tflite.LoadModelFromFile(model_path);
+  model_tflite.setLabel(label.getLabels());
   const QImage img("../build_debug/test/testdata/cat_2.jpg");
   ASSERT_FALSE(img.isNull());
   ASSERT_EQ(img.height(), 400);
@@ -211,7 +233,8 @@ TEST_F(InferenceTestCase, Cat2) {
   QRectF box;
   auto result = model_tflite.getResults();
   for (auto it = result.begin(); it != result.end(); ++it) {
-    std::tie(cls, score, box) = *it;
+    auto cls = it->index_class;
+    auto score = it->score;
     // labels
     EXPECT_EQ(model_tflite.getLabel(cls), "cat");
     // scores
@@ -219,7 +242,14 @@ TEST_F(InferenceTestCase, Cat2) {
   }
 }
 
-TEST_F(InferenceTestCase, Cat3) {
+TEST(InferenceAnimal, Cat3) {
+  const QString label_path{"../build_debug/test/resources/coco_labels.txt"};
+  const QString model_path{"../build_debug/test/resources/detect.tflite"};
+  ModelTensorFlowLite model_tflite;
+  LabelDetection label(label_path);
+  label.read();
+  model_tflite.LoadModelFromFile(model_path);
+  model_tflite.setLabel(label.getLabels());
   const QImage img("../build_debug/test/testdata/cat_3.jpg");
   ASSERT_FALSE(img.isNull());
   ASSERT_EQ(img.height(), 710);
@@ -230,7 +260,8 @@ TEST_F(InferenceTestCase, Cat3) {
   QRectF box;
   auto result = model_tflite.getResults();
   for (auto it = result.begin(); it != result.end(); ++it) {
-    std::tie(cls, score, box) = *it;
+    auto cls = it->index_class;
+    auto score = it->score;
     // labels
     EXPECT_EQ(model_tflite.getLabel(cls), "cat");
     // scores
@@ -238,7 +269,14 @@ TEST_F(InferenceTestCase, Cat3) {
   }
 }
 
-TEST_F(InferenceTestCase, Cat4) {
+TEST(InferenceAnimal, Cat4) {
+  const QString label_path{"../build_debug/test/resources/coco_labels.txt"};
+  const QString model_path{"../build_debug/test/resources/detect.tflite"};
+  ModelTensorFlowLite model_tflite;
+  LabelDetection label(label_path);
+  label.read();
+  model_tflite.LoadModelFromFile(model_path);
+  model_tflite.setLabel(label.getLabels());
   const QImage img("../build_debug/test/testdata/cat_4.jpg");
   ASSERT_FALSE(img.isNull());
   ASSERT_EQ(img.height(), 700);
@@ -249,7 +287,8 @@ TEST_F(InferenceTestCase, Cat4) {
   QRectF box;
   auto result = model_tflite.getResults();
   for (auto it = result.begin(); it != result.end(); ++it) {
-    std::tie(cls, score, box) = *it;
+    auto cls = it->index_class;
+    auto score = it->score;
     // labels
     EXPECT_EQ(model_tflite.getLabel(cls), "cat");
     // scores
@@ -257,7 +296,14 @@ TEST_F(InferenceTestCase, Cat4) {
   }
 }
 
-TEST_F(InferenceTestCase, Cat5) {
+TEST(InferenceAnimal, Cat5) {
+  const QString label_path{"../build_debug/test/resources/coco_labels.txt"};
+  const QString model_path{"../build_debug/test/resources/detect.tflite"};
+  ModelTensorFlowLite model_tflite;
+  LabelDetection label(label_path);
+  label.read();
+  model_tflite.LoadModelFromFile(model_path);
+  model_tflite.setLabel(label.getLabels());
   const QImage img("../build_debug/test/testdata/cat_5.jpg");
   ASSERT_FALSE(img.isNull());
   ASSERT_EQ(img.height(), 678);
@@ -268,7 +314,8 @@ TEST_F(InferenceTestCase, Cat5) {
   QRectF box;
   auto result = model_tflite.getResults();
   for (auto it = result.begin(); it != result.end(); ++it) {
-    std::tie(cls, score, box) = *it;
+    auto cls = it->index_class;
+    auto score = it->score;
     // labels
     EXPECT_EQ(model_tflite.getLabel(cls), "cat");
     // scores
