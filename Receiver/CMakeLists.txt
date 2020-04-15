@@ -1,6 +1,16 @@
-cmake_minimum_required (VERSION 3.7)
-project(QtTcpSocket LANGUAGES CXX)
+cmake_minimum_required (VERSION 3.16)
+project(QtTcpSocket LANGUAGES C CXX)
 set(NAME_PROJECT "Receiver")
+
+#-----------------------------------------------------------------------------
+# load cmake module
+#-----------------------------------------------------------------------------
+include(cmake/googletest.cmake)
+fetch_googletest(
+    ${PROJECT_SOURCE_DIR}/cmake
+    ${PROJECT_BINARY_DIR}/googletest
+)
+enable_testing()
 
 #-----------------------------------------------------------------------------
 # check build type
@@ -29,15 +39,18 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # Check architecture
 EXECUTE_PROCESS( COMMAND uname -m COMMAND tr -d '\n' OUTPUT_VARIABLE ARCHITECTURE )
 
-set(HEADERS_PATH "${CMAKE_CURRENT_SOURCE_DIR}/vendor/tensorflow-lite/include" CACHE INTERNAL "")
-include_directories(${HEADERS_PATH})
 #-------------------------------------------------------------------------------
 # Select external Library
 #-------------------------------------------------------------------------------
-if (${CMAKE_SYSTEM_NAME} MATCHES "Linux" AND "${ARCHITECTURE}" STREQUAL "x86_64")
-	link_directories(vendor/tensorflow-lite/aarch64_armv8-a/lib)
+set(HEADERS_PATH "${CMAKE_CURRENT_SOURCE_DIR}/vendor/tensorflow-lite/include" CACHE INTERNAL "")
+include_directories(${HEADERS_PATH})
+
+if (${CMAKE_SYSTEM_NAME} MATCHES "Linux" AND "${ARCHITECTURE}" STREQUAL "aarch64")
+	set(LIBRARYPATH "${CMAKE_CURRENT_SOURCE_DIR}/vendor/tensorflow-lite/aarch64_armv8-a/lib" CACHE INTERNAL "")
+    message(STATUS "Detect os: ${CMAKE_SYSTEM_NAME}\tarch: ${ARCHITECTURE}")
+    message(STATUS "Set library's directory: ${LIBRARYPATH}")
+    link_directories(${LIBRARYPATH})
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Linux" AND "${ARCHITECTURE}" STREQUAL "armv7l")
-	link_directories(vendor/tensorflow-lite/rpi_armv7l/lib)
 	set(LIBRARYPATH "${CMAKE_CURRENT_SOURCE_DIR}/vendor/tensorflow-lite/rpi_armv7l/lib" CACHE INTERNAL "")
     message(STATUS "Detect os: ${CMAKE_SYSTEM_NAME}\tarch: ${ARCHITECTURE}")
     message(STATUS "Set library's directory: ${LIBRARYPATH}")
@@ -50,42 +63,79 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin" AND "${ARCHITECTURE}" STREQUAL "x8
 endif()
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Linux" AND "${ARCHITECTURE}" STREQUAL "x86_64")
-
+	#-----------------------------------------------------------------------------
+	# Specific Flag for Linux Desktop
+	#-----------------------------------------------------------------------------	
+	set(CMAKE_C_FLAGS_DEBUG "-march=native -pthread")
+	set(CMAKE_CXX_FLAGS_DEBUG "-march=native -pthread")
+	set(CMAKE_C_FLAGS_RELEASE "-march=native -pthread")
+	set(CMAKE_CXX_FLAGS_RELEASE "-march=native -pthread")
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Linux" AND "${ARCHITECTURE}" STREQUAL "armv7l")
 	#-----------------------------------------------------------------------------
 	# Specific Flag for RaspBerry Pi 3 
 	#-----------------------------------------------------------------------------
-	set(CMAKE_C_FLAGS_DEBUG "-march=armv8-a+crc -mtune=cortex-a53 -mfpu=crypto-neon-fp-armv8 -mfloat-abi=hard -ftree-vectorize -funsafe-math-optimizations -pipe")
-	set(CMAKE_CXX_FLAGS_DEBUG "-march=armv8-a+crc -mtune=cortex-a53 -mfpu=crypto-neon-fp-armv8 -mfloat-abi=hard -ftree-vectorize -funsafe-math-optimizations -pipe")
-	set(CMAKE_C_FLAGS_RELEASE "-march=armv8-a+crc -mtune=cortex-a53 -mfpu=crypto-neon-fp-armv8 -mfloat-abi=hard -ftree-vectorize -funsafe-math-optimizations -pipe")
-	set(CMAKE_CXX_FLAGS_RELEASE "-march=armv8-a+crc -mtune=cortex-a53 -mfpu=crypto-neon-fp-armv8 -mfloat-abi=hard -ftree-vectorize -funsafe-math-optimizations -pipe")
+	set(CMAKE_C_FLAGS_DEBUG "-march=armv8-a+crc 
+		-mtune=cortex-a53 
+		-mfpu=crypto-neon-fp-armv8 
+		-mfloat-abi=hard 
+		-ftree-vectorize 
+		-funsafe-math-optimizations 
+		-pipe 
+		-pthread"
+	)
+	set(CMAKE_CXX_FLAGS_DEBUG "-march=armv8-a+crc 
+		-mtune=cortex-a53 
+		-mfpu=crypto-neon-fp-armv8 
+		-mfloat-abi=hard 
+		-ftree-vectorize 
+		-funsafe-math-optimizations 
+		-pipe 
+		-pthread"
+	)
+	set(CMAKE_C_FLAGS_RELEASE "-march=armv8-a+crc 
+		-mtune=cortex-a53 
+		-mfpu=crypto-neon-fp-armv8 
+		-mfloat-abi=hard 
+		-ftree-vectorize 
+		-funsafe-math-optimizations 
+		-pipe 
+		-pthread"
+	)
+	set(CMAKE_CXX_FLAGS_RELEASE "-march=armv8-a+crc 
+		-mtune=cortex-a53 
+		-mfpu=crypto-neon-fp-armv8 
+		-mfloat-abi=hard 
+		-ftree-vectorize 
+		-funsafe-math-optimizations 
+		-pipe 
+		-pthread"
+	)
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin" AND "${ARCHITECTURE}" STREQUAL "x86_64")
 	#-----------------------------------------------------------------------------
 	# Specific Flag for MacOS
 	#-----------------------------------------------------------------------------	
-	set(CMAKE_C_FLAGS_DEBUG "-march=native ")
-	set(CMAKE_CXX_FLAGS_DEBUG "-march=native")
-	set(CMAKE_C_FLAGS_RELEASE "-march=native")
-	set(CMAKE_CXX_FLAGS_RELEASE "-march=native")
+	set(CMAKE_C_FLAGS_DEBUG "-march=native -pthread")
+	set(CMAKE_CXX_FLAGS_DEBUG "-march=native -pthread")
+	set(CMAKE_C_FLAGS_RELEASE "-march=native -pthread")
+	set(CMAKE_CXX_FLAGS_RELEASE "-march=native -pthread")
 endif()
 
 #-----------------------------------------------------------------------------
 # Code coverage
 #-----------------------------------------------------------------------------
 if(COVERAGE)
-	add_library(coverage_config INTERFACE)
+	set(COVERAGE_CHECK "ON")
+	add_library(coverage INTERFACE)
 	if(${CMAKE_BUILD_TYPE} STREQUAL "Debug" AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-	  	message(STATUS "enabled coverage")
-	  	# Add required flags (GCC & LLVM/Clang)
-	  	target_compile_options(coverage_config INTERFACE
-			-O0        # no optimization
-			-g         # generate debug info
-			-ftest-coverage -fprofile-arcs # sets all required flags
+	  	target_compile_options(coverage INTERFACE
+			-O0        								# no optimization
+			-g         								# generate debug info
+			-ftest-coverage -fprofile-arcs 			# sets all required flags
 	  	)
 	  	if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
-			target_link_options(coverage_config INTERFACE --coverage)
+			target_link_options(coverage INTERFACE --coverage)
 	  	else()
-			target_link_libraries(coverage_config INTERFACE --coverage)
+			target_link_libraries(coverage INTERFACE --coverage)
 	  	endif()
 	endif()
 endif()
@@ -122,6 +172,7 @@ find_package(Threads REQUIRED)
 add_subdirectory(src)
 add_subdirectory(log)
 add_subdirectory(tf)
+add_subdirectory(test)
 
 # ----------------------------------------------------------------------------
 # display status message for important variables
@@ -133,11 +184,19 @@ message( STATUS "---------------------------------------------------------------
 message( STATUS )
 message( STATUS "Architecture:\t${ARCHITECTURE}" )
 message( STATUS "Compiler:\t${CMAKE_COMPILER}\t${CMAKE_CXX_COMPILER}")
-message( STATUS "C flags (Release): \t${CMAKE_C_FLAGS} ${CMAKE_C_FLAGS_RELEASE}")
-message( STATUS "C flags (Debug): \t${CMAKE_C_FLAGS} ${CMAKE_C_FLAGS_DEBUG}")
+message( STATUS "C flags (Release):\t${CMAKE_C_FLAGS} ${CMAKE_C_FLAGS_RELEASE}")
+message( STATUS "C flags (Debug):\t${CMAKE_C_FLAGS} ${CMAKE_C_FLAGS_DEBUG}")
 message( STATUS "C++ flags (Release):\t${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_RELEASE}")
 message( STATUS "C++ flags (Debug):\t${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_DEBUG}")
+message( STATUS "Coverage:\t${COVERAGE_CHECK}")
 message( STATUS "CMAKE_BINARY_DIR:\t${CMAKE_BINARY_DIR}")
 message( STATUS )
 message( STATUS "Change a value with: cmake -D<Variable>=<Value> .." )
 message( STATUS )
+
+# ----------------------------------------------------------------------------
+# copy resources
+# ----------------------------------------------------------------------------
+file(INSTALL ${CMAKE_CURRENT_SOURCE_DIR}/resources DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/src)
+file(INSTALL ${CMAKE_CURRENT_SOURCE_DIR}/resources DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/test)
+file(INSTALL ${CMAKE_CURRENT_SOURCE_DIR}/testdata DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/test)

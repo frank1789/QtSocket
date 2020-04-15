@@ -1,12 +1,14 @@
 #include <QApplication>
 #include <QObject>
 
+#include "findmodel.hpp"
+#include "instrumentor.h"
+#include "labels.hpp"
 #include "mainwindow.hpp"
+#include "model_tpu.hpp"
 
-#include "../log/instrumentor.h"
-#include "../tf/findmodel.hpp"
-#include "../tf/model_tpu.hpp"
-#include "../tf/util_label_image.hpp"
+const QString local_model_path{"/resources/detect.tflite"};
+const QString local_label_path{"/resources/coco_labels.txt"};
 
 int main(int argc, char* argv[]) {
 #if PROFILING
@@ -16,21 +18,32 @@ int main(int argc, char* argv[]) {
   MainWindow w;
   w.setWindowTitle("Receiver");
   w.show();
-  // initiliaze qdialog for setup model and label
-  FindModel m;
-  m.exec();
-  while (m.isVisible()) {
-    m.show();
+  // initialize QDialog, then setup model and label
+  auto model_path = QApplication::applicationDirPath() + local_model_path;
+  auto label_path = QApplication::applicationDirPath() + local_label_path;
+  if (!QFile::exists(model_path) && !QFile::exists(label_path)) {
+#if LOGGER
+    LOG(LevelAlert::E, "model file and label file not found, throw ui")
+#endif
+    FindModel m;
+    m.exec();
+    while (m.isVisible()) {
+      m.show();
+    }
+    // update path
+    label_path = m.getLabelPath();
+    model_path = m.getModelPath();
   }
-  // get path
-  auto dd = m.getLabelPath();
-  auto zz = m.getModelPath();
-  LabelDetection label(dd);
+  LabelDetection label(label_path);
   label.read();
-  ModelTensorFlowLite modeltflite(zz);
-  modeltflite.setLabel(label.getLabels());
-  QObject::connect(&w, &MainWindow::updateImage, &modeltflite,
-                   &ModelTensorFlowLite::imageAvailable);
+  ModelTensorFlowLite model_tflite;
+  model_tflite.LoadModelFromFile(model_path);
+  model_tflite.setLabel(label.getLabels());
+  QObject::connect(
+      &w, &MainWindow::updateImage,
+      [&model_tflite](QPixmap pixmap) { model_tflite.imageAvailable(pixmap); });
+  QObject::connect(&model_tflite, &ModelTensorFlowLite::objAvailable,
+                   [&w](BoxDetection result) { w.boxDetection(result); });
 
   auto r = a.exec();
 #if PROFILING

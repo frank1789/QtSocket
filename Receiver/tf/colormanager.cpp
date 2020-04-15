@@ -18,7 +18,7 @@ QColor ColorManager::getColor(QString element) {
 }
 
 QColor ColorManager::getNewColor() {
-  QColor color = def_color(defColors, elements.count());
+  QColor color = def_color(Colors, elements.count());
 
   if (!rgb) {
     int r = color.red();
@@ -53,7 +53,8 @@ int billinerColor(QImage mask, QColor color, int xa, int xb, int xc, int xd,
 }
 
 uint billinearPixel(QImage mask, double sx, double sy, int k, int j) {
-  double alpha, beta;
+  double alpha;
+  double beta;
 
   int xa = static_cast<int>(k / sx);
   int ya = static_cast<int>(j / sy);

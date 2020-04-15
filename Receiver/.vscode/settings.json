@@ -6,6 +6,17 @@
     "C_Cpp.default.intelliSenseMode": "clang-x64",
     "cmake.configureOnOpen": false,
     "files.associations": {
-        "unordered_map": "cpp"
+        "unordered_map": "cpp",
+        "iosfwd": "cpp",
+        "deque": "cpp",
+        "hash_map": "cpp",
+        "hash_set": "cpp",
+        "forward_list": "cpp",
+        "list": "cpp",
+        "string": "cpp",
+        "valarray": "cpp",
+        "vector": "cpp",
+        "*.tcc": "cpp",
+        "tuple": "cpp"
     }
 }

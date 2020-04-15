@@ -8,10 +8,11 @@
 #include <QImage>
 #include <QPushButton>
 #include <QRadioButton>
+#include <QRectF>
 #include <QString>
 #include <QVBoxLayout>
 
-#include "../log/logger.h"
+#include "logger.h"
 #include "ui_mainwindow.h"
 
 MainWindow::MainWindow(QWidget *parent)
@@ -19,7 +20,7 @@ MainWindow::MainWindow(QWidget *parent)
   ui->setupUi(this);
 
   // init central widget
-  QWidget *widget = new QWidget;
+  auto *widget = new QWidget;
   setCentralWidget(widget);
 
   // init complete group
@@ -52,15 +53,17 @@ MainWindow::MainWindow(QWidget *parent)
   });
 }
 
+void MainWindow::boxDetection(BoxDetection result) {
+  emit updateBoxDetection(result);
+}
+
 MainWindow::~MainWindow() {
   delete ui;
   delete client;
 }
 
 QGridLayout *MainWindow::create_label_preview() {
-#if LOGGER_UI
-  LOG(INFO, "make preview label ui.")
-#endif
+  LOG(LevelAlert::I, "make preview label ui.")
   // create horizontal layout
   auto m_group_label = new QGridLayout;
   return m_group_label;

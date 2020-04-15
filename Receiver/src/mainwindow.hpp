@@ -6,6 +6,7 @@
 
 #include "mylabel.hpp"
 #include "tcpclient.hpp"
+#include "object_detection.hpp"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -21,6 +22,7 @@ class QImage;
 class QPushButton;
 class QRadioButton;
 class QString;
+class QRectF;
 QT_END_NAMESPACE
 
 class MainWindow : public QMainWindow {
@@ -30,9 +32,13 @@ class MainWindow : public QMainWindow {
   MainWindow(QWidget *parent = nullptr);
   ~MainWindow();
 
+ public slots:
+  void boxDetection(BoxDetection result);
+
  signals:
-  void update_rgb_image(QImage);
+  // void updateImage(QImage);
   void updateImage(QPixmap);
+  void updateBoxDetection(BoxDetection);
 
  private:
   /**

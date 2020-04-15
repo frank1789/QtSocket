@@ -1,6 +1,26 @@
 #!/usr/bin/env sh
 
-
+# This script provides two functions:
+#   - "compile_debug": check if there are folders containing previous builds.
+#                    Compile the project in debug mode, then once completed,
+#                    start the unit test.
+#                    Collects information for code coverage.
+#
+#   - "compile_release": check if there are folders containing previous builds.
+#                       Fill in the project and start the executable.
+#
+# Args:
+#    - $1 the first argument is optional and is used to activate the debug mode.
+#      Is required to specify "debug" or "debug" does not accept other arguments.
+#
+# Usage:
+#
+# compile in debug mode:
+# $./build.sh debug
+#
+# # compile in release mode:
+# $./build.sh
+#
 
 # ////////////////////////////////////////////////////////////////////////////
 # declare function
@@ -11,10 +31,29 @@ compile_debug() {
     clear_old_build
     echo "create new directory $DIRECTORY"
     mkdir $DIRECTORY && cd $DIRECTORY
-    cmake -D CMAKE_BUILD_TYPE=Debug ..
-    make -j3
-    EXECUTABLE=$(find $PWD -name "Receiver")
-    ${EXECUTABLE}
+    # clear lcov
+    lcov --directory . --zerocounters
+    # setup cmake
+    cmake -D CMAKE_BUILD_TYPE=Debug -D COVERAGE=ON ..
+    make -j$(nproc)
+    UNIT_TEST=$(find $PWD -name "unit_tests")
+    ${UNIT_TEST}
+    # Create lcov report capturing coverage info
+    # filter out system and extra files.
+    lcov -d $PWD --capture --output-file coverage.info
+    lcov --remove coverage.info \
+        '*/usr/*' \
+        '/.cache/*' \
+        '*/unit_tests_*/*' \
+        '*/googletest/*' \
+        '*Qt*.framework*' \
+        '*Xcode.app*' \
+        '*.moc' \
+        '*moc_*.cpp' \
+        --output-file coverage-filtered.info
+    # output coverage data for debugging (optional)
+    lcov --list coverage-filtered.info
+    genhtml coverage-filtered.info --output-directory out-coverage --show-details
 }
 
 compile_release() {
@@ -23,7 +62,7 @@ compile_release() {
     echo "create new directory $DIRECTORY"
     mkdir $DIRECTORY && cd $DIRECTORY
     cmake -D CMAKE_BUILD_TYPE=Release ..
-    make -j3
+    make -j$(nproc)
     EXECUTABLE=$(find $PWD -name "Receiver")
     ${EXECUTABLE}
 }
@@ -51,10 +90,6 @@ clear_old_build() {
 # ////////////////////////////////////////////////////////////////////////////
 # main script
 # ////////////////////////////////////////////////////////////////////////////
-
-# generate dependecies if not exist
-make -f $PWD/Makefile
-
 if [ "$#" -eq "0" ]; then
     echo "build release version"
     compile_release
