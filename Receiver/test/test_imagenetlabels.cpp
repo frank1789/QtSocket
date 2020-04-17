@@ -4,6 +4,15 @@
 #include "labels.hpp"
 #include "test_label_function.hpp"
 
+TEST(Labels, IndexNumberImagenet) {
+  const std::string label_path = {
+      "../build_debug/test/resources/imagenet_labels.txt"};
+  auto label_ = std::make_unique<LabelDetection>(label_path);
+  label_->read();
+  auto num_lab = label_->getLabels().size();
+  EXPECT_EQ(num_lab, 1001);
+}
+
 TEST(Labels, Imagenet) {
   const std::string label_path = {
       "../build_debug/test/resources/imagenet_labels.txt"};
