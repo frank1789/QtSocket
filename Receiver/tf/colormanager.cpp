@@ -3,25 +3,22 @@
 #include <QColor>
 #include <QPainter>
 #include <QString>
-
 #include <random>
 
 #include "list_colour.hpp"
 
-int generateRandomInteger(int max){
-std::random_device dev;
-    std::mt19937 rng(dev());
-    std::uniform_int_distribution<std::mt19937::result_type> value(0,max); // distribution in range [1, 6]
-
-    return static_cast<int>(value(rng));
+int generateRandomInteger(int max) {
+  std::random_device dev;
+  std::mt19937 rng(dev());
+  std::uniform_int_distribution<std::mt19937::result_type> value(0, max);
+  return static_cast<int>(value(rng));
 }
-
 
 QColor ColorManager::getColor(int i) const {
   int index;
   QString name_color;
   QColor color;
-  if (i > Colors.size()){
+  if (i > Colors.size()) {
     i = generateRandomInteger(Colors.size());
   }
   std::tie(index, name_color, color) = Colors[i];
