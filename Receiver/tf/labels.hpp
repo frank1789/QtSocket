@@ -32,6 +32,11 @@ class LabelDetection {
    * @param path string containing the path to the file.
    */
   LabelDetection(const std::string &path);
+
+  /**
+   * @brief Read file lines by lines.
+   * 
+   */
   void read();
 
   /**
