@@ -63,8 +63,8 @@ TEST(InferenceAnimal, Dog1) {
   model_tflite.setLabel(label.getLabels());
   const QImage img("../build_debug/test/testdata/dog_1.jpg");
   ASSERT_FALSE(img.isNull());
-  ASSERT_EQ(img.height(), 248);
-  ASSERT_EQ(img.width(), 203);
+  ASSERT_EQ(img.height(), 482);
+  ASSERT_EQ(img.width(), 600);
   model_tflite.imageAvailable(img);
   int cls;
   float score;

@@ -39,7 +39,7 @@ MainWindow::MainWindow(QWidget *parent)
   m_group_all->addWidget(m_label, 0, 0);
   m_group_all->addWidget(client, 0, 1);
   widget->setLayout(m_group_all);
-  connect(client, qOverload<QPixmap>(&TcpClient::updateImage),
+  connect(client, &TcpClient::updatePixmap,
           [=](QPixmap img) {
             m_label->updatePixmap(img);
             emit updateImage(img);
