@@ -18,14 +18,10 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {
   ui->setupUi(this);
-
-  // init central widget
+  // init central widget and group
   auto *widget = new QWidget;
   setCentralWidget(widget);
-
-  // init complete group
   auto m_group_all = new QGridLayout;
-
   // allocate image
   m_image = new QImage(640, 480, QImage::Format_RGB888);
   for (int i = 0; i < 640; i++) {
@@ -33,22 +29,20 @@ MainWindow::MainWindow(QWidget *parent)
       m_image->setPixel(i, j, qRgb(0, 0, 0));
     }
   }
-
+  // initiliaze QLabel and image size
   m_label = new MyLabel(this);
-
-  // set minimum size
   m_label->setMinimumSize(640, 480);
-
   // load image
   m_label->setPixmap(QPixmap::fromImage(*m_image));
   client = new TcpClient();
   m_group_all->addWidget(m_label, 0, 0);
   m_group_all->addWidget(client, 0, 1);
   widget->setLayout(m_group_all);
-  connect(client, qOverload<QPixmap>(&TcpClient::updateImage), [=](QPixmap img) {
-    m_label->setImage(img);
-    emit updateImage(img);
-  });
+  connect(client, &TcpClient::updatePixmap,
+          [=](QPixmap img) {
+            m_label->updatePixmap(img);
+            emit updateImage(img);
+          });
 }
 
 void MainWindow::boxDetection(BoxDetection result) {

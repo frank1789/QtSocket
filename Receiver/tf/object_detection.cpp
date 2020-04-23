@@ -12,18 +12,15 @@ void ObjectDetection::searchObject(const std::vector<TfLiteTensor *> &outputs,
     detection_classes_  = std::make_unique<float>(*TensorData<float>(outputs[1], 0));
     detection_scores_   = std::make_unique<float>(*TensorData<float>(outputs[2], 0));
     num_detections_     = static_cast<int>(*TensorData<float>(outputs[3], 0));
-
+    // extract class and score, if valid append to list of result
     for (int i = 0; i < num_detections_; ++i) {
-      // get class
-      int cls = static_cast<int>(detection_classes_.get()[i]);
+      int cls = static_cast<int>(detection_classes_.get()[i] + 1);
       if (cls == 0) continue;
       auto score = static_cast<float>(detection_scores_.get()[i]);
       if (score < threshold) {
         LOG(LevelAlert::W, "invalid/low score: ", score, ", class ", cls)
         break;
       }
-      std::cout << "score: "<< score << ", class "<< cls<<"\n";
-
       // get corners coordinates
       const auto top =
           static_cast<qreal>(detection_boxes_.get()[4 * i] * img.height());
