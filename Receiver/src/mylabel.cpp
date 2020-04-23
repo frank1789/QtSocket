@@ -11,7 +11,7 @@ void MyLabel::setImage(QImage image) {
       pixmap.scaled(this->width(), this->height(), Qt::KeepAspectRatio));
 }
 
-void MyLabel::setImage(QPixmap image) {
+void MyLabel::updatePixmap(QPixmap image) {
   PROFILE_FUNCTION();
   setPixmap(
       image.scaled(this->width(), this->height(), Qt::KeepAspectRatio));

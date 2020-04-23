@@ -57,6 +57,10 @@ cd Receiver
 ./build.sh debug
 ```
 
+#### Documentation
+
+You can find the documentation in the _"../build_debug/doc_doxygen"_ folder.
+
 ## OLD
 ### Other part
 To run project build Sender
