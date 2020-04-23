@@ -22,9 +22,7 @@ int main(int argc, char* argv[]) {
   auto model_path = QApplication::applicationDirPath() + local_model_path;
   auto label_path = QApplication::applicationDirPath() + local_label_path;
   if (!QFile::exists(model_path) && !QFile::exists(label_path)) {
-#if LOGGER
     LOG(LevelAlert::E, "model file and label file not found, throw ui")
-#endif
     FindModel m;
     m.exec();
     while (m.isVisible()) {
@@ -42,8 +40,6 @@ int main(int argc, char* argv[]) {
   QObject::connect(
       &w, &MainWindow::updateImage,
       [&model_tflite](QPixmap pixmap) { model_tflite.imageAvailable(pixmap); });
-  QObject::connect(&model_tflite, &ModelTensorFlowLite::objAvailable,
-                   [&w](BoxDetection result) { w.boxDetection(result); });
 
   auto r = a.exec();
 #if PROFILING

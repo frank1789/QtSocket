@@ -5,23 +5,24 @@
 
 #include "tensordata.hpp"
 
-void ObjectDetection::SearchObject(const std::vector<TfLiteTensor *> &outputs,
-                                   float threshold, const QImage &img, int max_index_class) {
+void ObjectDetection::searchObject(const std::vector<TfLiteTensor *> &outputs,
+                                   float threshold, const QImage &img) {
   if (outputs.size() > 3 && outputs.size() < 5) {
     detection_boxes_    = std::make_unique<float>(*TensorData<float>(outputs[0], 0));
     detection_classes_  = std::make_unique<float>(*TensorData<float>(outputs[1], 0));
     detection_scores_   = std::make_unique<float>(*TensorData<float>(outputs[2], 0));
     num_detections_     = static_cast<int>(*TensorData<float>(outputs[3], 0));
 
-    for (int i = 0; i < num_detections_; i++) {
+    for (int i = 0; i < num_detections_; ++i) {
       // get class
       int cls = static_cast<int>(detection_classes_.get()[i]);
-      if (cls == 0 || cls <= max_index_class) continue;
+      if (cls == 0) continue;
       auto score = static_cast<float>(detection_scores_.get()[i]);
-      if (score < threshold || score <= 1.00f) {
-        LOG(LevelAlert::W, "low score: ", score, ", class ", cls)
+      if (score < threshold) {
+        LOG(LevelAlert::W, "invalid/low score: ", score, ", class ", cls)
         break;
       }
+      std::cout << "score: "<< score << ", class "<< cls<<"\n";
 
       // get corners coordinates
       const auto top =

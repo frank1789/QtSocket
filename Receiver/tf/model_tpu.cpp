@@ -180,18 +180,21 @@ void ModelTensorFlowLite::RunInference(const QImage &image) {
       ClassifierOutput();
       break;
 
-    case TypeDetection::ObjectDetection:
+    case TypeDetection::ObjectDetection: {
       ObjectOutput(image);
-      for (auto &r : getResults()) {
-        int cls = r.index_class;
-        auto score = r.score;
-        auto label = QString("%1: %2 %")
-                         .arg(QString::fromStdString(getLabel(cls)))
-                         .arg(QString::number(score * 100, 'g', 4));
-        r.name = label;
-        emit objAvailable(r);
+      auto partial_result = object_detect_->getResult();
+      if (partial_result.size() > 0) {
+        for (auto &r : partial_result) {
+          int cls = r.index_class;
+          auto score = r.score;
+          auto label = QString("%1: %2 %")
+                           .arg(QString::fromStdString(getLabel(cls)))
+                           .arg(QString::number(score * 100, 'g', 4));
+          r.name = label;
+          emit objAvailable(r);
+        }
       }
-      break;
+    } break;
 
     default:
       return;
@@ -230,7 +233,7 @@ void ModelTensorFlowLite::ClassifierOutput() {
 
 void ModelTensorFlowLite::ObjectOutput(const QImage img) {
   object_detect_ = std::make_unique<ObjectDetection>();
-  object_detect_->SearchObject(outputs, kThreshold, img, m_labels.size());
+  object_detect_->searchObject(outputs, kThreshold, img);
 }
 
 std::string ModelTensorFlowLite::getLabel(int i) {
@@ -239,8 +242,7 @@ std::string ModelTensorFlowLite::getLabel(int i) {
   return it->second;
 }
 
-std::vector<BoxDetection> ModelTensorFlowLite::getResults()
-    const {
+std::vector<BoxDetection> ModelTensorFlowLite::getResults() const {
   return object_detect_->getResult();
 }
 
