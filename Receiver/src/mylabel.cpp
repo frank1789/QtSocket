@@ -4,31 +4,26 @@
 
 MyLabel::MyLabel(QWidget *parent) : QLabel(parent) {}
 
-// when the system calls setImage, we'll set the label's pixmap
 void MyLabel::setImage(QImage image) {
   PROFILE_FUNCTION();
   QPixmap pixmap = QPixmap::fromImage(image);
-  int w = this->width();
-  int h = this->height();
-  setPixmap(pixmap.scaled(w, h, Qt::KeepAspectRatio));
+  setPixmap(
+      pixmap.scaled(this->width(), this->height(), Qt::KeepAspectRatio));
 }
 
-void MyLabel::updatePixmap(QPixmap image) {
+void MyLabel::setImage(QPixmap image) {
   PROFILE_FUNCTION();
-  int w = this->width();
-  int h = this->height();
-  setPixmap(image.scaled(w, h, Qt::KeepAspectRatio));
+  setPixmap(
+      image.scaled(this->width(), this->height(), Qt::KeepAspectRatio));
 }
 
-
-// #include <QPainter>  
-// #include <QBrush>    
-// #include <QPen>    
-// #include <QFont>    
-// #include <QPen>    
-// #include <QBrush>    
+// #include <QPainter>
+// #include <QBrush>
 // #include <QPen>
-
+// #include <QFont>
+// #include <QPen>
+// #include <QBrush>
+// #include <QPen>
 
 // QImage MyLabel::drawBoxes(QImage &image, QRect &rect, QString captions)
 // {
@@ -73,8 +68,9 @@ void MyLabel::updatePixmap(QPixmap image) {
 //     //     for(int i=0;i<boxes.count();i++)
 //     //     {
 //     //         // Check min confidence value and active label
-//     //         if (confidences[i] >= minConfidence && activeLabels[captions[i]])
-//     //         {               
+//     //         if (confidences[i] >= minConfidence &&
+//     activeLabels[captions[i]])
+//     //         {
 //     //             // Draw box
 //     //             cm.setRgb(rgb);
 //                 // pen.setColor(cm.getColor(captions[i]));
@@ -82,19 +78,24 @@ void MyLabel::updatePixmap(QPixmap image) {
 //     //             p.setBrush(brush);
 //     //             p.drawRect(boxes[i]);
 
-//     //             // Format text               
-//     //             QString confVal = QString::number(qRound(confidences[i] * 100)) + " %";
+//     //             // Format text
+//     //             QString confVal = QString::number(qRound(confidences[i] *
+//     100)) + " %";
 //     //             QString text    = captions[i] + " - " + confVal;
 
 //     //             // Text rect
 //     //             int width  = fm.width(text)+FONT_WIDTH_MARGIN;
 //     //             int height = fm.height();
-//     //             int left   = boxes[i].left()>=0 ? int(boxes[i].left()) : int(boxes[i].right()-width);
-//     //             int top    = boxes[i].top()-fm.height()>=0 ? int(boxes[i].top()-fm.height()) : int(boxes[i].bottom());
+//     //             int left   = boxes[i].left()>=0 ? int(boxes[i].left()) :
+//     int(boxes[i].right()-width);
+//     //             int top    = boxes[i].top()-fm.height()>=0 ?
+//     int(boxes[i].top()-fm.height()) : int(boxes[i].bottom());
 
 //     //             // Text position
 //     //             int tLeft = left+FONT_WIDTH_MARGIN/2;
-//     //             int tTop  = boxes[i].top()-fm.height()>=0 ? int(boxes[i].top() - FONT_HEIGHT_MARGIN) : int(boxes[i].bottom() + height - FONT_HEIGHT_MARGIN);
+//     //             int tTop  = boxes[i].top()-fm.height()>=0 ?
+//     int(boxes[i].top() - FONT_HEIGHT_MARGIN) : int(boxes[i].bottom() + height
+//     - FONT_HEIGHT_MARGIN);
 
 //     //             // Draw text background
 //     //             bPen.setColor(pen.color());
@@ -113,13 +114,8 @@ void MyLabel::updatePixmap(QPixmap image) {
 //     return image;
 // }
 
-
-
-
-
-
-
-// void LeptonThread::recalculateResult(const QImage &thermal, const QImage &rgb) {
+// void LeptonThread::recalculateResult(const QImage &thermal, const QImage
+// &rgb) {
 //   PROFILE_FUNCTION();
 //   QPainter painter(&m_result);
 //   painter.setCompositionMode(QPainter::CompositionMode_Source);
@@ -134,9 +130,8 @@ void MyLabel::updatePixmap(QPixmap image) {
 //   emit updateOverlay(m_result);
 // }
 
-
-
-// QImage AuxUtils::drawText(const QImage &image, const QRectF &rect, const QString &text)
+// QImage AuxUtils::drawText(const QImage &image, const QRectF &rect, const
+// QString &text)
 //     QPainter     p;
 //     QPainterPath path;
 //     QPen         pen;
@@ -158,27 +153,25 @@ void MyLabel::updatePixmap(QPixmap image) {
 //         brush.setStyle(Qt::SolidPattern);
 //         brush.setColor(fontColor);
 
-
 //         // Calculate text position
 //         QFontMetrics fm(font);
 //         for(int i=0;i<lines.count();i++)
 //         {
 //             // Calculate x0 and y0 positions
 //             int x = ((r.width()) - fm.width(lines.at(i)))/2;
-//             int y = pos == Qt::AlignBottom ? (r.height()) - fm.height()*(lines.count()-i) : (fm.height()*(i+1));
+//             int y = pos == Qt::AlignBottom ? (r.height()) -
+//             fm.height()*(lines.count()-i) : (fm.height()*(i+1));
 
 //             // Add text to path
 //             path.addText(r.left()+x,r.top()+y,font,lines.at(i));
 //         }
 
 //         // Set pen, brush, font and draw path
-//         p.setRenderHints(QPainter::TextAntialiasing | QPainter::Antialiasing);
-//         p.setPen(pen);
-//         p.setBrush(brush);
+//         p.setRenderHints(QPainter::TextAntialiasing |
+//         QPainter::Antialiasing); p.setPen(pen); p.setBrush(brush);
 //         p.setFont(font);
 //         p.drawPath(path);
 //     }
 
 //     return image;
 // }
-

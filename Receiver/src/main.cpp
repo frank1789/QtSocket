@@ -40,8 +40,6 @@ int main(int argc, char* argv[]) {
   QObject::connect(
       &w, &MainWindow::updateImage,
       [&model_tflite](QPixmap pixmap) { model_tflite.imageAvailable(pixmap); });
-  QObject::connect(&model_tflite, &ModelTensorFlowLite::objAvailable,
-                   [&w](QImage frame, BoxDetection result) { w.boxDetection(frame, result); });
 
   auto r = a.exec();
 #if PROFILING

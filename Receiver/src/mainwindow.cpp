@@ -41,14 +41,12 @@ MainWindow::MainWindow(QWidget *parent)
 
   // load image
   m_label->setPixmap(QPixmap::fromImage(*m_image));
-
   client = new TcpClient();
   m_group_all->addWidget(m_label, 0, 0);
   m_group_all->addWidget(client, 0, 1);
   widget->setLayout(m_group_all);
-
-  connect(client, &TcpClient::updatePixmap, [=](QPixmap img) {
-    m_label->updatePixmap(img);
+  connect(client, qOverload<QPixmap>(&TcpClient::updateImage), [=](QPixmap img) {
+    m_label->setImage(img);
     emit updateImage(img);
   });
 }

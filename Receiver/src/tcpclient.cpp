@@ -97,7 +97,7 @@ void TcpClient::imageAvailabe(QByteArray baImage) {
       image.pixel(0, image.height() - 1) == 4286611584)
     return;
 
-  emit updatePixmap(pixImage);
+  emit updateImage(pixImage);
 }
 
 void TcpClient::connectedToServer() {
