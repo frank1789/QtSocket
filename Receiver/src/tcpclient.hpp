@@ -27,6 +27,11 @@ class TcpClient : public QWidget {
   Q_OBJECT
 
  public:
+ /**
+  * @brief Construct a new Tcp Client object.
+  * 
+  * @param parent QWidget object, default = nullptr.
+  */
   explicit TcpClient(QWidget *parent = nullptr);
 
  public slots:

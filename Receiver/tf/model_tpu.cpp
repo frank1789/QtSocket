@@ -233,7 +233,7 @@ void ModelTensorFlowLite::ClassifierOutput() {
 
 void ModelTensorFlowLite::ObjectOutput(const QImage img) {
   object_detect_ = std::make_unique<ObjectDetection>();
-  object_detect_->SearchObject(outputs, kThreshold, img, m_labels.size());
+  object_detect_->searchObject(outputs, kThreshold, img);
 }
 
 std::string ModelTensorFlowLite::getLabel(int i) {

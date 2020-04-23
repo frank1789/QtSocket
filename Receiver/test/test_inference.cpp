@@ -53,9 +53,10 @@ TEST(InferenceExample, GraceHooper) {
 /// Other Case
 //////////////////////////////////////////////////////////////////////////////
 
+const QString label_path{"../build_debug/test/resources/coco_labels.txt"};
+const QString model_path{"../build_debug/test/resources/detect.tflite"};
+
 TEST(InferenceAnimal, Dog1) {
-  const QString label_path{"../build_debug/test/resources/coco_labels.txt"};
-  const QString model_path{"../build_debug/test/resources/detect.tflite"};
   ModelTensorFlowLite model_tflite;
   LabelDetection label(label_path);
   label.read();
@@ -81,8 +82,6 @@ TEST(InferenceAnimal, Dog1) {
 }
 
 TEST(InferenceAnimal, Dog2) {
-  const QString label_path{"../build_debug/test/resources/coco_labels.txt"};
-  const QString model_path{"../build_debug/test/resources/detect.tflite"};
   ModelTensorFlowLite model_tflite;
   LabelDetection label(label_path);
   label.read();
@@ -135,8 +134,6 @@ TEST(InferenceAnimal, Dog3) {
 }
 
 TEST(InferenceAnimal, Dog4) {
-  const QString label_path{"../build_debug/test/resources/coco_labels.txt"};
-  const QString model_path{"../build_debug/test/resources/detect.tflite"};
   ModelTensorFlowLite model_tflite;
   LabelDetection label(label_path);
   label.read();
@@ -162,8 +159,6 @@ TEST(InferenceAnimal, Dog4) {
 }
 
 TEST(InferenceAnimal, Dog5) {
-  const QString label_path{"../build_debug/test/resources/coco_labels.txt"};
-  const QString model_path{"../build_debug/test/resources/detect.tflite"};
   ModelTensorFlowLite model_tflite;
   LabelDetection label(label_path);
   label.read();
@@ -189,8 +184,6 @@ TEST(InferenceAnimal, Dog5) {
 }
 
 TEST(InferenceAnimal, Cat1) {
-  const QString label_path{"../build_debug/test/resources/coco_labels.txt"};
-  const QString model_path{"../build_debug/test/resources/detect.tflite"};
   ModelTensorFlowLite model_tflite;
   LabelDetection label(label_path);
   label.read();
@@ -216,8 +209,6 @@ TEST(InferenceAnimal, Cat1) {
 }
 
 TEST(InferenceAnimal, Cat2) {
-  const QString label_path{"../build_debug/test/resources/coco_labels.txt"};
-  const QString model_path{"../build_debug/test/resources/detect.tflite"};
   ModelTensorFlowLite model_tflite;
   LabelDetection label(label_path);
   label.read();
@@ -243,8 +234,6 @@ TEST(InferenceAnimal, Cat2) {
 }
 
 TEST(InferenceAnimal, Cat3) {
-  const QString label_path{"../build_debug/test/resources/coco_labels.txt"};
-  const QString model_path{"../build_debug/test/resources/detect.tflite"};
   ModelTensorFlowLite model_tflite;
   LabelDetection label(label_path);
   label.read();
@@ -270,8 +259,6 @@ TEST(InferenceAnimal, Cat3) {
 }
 
 TEST(InferenceAnimal, Cat4) {
-  const QString label_path{"../build_debug/test/resources/coco_labels.txt"};
-  const QString model_path{"../build_debug/test/resources/detect.tflite"};
   ModelTensorFlowLite model_tflite;
   LabelDetection label(label_path);
   label.read();
@@ -297,8 +284,6 @@ TEST(InferenceAnimal, Cat4) {
 }
 
 TEST(InferenceAnimal, Cat5) {
-  const QString label_path{"../build_debug/test/resources/coco_labels.txt"};
-  const QString model_path{"../build_debug/test/resources/detect.tflite"};
   ModelTensorFlowLite model_tflite;
   LabelDetection label(label_path);
   label.read();

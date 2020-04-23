@@ -6,11 +6,16 @@ osx_image: xcode11.3
 compiler:
   - clang
 
+
+cache:
+  directories:
+    - /home/travis
+
 git:
   depth: 3
 
 install:
-  - brew install lcov
+  - brew install lcov 
   - gem install  coveralls-lcov
   - pip3 install cpp-coveralls
 

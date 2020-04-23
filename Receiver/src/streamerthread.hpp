@@ -8,9 +8,8 @@
 #include <QThread>
 
 /**
- * @brief This class expands the QThreads by providing methods for receiving
+ * @brief This class expands the QThread by providing methods for receiving
  * frames from a TCP socket.
- *
  */
 class StreamerThread : public QThread {
   Q_OBJECT

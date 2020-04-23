@@ -38,14 +38,14 @@ class MyLabel : public QLabel {
   void setImage(QImage image);
 
   /**
-   * @brief SetImage slot
+   * @brief updatePixmap slot
    *
    * This method updates the image in the QLabel, then
    * scale the image to the size required by the QLabel.
    *
    * @param image QPixmap object.
    */
-  void setImage(QPixmap image);
+  void updatePixmap(QPixmap image);
 };
 
 #endif  // MY_LABEL_HPP

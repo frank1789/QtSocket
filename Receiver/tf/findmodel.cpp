@@ -66,7 +66,7 @@ QGridLayout* FindModel::initializeLayout() {
   // disable line edit
   m_line_model->setReadOnly(true);
   m_line_label->setReadOnly(true);
-  // set palceholder
+  // set placeholder
   m_line_label->setPlaceholderText("path/to/label_map.txt");
   m_line_model->setPlaceholderText("path/to/model.tflite");
   // add button
