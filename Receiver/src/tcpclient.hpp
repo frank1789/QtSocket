@@ -38,7 +38,7 @@ class TcpClient : public QWidget {
 
  signals:
   void updateImage(QImage);
-  void updateImage(QPixmap);
+  void updatePixmap(QPixmap);
 
  private slots:
   void imageAvailabe(QByteArray baImage);
