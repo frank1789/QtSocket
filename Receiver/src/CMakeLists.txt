@@ -11,10 +11,11 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/tcpclient.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/mainwindow.cpp
 )
-file(GLOB UIS ${CMAKE_CURRENT_SOURCE_DIR}/*.ui)
+
+set(UIS ${CMAKE_CURRENT_SOURCE_DIR}/mainwindow.ui)
 
 #-------------------------------------------------------------------------------
-# compile Debug Mode
+# Generate executable
 #-------------------------------------------------------------------------------
 add_executable(${NAME_PROJECT} ${SOURCES} ${UIS})
 target_link_libraries(${NAME_PROJECT} Qt5::Widgets Qt5::Network logger neuralnetwork)

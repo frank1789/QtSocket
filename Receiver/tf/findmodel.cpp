@@ -21,9 +21,9 @@ FindModel::FindModel(QDialog* parent) : QDialog(parent) {
           &FindModel::loadModelFile);
 }
 
-QString FindModel::getModelPath() { return m_filename_model; }
+QString FindModel::getModelPath() const { return m_filename_model; }
 
-QString FindModel::getLabelPath() { return m_filename_label; }
+QString FindModel::getLabelPath() const { return m_filename_label; }
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Slot

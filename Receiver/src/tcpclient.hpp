@@ -18,6 +18,11 @@ class QGroupBox;
 class QImage;
 QT_END_NAMESPACE
 
+/**
+ * @brief TcpClient class that expand QWidget and permit manage the connection
+ * status on UI.
+ *
+ */
 class TcpClient : public QWidget {
   Q_OBJECT
 
@@ -28,26 +33,29 @@ class TcpClient : public QWidget {
 
  signals:
   void updateImage(QImage);
-  void updatePixmap(QPixmap);
+  void updateImage(QPixmap);
 
  private slots:
   void imageAvailabe(QByteArray baImage);
 
   /**
-   * @brief
+   * @brief connectToServer slot.
    *
+   * Update connection status when click button and connect to remote sender.
    */
   void connectedToServer();
 
   /**
-   * @brief
+   * @brief onDisconnectClicked slot.
    *
+   * Update connection status when click button and disconnect to remote sender.
    */
   void onDisconnectClicked();
 
   /**
-   * @brief
+   * @brief sessionOpened slot.
    *
+   * Update connection status retrun message to user.
    */
   void sessionOpened();
 
@@ -65,21 +73,22 @@ class TcpClient : public QWidget {
   void enableConnectButton();
 
   /**
-   * @brief
+   * @brief onConnectClicked slot
    *
+   * Update message when clicked button.
    */
   void onConnectClicked();
 
  private:
   /**
-   * @brief Create a Information Group object
+   * @brief Create a Information Group object.
    *
    * @return QGridLayout* layout.
    */
   QGroupBox *createInformationGroup();
 
   /**
-   * @brief Create a Log Group object
+   * @brief Create a Log Group object.
    *
    * @return QGroupBox* widget.
    */
@@ -88,7 +97,7 @@ class TcpClient : public QWidget {
   /**
    * @brief update the UI.
    *
-   * @param[in] state socket status
+   * @param state socket status.
    */
   void updateGui(QAbstractSocket::SocketState state);
 

@@ -29,7 +29,17 @@ class MainWindow : public QMainWindow {
   Q_OBJECT
 
  public:
+  /**
+   * @brief Construct a new Main Window object.
+   * 
+   * @param parent QWidget default value parent.
+   */
   MainWindow(QWidget *parent = nullptr);
+
+  /**
+   * @brief Destroy the Main Window object.
+   * 
+   */
   ~MainWindow();
 
  public slots:
@@ -46,7 +56,7 @@ class MainWindow : public QMainWindow {
    *
    * function that builds the layout of the UI.
    *
-   * @return QGridLayout* [out] layout.
+   * @return QGridLayout* layout.
    */
   QGridLayout *create_label_preview();
 

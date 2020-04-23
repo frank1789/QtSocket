@@ -49,3 +49,9 @@ TEST(Color, ZinnwalditeBrown) {
   EXPECT_EQ(name, QString("Zinnwaldite brown"));
   EXPECT_EQ(code_hex, QColor("#2C1608"));
 }
+
+TEST(Color, ManageRed) {
+    ColorManager cm;
+    QColor color = cm.getColor(757);
+    EXPECT_EQ(color, QColor("#2C1608"));
+}
