@@ -50,7 +50,9 @@ void LabelDetection::read() {
   QTextStream in(&file);
   while (!in.atEnd()) {
     QString line = in.readLine();
-    auto [label_id, label_name] = m_process_line(line);
+    int label_id;
+    std::string label_name;
+    std::tie(label_id, label_name) = m_process_line(line);
     m_labels[label_id] = label_name;
   }
 }

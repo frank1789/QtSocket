@@ -7,7 +7,7 @@
 #include "mainwindow.hpp"
 #include "model_tpu.hpp"
 
-const QString local_model_path{"/resources/detect.tflite"};
+const QString local_model_path{"/resources/mobilenet_ssd_v1_coco_quant_postprocess_edgetpu.tflite"};
 const QString local_label_path{"/resources/coco_labels.txt"};
 
 int main(int argc, char* argv[]) {

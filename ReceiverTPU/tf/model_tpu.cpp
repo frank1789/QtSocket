@@ -8,6 +8,7 @@
 #include <QThread>
 
 #include "colormanager.hpp"
+#include "edgetpu.h"
 #include "image_utils.hpp"
 #include "instrumentor.h"
 #include "logger.h"
@@ -24,27 +25,48 @@ ModelTensorFlowLite::ModelTensorFlowLite()
     : wanted_height_(0),
       wanted_width_(0),
       wanted_channels_(3),
-      //      has_detection_mask_(false),
-      num_threads_(QThread::idealThreadCount()) {
+      num_threads_(1) {
   LOG(LevelAlert::I, "ctor model tensorflow lite")
-  LOG(LevelAlert::D, "ideal thread count: %d", num_threads_)
+  LOG(LevelAlert::D, "ideal thread count: ", num_threads_)
 }
 
 void ModelTensorFlowLite::InitializeModelTFLite(const std::string &path) {
   // open model and assign error reporter
   try {
-    model =
-        tflite::FlatBufferModel::BuildFromFile(path.c_str(), &error_reporter);
+    model = tflite::FlatBufferModel::BuildFromFile(path.c_str());
     if (model == nullptr) {
       LOG(LevelAlert::F, "can't load TensorFLow lite model from: ", path)
     }
-
-    // link model and resolver
-    tflite::InterpreterBuilder(*model, resolver)(&interpreter);
-    if (!interpreter) {
-      LOG(LevelAlert::F, "failed builder interpreter")
+    // use TPU
+    edgetpu::EdgeTpuContext *edgetpu_context{nullptr};
+    edgetpu::EdgeTpuManager *edgetpu_manager =
+        edgetpu::EdgeTpuManager::GetSingleton();
+    if (edgetpu_manager == nullptr) {
+      LOG(LevelAlert::F, "TPU unsupported on the current platform")
       std::abort();
     }
+#if LOGGER_CNN
+    const auto &available_tpus =
+        edgetpu::EdgeTpuManager::GetSingleton()->EnumerateEdgeTpu();
+    LOG(LevelAlert::F,  "Number of TPUs: ", available_tpus.size())
+      for(auto edgetpu : available_tpus)
+           LOG(LevelAlert::F, "TPU: ", (edgetpu.type == edgetpu::DeviceType::kApexUsb ? "USB" : "PCI"), edgetpu.path.c_str());
+    LOG(LevelAlert::T, "EdgeTPU runtime stack version: ",edgetpu_manager->Version().c_str());
+#endif
+    edgetpu_context = edgetpu_manager->NewEdgeTpuContext().release();
+    if (edgetpu_context == nullptr) {
+      LOG(LevelAlert::F, "TPU cannot be found or opened!")
+      std::abort();
+    }
+    edgetpu_manager->SetVerbosity(0);
+    resolver.AddCustom(edgetpu::kCustomOp, edgetpu::RegisterCustomOp());
+    // link model, resolver and check interpreter
+    tflite::InterpreterBuilder builder(*model, resolver);
+    if (builder(&interpreter) != kTfLiteOk) {
+      LOG(LevelAlert::F, "Interpreter: ERROR")
+      std::abort();
+    }
+    interpreter->SetExternalContext(kTfLiteEdgeTpuContext, edgetpu_context);
 
     // Apply accelaration (Neural Network Android)
     //    interpreter->UseNNAPI(accelaration);

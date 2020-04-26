@@ -4,7 +4,7 @@
             "name": "macOS",
             "includePath": [
                 "${workspaceFolder}/**",
-                "/usr/local/Cellar/qt/5.14.0/**"
+                "/usr/local/Cellar/qt/**"
             ],
             "defines": [],
             "macFrameworkPath": [
@@ -14,8 +14,7 @@
             "compilerPath": "/usr/bin/clang",
             "cStandard": "c11",
             "cppStandard": "c++17",
-            "intelliSenseMode": "${default}",
-            "compileCommands": "${workspaceFolder}/Receiver/build/compile_commands.json"
+            "intelliSenseMode": "${default}"
         }
     ],
     "version": 4

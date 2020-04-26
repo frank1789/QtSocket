@@ -43,12 +43,9 @@ class MainWindow : public QMainWindow {
   ~MainWindow();
 
  public slots:
-  void boxDetection(BoxDetection result);
 
  signals:
-  // void updateImage(QImage);
   void updateImage(QPixmap);
-  void updateBoxDetection(BoxDetection);
 
  private:
   /**

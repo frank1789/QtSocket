@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.7)
 set(LIB_NAME "neuralnetwork")
 
 #-------------------------------------------------------------------------------
@@ -36,8 +36,10 @@ add_library(${LIB_NAME} "")
 target_link_libraries(${LIB_NAME}
     Qt5::Widgets 
     Qt5::Network 
-    logger 
+    logger
+    edgetpu
     -ltensorflow-lite
+    -ledgetpu_arm64
 )
 
 target_sources(${LIB_NAME}
