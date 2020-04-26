@@ -37,9 +37,8 @@ target_link_libraries(${LIB_NAME}
     Qt5::Widgets 
     Qt5::Network 
     logger
-    edgetpu
+    -ledgetpu
     -ltensorflow-lite
-    -ledgetpu_arm64
 )
 
 target_sources(${LIB_NAME}
