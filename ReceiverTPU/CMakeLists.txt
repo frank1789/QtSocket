@@ -29,7 +29,6 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # Check architecture
 EXECUTE_PROCESS( COMMAND uname -m COMMAND tr -d '\n' OUTPUT_VARIABLE ARCHITECTURE )
 
-
 #-------------------------------------------------------------------------------
 # Select external Library
 #-------------------------------------------------------------------------------
@@ -55,6 +54,8 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin" AND "${ARCHITECTURE}" STREQUAL "x8
     link_directories(${LIBRARYPATH})
     include_directories(${CMAKE_SOURCE_DIR}/vendor/libedgetpu)
     link_directories(${CMAKE_SOURCE_DIR}/vendor/libedgetpu/direct/aarch64)
+	FIND_LIBRARY(edgetpu NAMES aarch64-edgetpu 
+		PATHS vendor/libedgetpu/lib/aarch64/direct/aarch64-linux-gnu/libedgetpu.so)
 endif()
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Linux" AND "${ARCHITECTURE}" STREQUAL "aarch64")

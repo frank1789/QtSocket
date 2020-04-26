@@ -1,58 +1,154 @@
 #include "model_tpu.hpp"
 
-#include <tensorflow/lite/examples/label_image/get_top_n_impl.h>
-#include <tensorflow/lite/kernels/internal/tensor.h>
-#include <tensorflow/lite/kernels/internal/tensor_utils.h>
-
-#include <QApplication>
 #include <QDebug>
-#include <QDir>
-#include <QDirIterator>
-#include <QFileDialog>
-#include <QFileInfo>
 #include <QImage>
+#include <QPixmap>
+#include <QRectF>
+#include <QString>
+#include <QThread>
 
-#include "../log/instrumentor.h"
-#include "../log/logger.h"
-#include "../src/streamerthread.hpp"
 #include "colormanager.hpp"
 #include "edgetpu.h"
-#include "model_support_function.hpp"
-#include "model_utils.h"
+#include "image_utils.hpp"
+#include "instrumentor.h"
+#include "logger.h"
+#include "tensorflow/lite/examples/label_image/bitmap_helpers_impl.h"
+#include "tensorflow/lite/examples/label_image/get_top_n_impl.h"
+#include "tensorflow/lite/kernels/internal/tensor.h"
+#include "tensorflow/lite/kernels/internal/tensor_utils.h"
 
-#define LOG_CNN 1
+namespace tfclassif = tflite::label_image;
 
-constexpr float min_threshold{0.6f};
+constexpr float kThreshold{0.001F};
 
-ModelTensorFlowLite::ModelTensorFlowLite() : QObject() {
-  threshold = min_threshold;
-  img_height = 512;
-  img_width = 512;
-  wanted_height = 0;
-  wanted_width = 0;
-  wanted_channels = 3;
-  has_detection_mask = false;
-  kind_network = type_detection::none;
-  numThreads = QThread::idealThreadCount();
-  LOG(INFO, "ctor model tensorflow lite")
-  LOG(DEBUG, "ideal thread count: %d", QThread::idealThreadCount())
+ModelTensorFlowLite::ModelTensorFlowLite()
+    : wanted_height_(0),
+      wanted_width_(0),
+      wanted_channels_(3),
+      num_threads_(1) {
+  LOG(LevelAlert::I, "ctor model tensorflow lite")
+  LOG(LevelAlert::D, "ideal thread count: ", num_threads_)
 }
 
-ModelTensorFlowLite::ModelTensorFlowLite(const QString &path)
-    : QObject(),
-      threshold(min_threshold),
-      img_height(512),
-      img_width(512),
-      wanted_height(0),
-      wanted_width(0),
-      wanted_channels(3),
-      has_detection_mask(false),
-      kind_network(type_detection::none),
-      numThreads(QThread::idealThreadCount()) {
-  LOG(INFO, "ctor model tensorflow lite")
-  LOG(DEBUG, "ideal thread count: %d", QThread::idealThreadCount())
-  LOG(DEBUG, "load model from resources %s", path.toStdString().c_str())
-  init_model_TFLite(path.toStdString());
+void ModelTensorFlowLite::InitializeModelTFLite(const std::string &path) {
+  // open model and assign error reporter
+  try {
+    model = tflite::FlatBufferModel::BuildFromFile(path.c_str());
+    if (model == nullptr) {
+      LOG(LevelAlert::F, "can't load TensorFLow lite model from: ", path)
+    }
+    // use TPU
+    edgetpu::EdgeTpuContext *edgetpu_context{nullptr};
+    edgetpu::EdgeTpuManager *edgetpu_manager =
+        edgetpu::EdgeTpuManager::GetSingleton();
+    if (edgetpu_manager == nullptr) {
+      LOG(LevelAlert::F, "TPU unsupported on the current platform")
+      std::abort();
+    }
+#if LOGGER_CNN
+    const auto &available_tpus =
+        edgetpu::EdgeTpuManager::GetSingleton()->EnumerateEdgeTpu();
+    LOG(LevelAlert::F,  "Number of TPUs: ", available_tpus.size())
+      for(auto edgetpu : available_tpus)
+           LOG(LevelAlert::F, "TPU: ", (edgetpu.type == edgetpu::DeviceType::kApexUsb ? "USB" : "PCI"), edgetpu.path.c_str());
+    LOG(LevelAlert::T, "EdgeTPU runtime stack version: ",edgetpu_manager->Version().c_str());
+#endif
+    edgetpu_context = edgetpu_manager->NewEdgeTpuContext().release();
+    if (edgetpu_context == nullptr) {
+      LOG(LevelAlert::F, "TPU cannot be found or opened!")
+      std::abort();
+    }
+    edgetpu_manager->SetVerbosity(0);
+    resolver.AddCustom(edgetpu::kCustomOp, edgetpu::RegisterCustomOp());
+    // link model, resolver and check interpreter
+    tflite::InterpreterBuilder builder(*model, resolver);
+    if (builder(&interpreter) != kTfLiteOk) {
+      LOG(LevelAlert::F, "Interpreter: ERROR")
+      std::abort();
+    }
+    interpreter->SetExternalContext(kTfLiteEdgeTpuContext, edgetpu_context);
+
+    // Apply accelaration (Neural Network Android)
+    //    interpreter->UseNNAPI(accelaration);
+
+    if (interpreter->AllocateTensors() != kTfLiteOk) {
+      LOG(LevelAlert::F, "failed to allocate tensor")
+      std::abort();
+    }
+
+    if (interpreter->outputs().size() > 1) {
+      kind_network_ = TypeDetection::ObjectDetection;
+    } else {
+      kind_network_ = TypeDetection::ImageClassifier;
+    }
+
+    // Get input dimension from the input tensor metadata
+    // Assuming one input only
+    int input = interpreter->inputs()[0];
+    TfLiteIntArray *dims = interpreter->tensor(input)->dims;
+
+    // Save outputs
+    outputs.clear();
+    for (unsigned int i = 0; i < interpreter->outputs().size(); ++i) {
+      outputs.push_back(interpreter->tensor(interpreter->outputs()[i]));
+    }
+    // set desire tensor image
+    wanted_height_ = dims->data[1];
+    wanted_width_ = dims->data[2];
+    wanted_channels_ = dims->data[3];
+    // set number threads
+    if (num_threads_ > 1) {
+      interpreter->SetNumThreads(num_threads_);
+    }
+    LOG(LevelAlert::I, "Tensorflow initialization: OK")
+
+#if LOGGER_CNN
+    LOG(LevelAlert::I, "verbose mode enable")
+    auto i_size = interpreter->inputs().size();
+    auto o_size = interpreter->outputs().size();
+    auto t_size = interpreter->tensors_size();
+
+    qDebug() << "tensors size: " << t_size;
+    qDebug() << "nodes size: " << interpreter->nodes_size();
+    qDebug() << "inputs: " << i_size;
+    qDebug() << "outputs: " << o_size;
+
+    for (auto i = 0; i < i_size; i++)
+      qDebug() << "input" << i << "name:" << interpreter->GetInputName(i)
+               << ", type:"
+               << interpreter->tensor(interpreter->inputs()[i])->type;
+
+    for (auto i = 0; i < o_size; i++)
+      qDebug() << "output" << i << "name:" << interpreter->GetOutputName(i)
+               << ", type:"
+               << interpreter->tensor(interpreter->outputs()[i])->type;
+
+    for (auto i = 0; i < t_size; i++) {
+      if (interpreter->tensor(i)->name)
+        qDebug() << i << ":" << interpreter->tensor(i)->name << ","
+                 << interpreter->tensor(i)->bytes << ","
+                 << interpreter->tensor(i)->type << ","
+                 << interpreter->tensor(i)->params.scale << ","
+                 << interpreter->tensor(i)->params.zero_point;
+    }
+
+    qDebug() << "wanted height:" << wanted_height_;
+    qDebug() << "wanted width:" << wanted_width_;
+    qDebug() << "wanted channels:" << wanted_channels_;
+#endif
+
+  } catch (...) {
+    LOG(LevelAlert::F, "can't load TensorFLow lite model from: ", path)
+    std::abort();
+  }
+}
+
+void ModelTensorFlowLite::LoadModelFromFile(const std::string &path) {
+  InitializeModelTFLite(path);
+}
+
+void ModelTensorFlowLite::LoadModelFromFile(const QString &path) {
+  InitializeModelTFLite(path.toStdString());
 }
 
 void ModelTensorFlowLite::setLabel(
@@ -60,319 +156,139 @@ void ModelTensorFlowLite::setLabel(
   m_labels = l;
 }
 
+void ModelTensorFlowLite::RunInference(const QImage &image) {
+  LOG(LevelAlert::D, "RunInference")
+  PROFILE_FUNCTION();
+  // detect kind input
+  int input = interpreter->inputs()[0];
+  TfLiteType input_type = interpreter->tensor(input)->type;
+  LOG(LevelAlert::D, "detect input type")
+  switch (input_type) {
+    case kTfLiteFloat32:
+      LOG(LevelAlert::D, "case kTfLiteFloat32")
+      resize_image<float>(interpreter->typed_tensor<float>(input), image.bits(),
+                          image.height(), image.width(), channels_,
+                          wanted_height_, wanted_width_, wanted_channels_,
+                          input_type);
+      break;
+    case kTfLiteInt8:
+      LOG(LevelAlert::D, "case kTfLiteInt8")
+      resize_image<int8_t>(interpreter->typed_tensor<int8_t>(input),
+                           image.bits(), image.height(), image.width(),
+                           channels_, wanted_height_, wanted_width_,
+                           wanted_channels_, input_type);
+      break;
+    case kTfLiteUInt8:
+      LOG(LevelAlert::D, "case kTfLiteUInt8")
+      resize_image<uint8_t>(interpreter->typed_tensor<uint8_t>(input),
+                            image.bits(), image.height(), image.width(),
+                            channels_, wanted_height_, wanted_width_,
+                            wanted_channels_, input_type);
+      break;
+    default:
+      LOG(LevelAlert::F, "cannot handle input type yet",
+          interpreter->tensor(input)->type)
+      std::exit(-1);
+  }
+  for (int i = 0; i < 2; i++) {
+    interpreter->Invoke();
+    if (interpreter->Invoke() != kTfLiteOk) {
+      LOG(LevelAlert::F, "Failed to invoke tflite!")
+    }
+  }
+
+  switch (kind_network_) {
+    case TypeDetection::ImageClassifier:
+      ClassifierOutput();
+      break;
+
+    case TypeDetection::ObjectDetection: {
+      ObjectOutput(image);
+      auto partial_result = object_detect_->getResult();
+      if (partial_result.size() > 0) {
+        for (auto &r : partial_result) {
+          int cls = r.index_class;
+          auto score = r.score;
+          auto label = QString("%1: %2 %")
+                           .arg(QString::fromStdString(getLabel(cls)))
+                           .arg(QString::number(score * 100, 'g', 4));
+          r.name = label;
+          emit objAvailable(r);
+        }
+      }
+    } break;
+
+    default:
+      return;
+  }
+}
+
+void ModelTensorFlowLite::ClassifierOutput() {
+  int output = interpreter->outputs()[0];
+  TfLiteIntArray *output_dims = interpreter->tensor(output)->dims;
+  // assume output dims to be something like (1, 1, ... ,size)
+  auto output_size = output_dims->data[output_dims->size - 1];
+  size_t number_of_results = 5;
+  auto input_type = interpreter->tensor(output)->type;
+  switch (interpreter->tensor(output)->type) {
+    case kTfLiteFloat32:
+      tfclassif::get_top_n<float>(interpreter->typed_output_tensor<float>(0),
+                                  output_size, number_of_results, kThreshold,
+                                  &top_results, input_type);
+      break;
+    case kTfLiteInt8:
+      tfclassif::get_top_n<int8_t>(interpreter->typed_output_tensor<int8_t>(0),
+                                   output_size, number_of_results, kThreshold,
+                                   &top_results, input_type);
+      break;
+    case kTfLiteUInt8:
+      tfclassif::get_top_n<uint8_t>(
+          interpreter->typed_output_tensor<uint8_t>(0), output_size,
+          number_of_results, kThreshold, &top_results, input_type);
+      break;
+    default:
+      LOG(LevelAlert::F, "cannot handle output type yet",
+          interpreter->tensor(output)->type)
+      std::exit(-1);
+  }
+}
+
+void ModelTensorFlowLite::ObjectOutput(const QImage img) {
+  object_detect_ = std::make_unique<ObjectDetection>();
+  object_detect_->searchObject(outputs, kThreshold, img);
+}
+
+std::string ModelTensorFlowLite::getLabel(int i) {
+  auto it = m_labels.find(i);
+  LOG(LevelAlert::D, "search for class: ", i, "found: ", it->second)
+  return it->second;
+}
+
+std::vector<BoxDetection> ModelTensorFlowLite::getResults() const {
+  return object_detect_->getResult();
+}
+
+std::vector<std::pair<float, int> >
+ModelTensorFlowLite::getResultClassification() const {
+  return top_results;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// Slot
+////////////////////////////////////////////////////////////////////////////////
+
 void ModelTensorFlowLite::imageAvailable(QPixmap image) {
   if (!image.isNull()) {
-    LOG(DEBUG, "image not null: %s", !image.isNull() ? "true" : "false")
+    LOG(LevelAlert::D, "image not null: ", !image.isNull() ? "true" : "false")
     QImage input = image.toImage().convertToFormat(QImage::Format_RGB888);
-    run(input);
+    RunInference(input);
   }
 }
 
-void ModelTensorFlowLite::run(QImage image) {
-  LOG(DEBUG, "run inference tflite")
-  StopWatch tm;
-  PROFILE_FUNCTION();
-  // check input
-  if (image.isNull()) {
-    LOG(WARN, "check image is not valid: %s\nthen return",
-        image.isNull() ? "true" : "false")
-    return;
+void ModelTensorFlowLite::imageAvailable(QImage image) {
+  if (!image.isNull()) {
+    LOG(LevelAlert::D, "image not null: ", !image.isNull() ? "true" : "false")
+    QImage input = image.convertToFormat(QImage::Format_RGB888);
+    RunInference(input);
   }
-  setInput(image);
-  // perform inference
-  if (interpreter->Invoke() != kTfLiteOk) {
-    LOG(ERROR, "failde to invoke intepreter")
-    return;
-  }
-  // check if classifier or object detection
-  LOG(DEBUG, "detect network: %d", kind_network)
-  switch (kind_network) {
-    case type_detection::image_classifier: {
-      std::vector<std::pair<float, int>> top_results;
-      if (!get_classifier_output(&top_results)) {
-        LOG(DEBUG, "empty result")
-        return;
-      }
-      break;
-    }
-    case type_detection::object_detection: {
-      LOG(DEBUG, "retrive object detection result")
-      if (!get_object_outputs()) {
-        LOG(DEBUG, "empty result")
-        return;
-      }
-      break;
-    }
-  }
-}
-
-void ModelTensorFlowLite::init_model_TFLite(const std::string &path) {
-  // open model and assign error reporter
-  try {
-    model =
-        tflite::FlatBufferModel::BuildFromFile(path.c_str(), &error_reporter);
-    if (model == nullptr) {
-      LOG(FATAL, "can't load TensorFLow lite model from: %", path.c_str())
-    }
-    // TPU support
-    std::shared_ptr<edgetpu::EdgeTpuContext> edgetpu_context =
-        edgetpu::EdgeTpuManager::GetSingleton()->OpenDevice();
-    // Build interpreter.
-    interpreter = coral::BuildEdgeTpuInterpreter(*model, edgetpu_context.get());
-    edgetpu::EdgeTpuManager *edgetpu_manager =
-        edgetpu::EdgeTpuManager::GetSingleton();
-    if (edgetpu_manager == nullptr) {
-      LOG(ERROR, "TPU unsupported on the current platform")
-      std::abort();
-    }
-
-#if LOG_CNN
-    const auto &available_tpus =
-        edgetpu::EdgeTpuManager::GetSingleton()->EnumerateEdgeTpu();
-    qDebug() << "Number of TPUs: " << available_tpus.size();
-    for (auto edgetpu : available_tpus)
-      qDebug() << "TPU:"
-               << (edgetpu.type == edgetpu::DeviceType::kApexUsb ? "USB"
-                                                                 : "PCI")
-               << edgetpu.path.c_str();
-    qDebug() << "EdgeTPU runtime stack version: "
-             << edgetpu_manager->Version().c_str();
-#endif
-    //    edgetpu_context = edgetpu_manager->NewEdgeTpuContext().release();
-    if (edgetpu_context == nullptr) {
-      LOG(ERROR, "TPU cannot be found or opened")
-      std::cerr << "TPU cannot be found or opened\n";
-      std::abort();
-    }
-
-    edgetpu_manager->SetVerbosity(0);
-    resolver.AddCustom(edgetpu::kCustomOp, edgetpu::RegisterCustomOp());
-    // Link model & resolver
-    //    tflite::InterpreterBuilder builder(*model, resolver)(&interpreter);
-    // Check interpreter
-    //    if (builder(&interpreter) != kTfLiteOk) {
-    //      qDebug() << "Interpreter: ERROR";
-    //      std::cerr << "interpreter failed to start"
-    //                << "\n";
-    //      std::abort();
-    //    }
-    // TPU context
-    //    interpreter->SetExternalContext(kTfLiteEdgeTpuContext,
-    //    edgetpu_context); if (interpreter->AllocateTensors() != kTfLiteOk) {
-    //      LOG(ERROR, "Allocate tensors: ERROR")
-    //      std::cerr << "failed to allocate tensor\n";
-    //      std::abort();
-    //    }
-
-    // Set kind of network
-    //    kind_network = interpreter->outputs().size() > 1
-    //                       ? type_detection::object_detection
-    //                       : type_detection::image_classifier;
-
-    //#if LOG_CNN
-    //    auto i_size = interpreter->inputs().size();
-    //    auto o_size = interpreter->outputs().size();
-    //    auto t_size = interpreter->tensors_size();
-
-    //    qDebug() << "tensors size: " << t_size;
-    //    qDebug() << "nodes size: " << interpreter->nodes_size();
-    //    qDebug() << "inputs: " << i_size;
-    //    qDebug() << "outputs: " << o_size;
-
-    //    for (int i = 0; i < i_size; i++)
-    //      qDebug() << "input" << i << "name:" << interpreter->GetInputName(i)
-    //               << ", type:"
-    //               << interpreter->tensor(interpreter->inputs()[i])->type;
-
-    //    for (int i = 0; i < o_size; i++)
-    //      qDebug() << "output" << i << "name:" <<
-    //      interpreter->GetOutputName(i)
-    //               << ", type:"
-    //               << interpreter->tensor(interpreter->outputs()[i])->type;
-    //#endif
-
-    // Get input dimension from the input tensor metadata
-    // Assuming one input only
-    const auto &required_shape = coral::GetInputShape(*interpreter, 0);
-    //    int input = interpreter->inputs()[0];
-    //    TfLiteIntArray *dims = interpreter->tensor(input)->dims;
-
-    //    // Save outputs
-    //    outputs.clear();
-    //    for (unsigned int i = 0; i < interpreter->outputs().size(); i++) {
-    //      outputs.push_back(interpreter->tensor(interpreter->outputs()[i]));
-    //    }
-
-    wanted_height = required_shape[0];
-    wanted_width = required_shape[1];
-    wanted_channels = required_shape[2];
-
-#if LOG_CNN
-    qDebug() << "Wanted height:" << wanted_height;
-    qDebug() << "Wanted width:" << wanted_width;
-    qDebug() << "Wanted channels:" << wanted_channels;
-#endif
-
-    if (numThreads > 1) {
-      interpreter->SetNumThreads(1);
-    }
-    LOG(INFO, "Tensorflow initialization: OK")
-
-  } catch (...) {
-    LOG(FATAL, "something in load model goes wrong")
-    std::cerr << "something in load model goes wrong"
-              << "\n";
-    std::abort();
-  }
-}
-
-void ModelTensorFlowLite::setInput(QImage image) {
-  // get inputs
-  std::vector<int> inputs = interpreter->inputs();
-  // set inputs
-  for (unsigned int i = 0; i < interpreter->inputs().size(); ++i) {
-    auto input = inputs[i];
-    // convert input
-    switch (interpreter->tensor(input)->type) {
-      case kTfLiteFloat32:
-        formatImageTFLite<float>(interpreter->typed_tensor<float>(input),
-                                 image.bits(), image.height(), image.width(),
-                                 m_num_channels, wanted_height, wanted_width,
-                                 wanted_channels, true);
-        break;
-      case kTfLiteUInt8:
-        formatImageTFLite<uint8_t>(interpreter->typed_tensor<uint8_t>(input),
-                                   image.bits(), img_height, img_width,
-                                   m_num_channels, wanted_height, wanted_width,
-                                   wanted_channels, false);
-        break;
-      default:
-        LOG(WARN, "Cannot handle input type %s yet",
-            interpreter->tensor(input)->type)
-        return;
-    }
-  }
-}
-
-bool ModelTensorFlowLite::get_classifier_output(
-    std::vector<std::pair<float, int>> *top_results) {
-  bool status{false};
-  const int output_size = 1000;
-  const size_t num_results = 5;
-  // Assume one output
-  if (interpreter->outputs().size() > 0) {
-    int output = interpreter->outputs()[0];
-    switch (interpreter->tensor(output)->type) {
-      case kTfLiteFloat32: {
-        tflite::label_image::get_top_n<float>(
-            interpreter->typed_output_tensor<float>(0), output_size,
-            num_results, threshold, top_results, true);
-        status = true;
-        break;
-      }
-      case kTfLiteUInt8: {
-        tflite::label_image::get_top_n<uint8_t>(
-            interpreter->typed_output_tensor<uint8_t>(0), output_size,
-            num_results, threshold, top_results, false);
-        status = true;
-        break;
-      }
-      default: {
-        LOG(ERROR, "Cannot handle output type %s yet",
-            interpreter->tensor(output)->type)
-        status = false;
-      }
-    }
-  }
-  return status;
-}
-
-bool ModelTensorFlowLite::get_object_outputs() {
-  bool status{false};
-  if (outputs.size() >= 4) {
-    const int num_detections =
-        static_cast<int>(*TensorData<float>(outputs[3], 0));
-    const float *detection_classes = TensorData<float>(outputs[1], 0);
-    const float *detection_scores = TensorData<float>(outputs[2], 0);
-    const float *detection_boxes = TensorData<float>(outputs[0], 0);
-    const float *detection_masks = !has_detection_mask || outputs.size() < 5
-                                       ? nullptr
-                                       : TensorData<float>(outputs[4], 0);
-    ColorManager cm;
-
-    for (int i = 0; i < num_detections; i++) {
-      // Get class
-      const int cls = static_cast<int>(detection_classes[i]);
-      // Ignore first one
-      if (cls == 0) continue;
-      // Get score
-      auto score = detection_scores[i];
-      // Check minimum score
-      if (score < threshold) {
-        LOG(WARN, "low score: %3.3lf, class %s", static_cast<double>(score),
-            getLabel(cls).toStdString().c_str())
-        break;
-      }
-      // Get class label
-      const QString label = getLabel(cls);
-      // Get coordinates
-      const float top = detection_boxes[4 * i] * img_height;
-      const float left = detection_boxes[4 * i + 1] * img_width;
-      const float bottom = detection_boxes[4 * i + 2] * img_height;
-      const float right = detection_boxes[4 * i + 3] * img_width;
-      // Save coordinates
-      QRectF box(left, top, right - left, bottom - top);
-      // Get masks
-      // WARNING: Under development
-      // https://github.com/matterport/Mask_RCNN/issues/222
-      if (detection_masks != nullptr) {
-        const int dim1 = outputs[4]->dims->data[2];
-        const int dim2 = outputs[4]->dims->data[3];
-        QImage mask(dim1, dim2, QImage::Format_ARGB32_Premultiplied);
-        // Set binary mask [dim1,dim2]
-        for (int j = 0; j < mask.height(); j++) {
-          for (int k = 0; k < mask.width(); k++) {
-            auto index = i * dim1 * dim2 + j * dim2 + k;
-            auto check = detection_masks[index] >= MASK_THRESHOLD;
-            auto fill =
-                (check == true) ? cm.getColor(label) : QColor(Qt::transparent);
-            mask.setPixel(k, j, fill.rgba());
-          }
-        }
-
-        // Billinear interpolation
-        // https://chu24688.tian.yam.com/posts/44797337
-        // QImage maskScaled =
-        //
-        ColorManager::billinearInterpolation(mask, box.height(), box.width());
-
-        // Scale mask to box size
-        QImage maskScaled = mask.scaled(
-            static_cast<int>(box.width()), static_cast<int>(box.height()),
-            Qt::IgnoreAspectRatio, Qt::FastTransformation);
-
-        // Border detection
-        //         QTransform trans(-1,0,1,-2,0,2,-1,0,1);
-        //         maskScaled =
-        //         ColorManager::applyTransformation(maskScaled,trans);
-
-        // Append to masks
-        //        result->masks.append(maskScaled);
-      }
-      // Append data
-      LOG(DEBUG, "label: %s, score: %3.3lf", label.toStdString().c_str(),
-          static_cast<double>(score))
-      //      result->caption.append(label);
-      //      result->confidences.append(static_cast<double>(score));
-      //      result->box.append(box);
-      status = true;
-    }
-  }
-  return status;
-}
-
-QString ModelTensorFlowLite::getLabel(int i) {
-  std::unordered_map<int, std::string>::iterator it = m_labels.find(i);
-  LOG(DEBUG, "search for class %d, found %s", i, it->second.c_str())
-  return QString::fromStdString(it->second);
 }

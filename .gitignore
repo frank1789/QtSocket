@@ -122,3 +122,6 @@ compile_commands.json
 !ReceiverTPU/vendor/tensorflow-lite/osx_x86_64/lib/libtensorflow-lite.a
 !ReceiverTPU/vendor/libedgetpu/lib/aarch64/libedgetpu_arm64_throttled.so
 !ReceiverTPU/vendor/libedgetpu/lib/aarch64/libedgetpu_arm64.so
+!ReceiverTPU/vendor/libedgetpu/lib/aarch64/direct/*
+
+ReceiverTPU/vendor/libedgetpu/lib/aarch64/direct/.DS_Store
